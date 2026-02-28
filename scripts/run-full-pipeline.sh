@@ -266,6 +266,18 @@ fi
   --schema schemas/release-decision-report.schema.json \
   --report "${VALIDATION_DIR}/release-decision-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.iteration_plan.cli \
+  --release-decision-report "${OUT_DIR}/release-decision-report.json" \
+  --hook-backlog-report "${OUT_DIR}/hook-backlog-report.json" \
+  --proposal-risk-report "${OUT_DIR}/proposal-risk-report.json" \
+  --test-impact-report "${OUT_DIR}/test-impact-report.json" \
+  --output "${OUT_DIR}/iteration-plan-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/iteration-plan-report.json" \
+  --schema schemas/iteration-plan-report.schema.json \
+  --report "${VALIDATION_DIR}/iteration-plan-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
   --compatibility-matrix "${OUT_DIR}/compatibility-matrix.json" \
@@ -292,6 +304,7 @@ fi
     "${OUT_DIR}/proposal-review-checklist.json" \
     "${OUT_DIR}/quality-gate-report.json" \
     "${OUT_DIR}/release-decision-report.json" \
+    "${OUT_DIR}/iteration-plan-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \

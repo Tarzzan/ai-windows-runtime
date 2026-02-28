@@ -186,6 +186,13 @@ if [[ -f "${OUT_DIR}/release-decision-report.json" ]]; then
     --report "${REPORT_DIR}/release-decision-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/iteration-plan-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/iteration-plan-report.json" \
+    --schema schemas/iteration-plan-report.schema.json \
+    --report "${REPORT_DIR}/iteration-plan-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/repro-package.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/repro-package.json" \

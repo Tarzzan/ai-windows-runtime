@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Iteration Plan Report Artifact",
+  "type": "object",
+  "required": [
+    "artifact_version",
+    "generated_at",
+    "decision_context",
+    "summary",
+    "tasks",
+    "actions"
+  ],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "decision_context": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "total_tasks",
+        "blocking_tasks",
+        "p0_tasks",
+        "p1_tasks",
+        "p2_tasks",
+        "estimated_total_hours"
+      ],
+      "properties": {
+        "total_tasks": {"type": "integer"},
+        "blocking_tasks": {"type": "integer"},
+        "p0_tasks": {"type": "integer"},
+        "p1_tasks": {"type": "integer"},
+        "p2_tasks": {"type": "integer"},
+        "estimated_total_hours": {"type": "integer"}
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "priority",
+          "objective",
+          "source",
+          "suggested_command",
+          "estimated_hours",
+          "blocking"
+        ],
+        "properties": {
+          "id": {"type": "string"},
+          "priority": {"type": "string"},
+          "objective": {"type": "string"},
+          "source": {"type": "string"},
+          "suggested_command": {"type": "string"},
+          "estimated_hours": {"type": "integer"},
+          "blocking": {"type": "boolean"}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}
