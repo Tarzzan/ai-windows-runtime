@@ -50,6 +50,18 @@ fi
   --schema schemas/root-cause-summary.schema.json \
   --report "${VALIDATION_DIR}/root-cause-summary-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.test_impact.cli \
+  --patch-plan "${OUT_DIR}/patch-plan.json" \
+  --gaps "${OUT_DIR}/gaps.json" \
+  --root-cause "${OUT_DIR}/root-cause-summary.json" \
+  --proposal-provenance "${OUT_DIR}/proposal-provenance.json" \
+  --output "${OUT_DIR}/test-impact-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/test-impact-report.json" \
+  --schema schemas/test-impact-report.schema.json \
+  --report "${VALIDATION_DIR}/test-impact-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.release_readiness.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
   --trend-report "${OUT_DIR}/trend-report.json" \
@@ -67,6 +79,7 @@ fi
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
     "${OUT_DIR}/root-cause-summary.json" \
+    "${OUT_DIR}/test-impact-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
@@ -111,6 +124,7 @@ fi
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
     "${OUT_DIR}/root-cause-summary.json" \
+    "${OUT_DIR}/test-impact-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
@@ -137,5 +151,6 @@ cp "${OUT_DIR}/repro-package.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/root-cause-summary.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/patch-plan-diff.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/proposal-provenance.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/test-impact-report.json" "${BUNDLE_DIR}/"
 
 echo "release bundle: ok"

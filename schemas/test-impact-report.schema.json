@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Test Impact Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "suites", "coverage", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "total_proposals",
+        "impacted_categories",
+        "suggested_suites",
+        "high_priority_suites",
+        "weak_provenance_entries"
+      ],
+      "properties": {
+        "total_proposals": {"type": "integer"},
+        "impacted_categories": {"type": "integer"},
+        "suggested_suites": {"type": "integer"},
+        "high_priority_suites": {"type": "integer"},
+        "weak_provenance_entries": {"type": "integer"}
+      }
+    },
+    "suites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "priority",
+          "estimated_minutes",
+          "trigger_categories",
+          "trigger_proposals",
+          "suggested_command",
+          "reason"
+        ],
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "priority": {"type": "string"},
+          "estimated_minutes": {"type": "integer"},
+          "trigger_categories": {"type": "array", "items": {"type": "string"}},
+          "trigger_proposals": {"type": "array", "items": {"type": "string"}},
+          "suggested_command": {"type": "string"},
+          "reason": {"type": "string"}
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["categories_without_suite", "root_cause_alignment"],
+      "properties": {
+        "categories_without_suite": {"type": "array", "items": {"type": "string"}},
+        "root_cause_alignment": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["category", "count", "covered"],
+            "properties": {
+              "category": {"type": "string"},
+              "count": {"type": "integer"},
+              "covered": {"type": "boolean"}
+            }
+          }
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}
+

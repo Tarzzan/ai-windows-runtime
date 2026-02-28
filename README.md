@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 21)
+## Current scope (Phase 22)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -74,6 +74,9 @@ Core runtime capabilities in this phase:
 47. Generate proposal provenance artifacts linking patch proposals back to gaps and traces.
 48. Compute per-proposal provenance scores and evidence excerpts for reviewer traceability.
 49. Validate proposal provenance artifacts automatically in pipeline and bundle gates.
+50. Generate test impact report artifacts from patch proposals and gap categories.
+51. Prioritize suggested test suites with estimated effort and execution commands.
+52. Validate test impact report artifacts automatically in pipeline and release bundle gates.
 
 ## Quick start
 ```bash
@@ -112,6 +115,8 @@ scripts/build-patch-plan-diff.sh out
 # out/patch-plan-diff.json is generated and schema-validated
 scripts/build-proposal-provenance.sh out
 # out/proposal-provenance.json is generated and schema-validated
+scripts/build-test-impact-report.sh out
+# out/test-impact-report.json is generated and schema-validated
 scripts/build-repro-package.sh out
 # out/repro-package.json is generated and schema-validated
 pytest -q
