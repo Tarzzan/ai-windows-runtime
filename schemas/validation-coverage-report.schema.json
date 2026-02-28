@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Validation Coverage Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "reports", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["required_reports", "covered_reports", "missing_reports", "coverage_ratio"],
+      "properties": {
+        "required_reports": {"type": "integer"},
+        "covered_reports": {"type": "integer"},
+        "missing_reports": {"type": "integer"},
+        "coverage_ratio": {"type": "number"}
+      }
+    },
+    "reports": {"type": "array", "items": {"type": "object"}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

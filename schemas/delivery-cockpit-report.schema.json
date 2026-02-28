@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Delivery Cockpit Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "cockpit_status",
+        "readiness_score",
+        "pilot_recommendation",
+        "blocking_tasks",
+        "sprint_now_tasks",
+        "missing_validation_reports",
+        "health_ratio"
+      ],
+      "properties": {
+        "cockpit_status": {"type": "string"},
+        "readiness_score": {"type": "integer"},
+        "pilot_recommendation": {"type": "string"},
+        "blocking_tasks": {"type": "integer"},
+        "sprint_now_tasks": {"type": "integer"},
+        "missing_validation_reports": {"type": "integer"},
+        "health_ratio": {"type": "number"}
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

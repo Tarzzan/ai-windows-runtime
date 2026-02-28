@@ -48,6 +48,11 @@ compat-remediation-sprint = "compat_runtime.remediation_sprint.cli:main"
 compat-release-brief = "compat_runtime.release_brief.cli:main"
 compat-rollout-guardrails = "compat_runtime.rollout_guardrails.cli:main"
 compat-artifact-health = "compat_runtime.artifact_health.cli:main"
+compat-delivery-cockpit = "compat_runtime.delivery_cockpit.cli:main"
+compat-stakeholder-update = "compat_runtime.stakeholder_update.cli:main"
+compat-handoff-checklist = "compat_runtime.handoff_checklist.cli:main"
+compat-validation-coverage = "compat_runtime.validation_coverage.cli:main"
+compat-launch-readiness = "compat_runtime.launch_readiness.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

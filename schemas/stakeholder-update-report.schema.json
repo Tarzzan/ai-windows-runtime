@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Stakeholder Update Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "highlights", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "audience",
+        "delivery_status",
+        "pilot_recommendation",
+        "readiness_score",
+        "trajectory",
+        "p0_risks"
+      ],
+      "properties": {
+        "audience": {"type": "string"},
+        "delivery_status": {"type": "string"},
+        "pilot_recommendation": {"type": "string"},
+        "readiness_score": {"type": "integer"},
+        "trajectory": {"type": "string"},
+        "p0_risks": {"type": "integer"}
+      }
+    },
+    "highlights": {"type": "array", "items": {"type": "string"}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

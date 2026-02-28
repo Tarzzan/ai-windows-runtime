@@ -387,6 +387,62 @@ fi
   --schema schemas/artifact-health-report.schema.json \
   --report "${VALIDATION_DIR}/artifact-health-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.delivery_cockpit.cli \
+  --release-brief-report "${OUT_DIR}/release-brief-report.json" \
+  --remediation-sprint-report "${OUT_DIR}/remediation-sprint-report.json" \
+  --artifact-health-report "${OUT_DIR}/artifact-health-report.json" \
+  --output "${OUT_DIR}/delivery-cockpit-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/delivery-cockpit-report.json" \
+  --schema schemas/delivery-cockpit-report.schema.json \
+  --report "${VALIDATION_DIR}/delivery-cockpit-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.stakeholder_update.cli \
+  --delivery-cockpit-report "${OUT_DIR}/delivery-cockpit-report.json" \
+  --release-brief-report "${OUT_DIR}/release-brief-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --output "${OUT_DIR}/stakeholder-update-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/stakeholder-update-report.json" \
+  --schema schemas/stakeholder-update-report.schema.json \
+  --report "${VALIDATION_DIR}/stakeholder-update-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.handoff_checklist.cli \
+  --stakeholder-update-report "${OUT_DIR}/stakeholder-update-report.json" \
+  --ownership-assignment-report "${OUT_DIR}/ownership-assignment-report.json" \
+  --rollout-guardrails-report "${OUT_DIR}/rollout-guardrails-report.json" \
+  --validation-command-pack "${OUT_DIR}/validation-command-pack.json" \
+  --output "${OUT_DIR}/handoff-checklist-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/handoff-checklist-report.json" \
+  --schema schemas/handoff-checklist-report.schema.json \
+  --report "${VALIDATION_DIR}/handoff-checklist-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.validation_coverage.cli \
+  --validation-dir "${VALIDATION_DIR}" \
+  --output "${OUT_DIR}/validation-coverage-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/validation-coverage-report.json" \
+  --schema schemas/validation-coverage-report.schema.json \
+  --report "${VALIDATION_DIR}/validation-coverage-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.launch_readiness.cli \
+  --handoff-checklist-report "${OUT_DIR}/handoff-checklist-report.json" \
+  --validation-coverage-report "${OUT_DIR}/validation-coverage-report.json" \
+  --quality-gate-report "${OUT_DIR}/quality-gate-report.json" \
+  --release-decision-report "${OUT_DIR}/release-decision-report.json" \
+  --pilot-readiness-report "${OUT_DIR}/pilot-readiness-report.json" \
+  --output "${OUT_DIR}/launch-readiness-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/launch-readiness-report.json" \
+  --schema schemas/launch-readiness-report.schema.json \
+  --report "${VALIDATION_DIR}/launch-readiness-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
   --compatibility-matrix "${OUT_DIR}/compatibility-matrix.json" \
@@ -425,6 +481,11 @@ fi
     "${OUT_DIR}/release-brief-report.json" \
     "${OUT_DIR}/rollout-guardrails-report.json" \
     "${OUT_DIR}/artifact-health-report.json" \
+    "${OUT_DIR}/delivery-cockpit-report.json" \
+    "${OUT_DIR}/stakeholder-update-report.json" \
+    "${OUT_DIR}/handoff-checklist-report.json" \
+    "${OUT_DIR}/validation-coverage-report.json" \
+    "${OUT_DIR}/launch-readiness-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
@@ -462,6 +523,11 @@ cp "${OUT_DIR}/remediation-sprint-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-brief-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/rollout-guardrails-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/artifact-health-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/delivery-cockpit-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/stakeholder-update-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/handoff-checklist-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/validation-coverage-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/launch-readiness-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/repro-package.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/root-cause-summary.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/patch-plan-diff.json" "${BUNDLE_DIR}/"

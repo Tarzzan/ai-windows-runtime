@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Handoff Checklist Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "checks", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["checks_total", "checks_pass", "checks_warn", "checks_fail"],
+      "properties": {
+        "checks_total": {"type": "integer"},
+        "checks_pass": {"type": "integer"},
+        "checks_warn": {"type": "integer"},
+        "checks_fail": {"type": "integer"}
+      }
+    },
+    "checks": {"type": "array", "items": {"type": "object"}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

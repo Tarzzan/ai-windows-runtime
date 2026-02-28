@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Launch Readiness Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "status", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "status": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "release_decision",
+        "quality_gate",
+        "pilot_recommendation",
+        "handoff_failed_checks",
+        "validation_missing_reports"
+      ],
+      "properties": {
+        "release_decision": {"type": "string"},
+        "quality_gate": {"type": "string"},
+        "pilot_recommendation": {"type": "string"},
+        "handoff_failed_checks": {"type": "integer"},
+        "validation_missing_reports": {"type": "integer"}
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

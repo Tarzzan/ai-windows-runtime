@@ -1,0 +1,1 @@
+"""Validation coverage report module."""

@@ -1,0 +1,1 @@
+"""Delivery cockpit report module."""

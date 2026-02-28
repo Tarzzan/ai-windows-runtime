@@ -277,6 +277,41 @@ if [[ -f "${OUT_DIR}/artifact-health-report.json" ]]; then
     --report "${REPORT_DIR}/artifact-health-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/delivery-cockpit-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/delivery-cockpit-report.json" \
+    --schema schemas/delivery-cockpit-report.schema.json \
+    --report "${REPORT_DIR}/delivery-cockpit-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/stakeholder-update-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/stakeholder-update-report.json" \
+    --schema schemas/stakeholder-update-report.schema.json \
+    --report "${REPORT_DIR}/stakeholder-update-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/handoff-checklist-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/handoff-checklist-report.json" \
+    --schema schemas/handoff-checklist-report.schema.json \
+    --report "${REPORT_DIR}/handoff-checklist-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/validation-coverage-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/validation-coverage-report.json" \
+    --schema schemas/validation-coverage-report.schema.json \
+    --report "${REPORT_DIR}/validation-coverage-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/launch-readiness-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/launch-readiness-report.json" \
+    --schema schemas/launch-readiness-report.schema.json \
+    --report "${REPORT_DIR}/launch-readiness-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/repro-package.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/repro-package.json" \
