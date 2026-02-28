@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Runtime Signal Report Artifact",
+  "type": "object",
+  "required": [
+    "artifact_version",
+    "generated_at",
+    "summary",
+    "coverage",
+    "issues",
+    "actions"
+  ],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "events_scanned",
+        "domains_detected",
+        "hook_domains_total",
+        "hook_domains_covered",
+        "hook_coverage_ratio",
+        "com_failures",
+        "winrt_failures",
+        "registry_failures",
+        "network_failures",
+        "installer_failures",
+        "crash_like_failures"
+      ],
+      "properties": {
+        "events_scanned": {"type": "integer"},
+        "domains_detected": {"type": "integer"},
+        "hook_domains_total": {"type": "integer"},
+        "hook_domains_covered": {"type": "integer"},
+        "hook_coverage_ratio": {"type": "number"},
+        "com_failures": {"type": "integer"},
+        "winrt_failures": {"type": "integer"},
+        "registry_failures": {"type": "integer"},
+        "network_failures": {"type": "integer"},
+        "installer_failures": {"type": "integer"},
+        "crash_like_failures": {"type": "integer"}
+      }
+    },
+    "coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["domain", "events", "errors", "hook_present", "sample_actions"],
+        "properties": {
+          "domain": {"type": "string"},
+          "events": {"type": "integer"},
+          "errors": {"type": "integer"},
+          "hook_present": {"type": "boolean"},
+          "sample_actions": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "source", "domain", "severity", "timestamp", "message"],
+        "properties": {
+          "id": {"type": "string"},
+          "source": {"type": "string"},
+          "domain": {"type": "string"},
+          "severity": {"type": "string"},
+          "timestamp": {"type": ["string", "null"]},
+          "message": {"type": "string"}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}
