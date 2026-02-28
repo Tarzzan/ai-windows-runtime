@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Remediation Sprint Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "tasks", "buckets", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "tasks_total",
+        "sprint_now_tasks",
+        "sprint_next_tasks",
+        "backlog_tasks",
+        "iterations_to_clear_blockers",
+        "estimated_iterations_to_go"
+      ],
+      "properties": {
+        "tasks_total": {"type": "integer"},
+        "sprint_now_tasks": {"type": "integer"},
+        "sprint_next_tasks": {"type": "integer"},
+        "backlog_tasks": {"type": "integer"},
+        "iterations_to_clear_blockers": {"type": "integer"},
+        "estimated_iterations_to_go": {"type": "integer"}
+      }
+    },
+    "tasks": {"type": "array", "items": {"type": "object"}},
+    "buckets": {"type": "object"},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

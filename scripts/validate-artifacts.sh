@@ -242,6 +242,41 @@ if [[ -f "${OUT_DIR}/pilot-readiness-report.json" ]]; then
     --report "${REPORT_DIR}/pilot-readiness-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/ownership-assignment-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/ownership-assignment-report.json" \
+    --schema schemas/ownership-assignment-report.schema.json \
+    --report "${REPORT_DIR}/ownership-assignment-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/remediation-sprint-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/remediation-sprint-report.json" \
+    --schema schemas/remediation-sprint-report.schema.json \
+    --report "${REPORT_DIR}/remediation-sprint-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/release-brief-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/release-brief-report.json" \
+    --schema schemas/release-brief-report.schema.json \
+    --report "${REPORT_DIR}/release-brief-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/rollout-guardrails-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/rollout-guardrails-report.json" \
+    --schema schemas/rollout-guardrails-report.schema.json \
+    --report "${REPORT_DIR}/rollout-guardrails-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/artifact-health-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/artifact-health-report.json" \
+    --schema schemas/artifact-health-report.schema.json \
+    --report "${REPORT_DIR}/artifact-health-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/repro-package.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/repro-package.json" \

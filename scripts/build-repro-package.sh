@@ -44,6 +44,11 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/risk-watchlist-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
+    "${OUT_DIR}/ownership-assignment-report.json" \
+    "${OUT_DIR}/remediation-sprint-report.json" \
+    "${OUT_DIR}/release-brief-report.json" \
+    "${OUT_DIR}/rollout-guardrails-report.json" \
+    "${OUT_DIR}/artifact-health-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \

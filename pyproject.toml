@@ -43,6 +43,11 @@ compat-validation-command-pack = "compat_runtime.validation_command_pack.cli:mai
 compat-risk-watchlist = "compat_runtime.risk_watchlist.cli:main"
 compat-release-gate-history = "compat_runtime.release_gate_history.cli:main"
 compat-pilot-readiness = "compat_runtime.pilot_readiness.cli:main"
+compat-ownership-assignment = "compat_runtime.ownership_assignment.cli:main"
+compat-remediation-sprint = "compat_runtime.remediation_sprint.cli:main"
+compat-release-brief = "compat_runtime.release_brief.cli:main"
+compat-rollout-guardrails = "compat_runtime.rollout_guardrails.cli:main"
+compat-artifact-health = "compat_runtime.artifact_health.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

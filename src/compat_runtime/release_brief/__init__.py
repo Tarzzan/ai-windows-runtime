@@ -1,0 +1,1 @@
+"""Release brief summary artifact."""

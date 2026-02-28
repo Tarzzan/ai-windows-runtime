@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Brief Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "headline", "summary", "top_risks", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "headline": {"type": "string"},
+    "summary": {"type": "object"},
+    "top_risks": {"type": "array", "items": {"type": "object"}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

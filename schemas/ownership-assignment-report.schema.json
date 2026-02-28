@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ownership Assignment Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "owners", "tasks", "watchlist", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["owners", "tasks_assigned", "watchlist_assigned", "p0_items", "unassigned_items"],
+      "properties": {
+        "owners": {"type": "integer"},
+        "tasks_assigned": {"type": "integer"},
+        "watchlist_assigned": {"type": "integer"},
+        "p0_items": {"type": "integer"},
+        "unassigned_items": {"type": "integer"}
+      }
+    },
+    "owners": {"type": "array", "items": {"type": "string"}},
+    "tasks": {"type": "array", "items": {"type": "object"}},
+    "watchlist": {"type": "array", "items": {"type": "object"}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

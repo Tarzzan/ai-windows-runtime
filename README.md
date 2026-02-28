@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 40)
+## Current scope (Phase 45)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -131,6 +131,21 @@ Core runtime capabilities in this phase:
 104. Generate pilot readiness artifact (`pilot-readiness-report.json`) with `ready/limited_pilot/not_ready` recommendation.
 105. Correlate blockers, readiness posture, forecast horizon, and watchlist severity before pilot launch.
 106. Validate pilot readiness artifacts automatically in pipeline, release bundle, and reproducible package flows.
+107. Generate ownership assignment artifact (`ownership-assignment-report.json`) from iteration plan, watchlist, and validation command pack.
+108. Map critical tasks and risk entries to explicit owner groups with command alignment for execution.
+109. Validate ownership assignment artifacts automatically in pipeline, release bundle, and reproducible package flows.
+110. Generate remediation sprint artifact (`remediation-sprint-report.json`) from ownership, burndown, and forecast signals.
+111. Bucket remediation workload into `sprint_now/sprint_next/backlog` for short-horizon planning.
+112. Validate remediation sprint artifacts automatically in pipeline, release bundle, and reproducible package flows.
+113. Generate release brief artifact (`release-brief-report.json`) with executive headline from readiness, pilot, forecast, and risk signals.
+114. Consolidate release posture and top risks into a concise stakeholder communication surface.
+115. Validate release brief artifacts automatically in pipeline, release bundle, and reproducible package flows.
+116. Generate rollout guardrails artifact (`rollout-guardrails-report.json`) from pilot readiness, rollback, risk, and crash signals.
+117. Define rollout stop conditions and mandatory safeguards before expanding pilot scope.
+118. Validate rollout guardrails artifacts automatically in pipeline, release bundle, and reproducible package flows.
+119. Generate artifact health artifact (`artifact-health-report.json`) from validation report inventory coverage.
+120. Measure required-report completeness with health ratio and remediation actions.
+121. Validate artifact health artifacts automatically in pipeline, release bundle, and reproducible package flows.
 
 ## Quick start
 ```bash
@@ -187,6 +202,16 @@ scripts/build-release-gate-history-report.sh out
 # out/release-gate-history-report.json is generated and schema-validated
 scripts/build-pilot-readiness-report.sh out
 # out/pilot-readiness-report.json is generated and schema-validated
+scripts/build-ownership-assignment-report.sh out
+# out/ownership-assignment-report.json is generated and schema-validated
+scripts/build-remediation-sprint-report.sh out
+# out/remediation-sprint-report.json is generated and schema-validated
+scripts/build-release-brief-report.sh out
+# out/release-brief-report.json is generated and schema-validated
+scripts/build-rollout-guardrails-report.sh out
+# out/rollout-guardrails-report.json is generated and schema-validated
+scripts/build-artifact-health-report.sh out
+# out/artifact-health-report.json is generated and schema-validated
 scripts/build-root-cause-summary.sh out
 # out/root-cause-summary.json is generated and schema-validated
 scripts/build-patch-plan-diff.sh out

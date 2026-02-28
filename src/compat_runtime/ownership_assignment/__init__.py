@@ -1,0 +1,1 @@
+"""Ownership assignment report artifact."""

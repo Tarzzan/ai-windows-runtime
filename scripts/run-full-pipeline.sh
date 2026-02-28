@@ -363,6 +363,62 @@ fi
   --schema schemas/pilot-readiness-report.schema.json \
   --report "${VALIDATION_DIR}/pilot-readiness-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.ownership_assignment.cli \
+  --iteration-plan-report "${OUT_DIR}/iteration-plan-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --validation-command-pack "${OUT_DIR}/validation-command-pack.json" \
+  --output "${OUT_DIR}/ownership-assignment-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/ownership-assignment-report.json" \
+  --schema schemas/ownership-assignment-report.schema.json \
+  --report "${VALIDATION_DIR}/ownership-assignment-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.remediation_sprint.cli \
+  --ownership-assignment-report "${OUT_DIR}/ownership-assignment-report.json" \
+  --execution-burndown-report "${OUT_DIR}/execution-burndown-report.json" \
+  --release-forecast-report "${OUT_DIR}/release-forecast-report.json" \
+  --output "${OUT_DIR}/remediation-sprint-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/remediation-sprint-report.json" \
+  --schema schemas/remediation-sprint-report.schema.json \
+  --report "${VALIDATION_DIR}/remediation-sprint-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.release_brief.cli \
+  --pilot-readiness-report "${OUT_DIR}/pilot-readiness-report.json" \
+  --readiness-scorecard-report "${OUT_DIR}/readiness-scorecard-report.json" \
+  --release-forecast-report "${OUT_DIR}/release-forecast-report.json" \
+  --release-gate-history-report "${OUT_DIR}/release-gate-history-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --output "${OUT_DIR}/release-brief-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/release-brief-report.json" \
+  --schema schemas/release-brief-report.schema.json \
+  --report "${VALIDATION_DIR}/release-brief-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.rollout_guardrails.cli \
+  --pilot-readiness-report "${OUT_DIR}/pilot-readiness-report.json" \
+  --rollback-hints-report "${OUT_DIR}/rollback-hints.json" \
+  --proposal-risk-report "${OUT_DIR}/proposal-risk-report.json" \
+  --crash-signature-report "${OUT_DIR}/crash-signature-report.json" \
+  --output "${OUT_DIR}/rollout-guardrails-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/rollout-guardrails-report.json" \
+  --schema schemas/rollout-guardrails-report.schema.json \
+  --report "${VALIDATION_DIR}/rollout-guardrails-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.artifact_health.cli \
+  --validation-dir "${VALIDATION_DIR}" \
+  --output "${OUT_DIR}/artifact-health-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/artifact-health-report.json" \
+  --schema schemas/artifact-health-report.schema.json \
+  --report "${VALIDATION_DIR}/artifact-health-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
   --compatibility-matrix "${OUT_DIR}/compatibility-matrix.json" \
@@ -397,6 +453,11 @@ fi
     "${OUT_DIR}/risk-watchlist-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
+    "${OUT_DIR}/ownership-assignment-report.json" \
+    "${OUT_DIR}/remediation-sprint-report.json" \
+    "${OUT_DIR}/release-brief-report.json" \
+    "${OUT_DIR}/rollout-guardrails-report.json" \
+    "${OUT_DIR}/artifact-health-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
