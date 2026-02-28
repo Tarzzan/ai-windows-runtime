@@ -59,6 +59,16 @@ fi
   --schema schemas/crash-signature-report.schema.json \
   --report "${VALIDATION_DIR}/crash-signature-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.installer_phases.cli \
+  --trace "${OUT_DIR}/trace.json" \
+  --runtime-trace "${OUT_DIR}/runtime-trace.json" \
+  --output "${OUT_DIR}/installer-phase-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/installer-phase-report.json" \
+  --schema schemas/installer-phase-report.schema.json \
+  --report "${VALIDATION_DIR}/installer-phase-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.root_cause.cli \
   --gaps "${OUT_DIR}/gaps.json" "${OUT_DIR}/runtime-gaps.json" \
   --patch-plans "${OUT_DIR}/patch-plan.json" "${OUT_DIR}/runtime-patch-plan.json" \
@@ -136,6 +146,7 @@ fi
     "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/crash-signature-report.json" \
+    "${OUT_DIR}/installer-phase-report.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
     "${OUT_DIR}/root-cause-summary.json" \
@@ -186,6 +197,7 @@ fi
     "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/crash-signature-report.json" \
+    "${OUT_DIR}/installer-phase-report.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
     "${OUT_DIR}/root-cause-summary.json" \
@@ -220,6 +232,7 @@ cp "${OUT_DIR}/root-cause-summary.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/patch-plan-diff.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/proposal-provenance.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/crash-signature-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/installer-phase-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/test-impact-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/rollback-hints.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/proposal-risk-report.json" "${BUNDLE_DIR}/"

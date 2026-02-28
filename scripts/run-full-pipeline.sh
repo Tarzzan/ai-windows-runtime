@@ -58,6 +58,11 @@ fi
   --runtime-trace "${OUT_DIR}/runtime-trace.json" \
   --output "${OUT_DIR}/crash-signature-report.json"
 
+"${PYTHON_BIN}" -m compat_runtime.installer_phases.cli \
+  --trace "${OUT_DIR}/trace.json" \
+  --runtime-trace "${OUT_DIR}/runtime-trace.json" \
+  --output "${OUT_DIR}/installer-phase-report.json"
+
 "${PYTHON_BIN}" -m compat_runtime.patch_orchestrator.cli \
   --gaps "${OUT_DIR}/runtime-gaps.json" \
   --output "${OUT_DIR}/runtime-patch-plan.json"
@@ -173,6 +178,7 @@ fi
     "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/crash-signature-report.json" \
+    "${OUT_DIR}/installer-phase-report.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
     "${OUT_DIR}/root-cause-summary.json" \
@@ -223,6 +229,7 @@ fi
     "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/crash-signature-report.json" \
+    "${OUT_DIR}/installer-phase-report.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
     "${OUT_DIR}/root-cause-summary.json" \

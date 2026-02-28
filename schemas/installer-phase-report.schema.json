@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Installer Phase Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "phases", "timeline", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["events_scanned", "phases_detected", "error_events", "has_errors"],
+      "properties": {
+        "events_scanned": {"type": "integer"},
+        "phases_detected": {"type": "integer"},
+        "error_events": {"type": "integer"},
+        "has_errors": {"type": "boolean"}
+      }
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "phase",
+          "events",
+          "errors",
+          "success",
+          "progress",
+          "first_seen",
+          "last_seen",
+          "phase_status"
+        ],
+        "properties": {
+          "phase": {"type": "string"},
+          "events": {"type": "integer"},
+          "errors": {"type": "integer"},
+          "success": {"type": "integer"},
+          "progress": {"type": "integer"},
+          "first_seen": {"type": ["string", "null"]},
+          "last_seen": {"type": ["string", "null"]},
+          "phase_status": {"type": "string"}
+        }
+      }
+    },
+    "timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "source", "phase", "status", "category", "message"],
+        "properties": {
+          "timestamp": {"type": ["string", "null"]},
+          "source": {"type": "string"},
+          "phase": {"type": "string"},
+          "status": {"type": "string"},
+          "category": {"type": "string"},
+          "message": {"type": "string"}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}
+

@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 27)
+## Current scope (Phase 28)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -92,6 +92,9 @@ Core runtime capabilities in this phase:
 65. Generate crash signature report artifacts from base/runtime traces.
 66. Normalize anomaly signatures and classify priority for crash triage workflows.
 67. Validate crash signature report artifacts automatically in pipeline and release bundle gates.
+68. Generate installer phase report artifacts from base/runtime traces.
+69. Track installer phase timelines with per-phase status rollups.
+70. Validate installer phase report artifacts automatically in pipeline and release bundle gates.
 
 ## Quick start
 ```bash
@@ -132,6 +135,8 @@ scripts/build-proposal-provenance.sh out
 # out/proposal-provenance.json is generated and schema-validated
 scripts/build-crash-signature-report.sh out
 # out/crash-signature-report.json is generated and schema-validated
+scripts/build-installer-phase-report.sh out
+# out/installer-phase-report.json is generated and schema-validated
 scripts/build-test-impact-report.sh out
 # out/test-impact-report.json is generated and schema-validated
 scripts/build-rollback-hints.sh out

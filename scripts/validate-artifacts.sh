@@ -60,6 +60,13 @@ if [[ -f "${OUT_DIR}/crash-signature-report.json" ]]; then
     --report "${REPORT_DIR}/crash-signature-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/installer-phase-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/installer-phase-report.json" \
+    --schema schemas/installer-phase-report.schema.json \
+    --report "${REPORT_DIR}/installer-phase-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/root-cause-summary.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/root-cause-summary.json" \
