@@ -28,6 +28,7 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/root-cause-summary.json" \
     "${OUT_DIR}/test-impact-report.json" \
     "${OUT_DIR}/rollback-hints.json" \
+    "${OUT_DIR}/proposal-risk-report.json" \
     "${OUT_DIR}/proposal-review-checklist.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \

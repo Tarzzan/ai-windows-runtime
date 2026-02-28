@@ -10,18 +10,18 @@ OUT_DIR="${1:-out}"
 VALIDATION_DIR="${OUT_DIR}/validation"
 mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
 
-"${PYTHON_BIN}" -m compat_runtime.proposal_review_checklist.cli \
+"${PYTHON_BIN}" -m compat_runtime.proposal_risk.cli \
   --patch-plan "${OUT_DIR}/patch-plan.json" \
   --proposal-provenance "${OUT_DIR}/proposal-provenance.json" \
   --patch-plan-diff "${OUT_DIR}/patch-plan-diff.json" \
   --test-impact "${OUT_DIR}/test-impact-report.json" \
   --rollback-hints "${OUT_DIR}/rollback-hints.json" \
-  --proposal-risk "${OUT_DIR}/proposal-risk-report.json" \
-  --output "${OUT_DIR}/proposal-review-checklist.json"
+  --output "${OUT_DIR}/proposal-risk-report.json"
 
 "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
-  --input "${OUT_DIR}/proposal-review-checklist.json" \
-  --schema schemas/proposal-review-checklist.schema.json \
-  --report "${VALIDATION_DIR}/proposal-review-checklist-validation.json"
+  --input "${OUT_DIR}/proposal-risk-report.json" \
+  --schema schemas/proposal-risk-report.schema.json \
+  --report "${VALIDATION_DIR}/proposal-risk-report-validation.json"
 
-echo "proposal review checklist: ok"
+echo "proposal risk report: ok"
+

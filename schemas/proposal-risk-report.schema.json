@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proposal Risk Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "proposals", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "total_proposals",
+        "high_risk",
+        "medium_risk",
+        "low_risk",
+        "weak_provenance"
+      ],
+      "properties": {
+        "total_proposals": {"type": "integer"},
+        "high_risk": {"type": "integer"},
+        "medium_risk": {"type": "integer"},
+        "low_risk": {"type": "integer"},
+        "weak_provenance": {"type": "integer"}
+      }
+    },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "gap_id",
+          "priority",
+          "declared_risk",
+          "risk_score",
+          "risk_level",
+          "provenance_score",
+          "rollback_level",
+          "changed_or_added",
+          "drivers"
+        ],
+        "properties": {
+          "gap_id": {"type": "string"},
+          "priority": {"type": "string"},
+          "declared_risk": {"type": "string"},
+          "risk_score": {"type": "integer"},
+          "risk_level": {"type": "string"},
+          "provenance_score": {"type": "number"},
+          "rollback_level": {"type": "string"},
+          "changed_or_added": {"type": "boolean"},
+          "drivers": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}
+

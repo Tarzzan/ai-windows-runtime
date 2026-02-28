@@ -28,6 +28,7 @@ compat-test-impact = "compat_runtime.test_impact.cli:main"
 compat-rollback-hints = "compat_runtime.rollback_hints.cli:main"
 compat-review-checklist = "compat_runtime.proposal_review_checklist.cli:main"
 compat-template-catalog = "compat_runtime.patch_template_library.cli:main"
+compat-proposal-risk = "compat_runtime.proposal_risk.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

@@ -19,6 +19,7 @@ def test_review_checklist_flags_required_failures():
     diff = {"added": [{"gap_id": "gap-1"}], "changed": []}
     test_impact = {"summary": {"suggested_suites": 2}}
     rollback = {"summary": {"total_hints": 1}, "hints": [{"gap_id": "gap-1", "rollback_level": "full"}]}
+    proposal_risk = {"proposals": [{"gap_id": "gap-1", "risk_level": "high"}]}
 
     report = build_proposal_review_checklist(
         patch_plan=patch_plan,
@@ -26,6 +27,7 @@ def test_review_checklist_flags_required_failures():
         patch_plan_diff=diff,
         test_impact=test_impact,
         rollback_hints=rollback,
+        proposal_risk=proposal_risk,
     )
 
     assert report["summary"]["proposal_count"] == 1
@@ -41,4 +43,3 @@ def test_review_checklist_detects_missing_coverage():
     assert report["ready_for_approval"] is False
     assert report["summary"]["required_failures"] >= 1
     assert report["actions"]
-

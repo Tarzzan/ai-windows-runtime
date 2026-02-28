@@ -40,6 +40,17 @@ def _proposal_index_by_gap(payload: dict, key: str) -> dict[str, dict]:
     return index
 
 
+def _proposal_risk_index(proposal_risk: dict | None) -> dict[str, dict]:
+    index: dict[str, dict] = {}
+    if not proposal_risk:
+        return index
+    for row in proposal_risk.get("proposals", []):
+        gap_id = row.get("gap_id")
+        if isinstance(gap_id, str):
+            index[gap_id] = row
+    return index
+
+
 def _actions(required_failures: int, warns: int, todos: int) -> list[str]:
     actions = []
     if required_failures > 0:
@@ -60,10 +71,12 @@ def build_proposal_review_checklist(
     patch_plan_diff: dict | None = None,
     test_impact: dict | None = None,
     rollback_hints: dict | None = None,
+    proposal_risk: dict | None = None,
 ) -> dict:
     proposals = patch_plan.get("proposals", [])
     provenance_index = _proposal_index_by_gap(proposal_provenance or {}, "proposals")
     rollback_index = _proposal_index_by_gap(rollback_hints or {}, "hints")
+    risk_index = _proposal_risk_index(proposal_risk)
 
     changed_ids = set()
     if patch_plan_diff:
@@ -149,6 +162,30 @@ def build_proposal_review_checklist(
             )
         )
 
+        risk_entry = risk_index.get(gap_id)
+        risk_level = str((risk_entry or {}).get("risk_level", "unknown"))
+        items.append(
+            _new_item(
+                item_id=f"{gap_id}:risk_scored",
+                title=f"{gap_id} risk score available",
+                required=priority == "P0",
+                status="pass" if bool(risk_entry) else "fail",
+                evidence="out/proposal-risk-report.json",
+                proposal_gap_id=gap_id,
+            )
+        )
+        if risk_level == "high":
+            items.append(
+                _new_item(
+                    item_id=f"{gap_id}:high_risk_review",
+                    title=f"{gap_id} high-risk reviewer sign-off",
+                    required=False,
+                    status="todo",
+                    evidence="out/proposal-risk-report.json",
+                    proposal_gap_id=gap_id,
+                )
+            )
+
         if gap_id in changed_ids:
             items.append(
                 _new_item(
@@ -196,6 +233,7 @@ def main() -> None:
     parser.add_argument("--patch-plan-diff", required=False, help="Optional patch plan diff path")
     parser.add_argument("--test-impact", required=False, help="Optional test impact report path")
     parser.add_argument("--rollback-hints", required=False, help="Optional rollback hints path")
+    parser.add_argument("--proposal-risk", required=False, help="Optional proposal risk report path")
     parser.add_argument("--output", required=True, help="Output JSON path")
     args = parser.parse_args()
 
@@ -204,6 +242,7 @@ def main() -> None:
     diff = read_json(args.patch_plan_diff) if args.patch_plan_diff else None
     test_impact = read_json(args.test_impact) if args.test_impact else None
     rollback = read_json(args.rollback_hints) if args.rollback_hints else None
+    proposal_risk = read_json(args.proposal_risk) if args.proposal_risk else None
 
     artifact = build_proposal_review_checklist(
         patch_plan=patch_plan,
@@ -211,10 +250,10 @@ def main() -> None:
         patch_plan_diff=diff,
         test_impact=test_impact,
         rollback_hints=rollback,
+        proposal_risk=proposal_risk,
     )
     write_json(args.output, artifact)
 
 
 if __name__ == "__main__":
     main()
-

@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 25)
+## Current scope (Phase 26)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -86,6 +86,9 @@ Core runtime capabilities in this phase:
 59. Generate patch template catalog artifacts with template metadata and usage analytics.
 60. Map gap categories to reusable patch templates with priority distribution tracking.
 61. Validate patch template catalog artifacts automatically in pipeline and release bundle gates.
+62. Generate proposal risk report artifacts with per-proposal risk scores and risk levels.
+63. Correlate risk scoring with provenance strength, diff churn, rollback level, and test impact.
+64. Validate proposal risk report artifacts automatically in pipeline and release bundle gates.
 
 ## Quick start
 ```bash
@@ -128,6 +131,8 @@ scripts/build-test-impact-report.sh out
 # out/test-impact-report.json is generated and schema-validated
 scripts/build-rollback-hints.sh out
 # out/rollback-hints.json is generated and schema-validated
+scripts/build-proposal-risk-report.sh out
+# out/proposal-risk-report.json is generated and schema-validated
 scripts/build-proposal-review-checklist.sh out
 # out/proposal-review-checklist.json is generated and schema-validated
 scripts/build-patch-template-catalog.sh out
