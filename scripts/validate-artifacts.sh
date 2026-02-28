@@ -53,6 +53,13 @@ if [[ -f "${OUT_DIR}/runtime-trace.json" ]]; then
     --report "${REPORT_DIR}/runtime-trace-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/crash-signature-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/crash-signature-report.json" \
+    --schema schemas/crash-signature-report.schema.json \
+    --report "${REPORT_DIR}/crash-signature-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/root-cause-summary.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/root-cause-summary.json" \

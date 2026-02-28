@@ -23,6 +23,7 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/proposal-provenance.json" \
     "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
+    "${OUT_DIR}/crash-signature-report.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
     "${OUT_DIR}/root-cause-summary.json" \

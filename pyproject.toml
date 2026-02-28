@@ -29,6 +29,7 @@ compat-rollback-hints = "compat_runtime.rollback_hints.cli:main"
 compat-review-checklist = "compat_runtime.proposal_review_checklist.cli:main"
 compat-template-catalog = "compat_runtime.patch_template_library.cli:main"
 compat-proposal-risk = "compat_runtime.proposal_risk.cli:main"
+compat-crash-signatures = "compat_runtime.crash_signatures.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

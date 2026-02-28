@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Crash Signature Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "signatures", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["events_scanned", "signatures", "high_priority_signatures"],
+      "properties": {
+        "events_scanned": {"type": "integer"},
+        "signatures": {"type": "integer"},
+        "high_priority_signatures": {"type": "integer"}
+      }
+    },
+    "signatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "category",
+          "priority",
+          "count",
+          "sources",
+          "first_seen",
+          "last_seen",
+          "normalized_message",
+          "sample_messages"
+        ],
+        "properties": {
+          "id": {"type": "string"},
+          "kind": {"type": "string"},
+          "category": {"type": "string"},
+          "priority": {"type": "string"},
+          "count": {"type": "integer"},
+          "sources": {"type": "array", "items": {"type": "string"}},
+          "first_seen": {"type": ["string", "null"]},
+          "last_seen": {"type": ["string", "null"]},
+          "normalized_message": {"type": "string"},
+          "sample_messages": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}
+
