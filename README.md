@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 33)
+## Current scope (Phase 34)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -110,6 +110,9 @@ Core runtime capabilities in this phase:
 83. Generate iteration plan artifact (`iteration-plan-report.json`) from decision/backlog/risk/test-impact signals.
 84. Build prioritized execution tasks (`P0/P1/P2`) with estimated effort and blocking flags.
 85. Validate iteration plan artifacts automatically in pipeline, release bundle, and reproducible package flows.
+86. Generate release forecast artifact (`release-forecast-report.json`) from iteration/decision/KPI/trend signals.
+87. Estimate iterations and timeline to converge toward release readiness (`go`) with explicit assumptions.
+88. Validate release forecast artifacts automatically in pipeline, release bundle, and reproducible package flows.
 
 ## Quick start
 ```bash
@@ -152,6 +155,8 @@ scripts/build-hook-backlog-report.sh out
 # out/hook-backlog-report.json is generated and schema-validated
 scripts/build-iteration-plan-report.sh out
 # out/iteration-plan-report.json is generated and schema-validated
+scripts/build-release-forecast-report.sh out
+# out/release-forecast-report.json is generated and schema-validated
 scripts/build-root-cause-summary.sh out
 # out/root-cause-summary.json is generated and schema-validated
 scripts/build-patch-plan-diff.sh out

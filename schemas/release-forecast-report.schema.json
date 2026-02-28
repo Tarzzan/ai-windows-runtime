@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Forecast Report Artifact",
+  "type": "object",
+  "required": [
+    "artifact_version",
+    "generated_at",
+    "summary",
+    "top_tasks",
+    "actions",
+    "assumptions"
+  ],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "decision_context",
+        "risk_level",
+        "total_tasks",
+        "blocking_tasks",
+        "p0_tasks",
+        "estimated_total_hours",
+        "estimated_iterations_to_go",
+        "estimated_days_to_go",
+        "forecast_wave",
+        "pace_factor",
+        "trend_improved_metrics",
+        "trend_regressed_metrics"
+      ],
+      "properties": {
+        "decision_context": {"type": "string"},
+        "risk_level": {"type": "string"},
+        "total_tasks": {"type": "integer"},
+        "blocking_tasks": {"type": "integer"},
+        "p0_tasks": {"type": "integer"},
+        "estimated_total_hours": {"type": "integer"},
+        "estimated_iterations_to_go": {"type": "integer"},
+        "estimated_days_to_go": {"type": "integer"},
+        "forecast_wave": {"type": "string"},
+        "pace_factor": {"type": "number"},
+        "trend_improved_metrics": {"type": "integer"},
+        "trend_regressed_metrics": {"type": "integer"}
+      }
+    },
+    "top_tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "priority", "blocking", "objective", "suggested_command"],
+        "properties": {
+          "id": {"type": ["string", "null"]},
+          "priority": {"type": ["string", "null"]},
+          "blocking": {"type": "boolean"},
+          "objective": {"type": ["string", "null"]},
+          "suggested_command": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}},
+    "assumptions": {
+      "type": "object",
+      "required": [
+        "hours_per_iteration_capacity",
+        "blocking_tasks_per_iteration_target",
+        "forecast_model"
+      ],
+      "properties": {
+        "hours_per_iteration_capacity": {"type": "integer"},
+        "blocking_tasks_per_iteration_target": {"type": "integer"},
+        "forecast_model": {"type": "string"}
+      }
+    }
+  }
+}
