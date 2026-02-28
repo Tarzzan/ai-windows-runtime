@@ -200,6 +200,13 @@ if [[ -f "${OUT_DIR}/release-forecast-report.json" ]]; then
     --report "${REPORT_DIR}/release-forecast-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/readiness-scorecard-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/readiness-scorecard-report.json" \
+    --schema schemas/readiness-scorecard-report.schema.json \
+    --report "${REPORT_DIR}/readiness-scorecard-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/repro-package.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/repro-package.json" \

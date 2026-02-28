@@ -258,6 +258,19 @@ fi
   --schema schemas/release-forecast-report.schema.json \
   --report "${VALIDATION_DIR}/release-forecast-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.readiness_scorecard.cli \
+  --quality-gate-report "${OUT_DIR}/quality-gate-report.json" \
+  --release-decision-report "${OUT_DIR}/release-decision-report.json" \
+  --iteration-plan-report "${OUT_DIR}/iteration-plan-report.json" \
+  --release-forecast-report "${OUT_DIR}/release-forecast-report.json" \
+  --kpi-report "${OUT_DIR}/kpi-report.json" \
+  --output "${OUT_DIR}/readiness-scorecard-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/readiness-scorecard-report.json" \
+  --schema schemas/readiness-scorecard-report.schema.json \
+  --report "${VALIDATION_DIR}/readiness-scorecard-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
   --compatibility-matrix "${OUT_DIR}/compatibility-matrix.json" \
@@ -285,6 +298,7 @@ fi
     "${OUT_DIR}/release-decision-report.json" \
     "${OUT_DIR}/iteration-plan-report.json" \
     "${OUT_DIR}/release-forecast-report.json" \
+    "${OUT_DIR}/readiness-scorecard-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
@@ -311,6 +325,7 @@ cp "${OUT_DIR}/quality-gate-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-decision-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/iteration-plan-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-forecast-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/readiness-scorecard-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/repro-package.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/root-cause-summary.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/patch-plan-diff.json" "${BUNDLE_DIR}/"

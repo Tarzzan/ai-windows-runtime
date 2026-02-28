@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Readiness Scorecard Report Artifact",
+  "type": "object",
+  "required": [
+    "artifact_version",
+    "generated_at",
+    "score",
+    "band",
+    "release_candidate",
+    "summary",
+    "factors",
+    "actions"
+  ],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "score": {"type": "integer"},
+    "band": {"type": "string"},
+    "release_candidate": {"type": "boolean"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "decision_context",
+        "quality_gate",
+        "risk_level",
+        "blocking_tasks",
+        "estimated_iterations_to_go"
+      ],
+      "properties": {
+        "decision_context": {"type": "string"},
+        "quality_gate": {"type": "string"},
+        "risk_level": {"type": "string"},
+        "blocking_tasks": {"type": "integer"},
+        "estimated_iterations_to_go": {"type": "integer"}
+      }
+    },
+    "factors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["factor", "delta", "detail"],
+        "properties": {
+          "factor": {"type": "string"},
+          "delta": {"type": "integer"},
+          "detail": {"type": "string"}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

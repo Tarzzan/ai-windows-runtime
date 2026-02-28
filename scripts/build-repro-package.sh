@@ -38,6 +38,7 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/release-decision-report.json" \
     "${OUT_DIR}/iteration-plan-report.json" \
     "${OUT_DIR}/release-forecast-report.json" \
+    "${OUT_DIR}/readiness-scorecard-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \

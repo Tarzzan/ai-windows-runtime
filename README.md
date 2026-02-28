@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 34)
+## Current scope (Phase 35)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -113,6 +113,9 @@ Core runtime capabilities in this phase:
 86. Generate release forecast artifact (`release-forecast-report.json`) from iteration/decision/KPI/trend signals.
 87. Estimate iterations and timeline to converge toward release readiness (`go`) with explicit assumptions.
 88. Validate release forecast artifacts automatically in pipeline, release bundle, and reproducible package flows.
+89. Generate readiness scorecard artifact (`readiness-scorecard-report.json`) with a normalized score (0-100).
+90. Classify overall posture in `red/amber/green` band with release-candidate flag and factor breakdown.
+91. Validate readiness scorecard artifacts automatically in pipeline, release bundle, and reproducible package flows.
 
 ## Quick start
 ```bash
@@ -157,6 +160,8 @@ scripts/build-iteration-plan-report.sh out
 # out/iteration-plan-report.json is generated and schema-validated
 scripts/build-release-forecast-report.sh out
 # out/release-forecast-report.json is generated and schema-validated
+scripts/build-readiness-scorecard-report.sh out
+# out/readiness-scorecard-report.json is generated and schema-validated
 scripts/build-root-cause-summary.sh out
 # out/root-cause-summary.json is generated and schema-validated
 scripts/build-patch-plan-diff.sh out
