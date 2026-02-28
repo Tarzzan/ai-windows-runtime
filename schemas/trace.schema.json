@@ -14,7 +14,12 @@
           "timestamp": {"type": "string"},
           "category": {"type": "string"},
           "message": {"type": "string"},
-          "severity": {"type": "string"}
+          "severity": {"type": "string"},
+          "source": {"type": "string"},
+          "seq": {"type": ["integer", "null"]},
+          "component": {"type": ["string", "null"]},
+          "action": {"type": ["string", "null"]},
+          "stage": {"type": ["string", "null"]}
         }
       }
     }

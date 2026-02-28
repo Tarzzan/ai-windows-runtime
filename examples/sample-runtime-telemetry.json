@@ -1,0 +1,33 @@
+{
+  "artifact_version": "1.0",
+  "events": [
+    {
+      "seq": 1,
+      "component": "win32",
+      "action": "CreateProcessW",
+      "stage": "Start",
+      "detail": null
+    },
+    {
+      "seq": 2,
+      "component": "win32",
+      "action": "CreateProcessW",
+      "stage": "Success",
+      "detail": "process"
+    },
+    {
+      "seq": 3,
+      "component": "win32",
+      "action": "RegQueryValueExW",
+      "stage": "Error",
+      "detail": "registry value not found: HKCU\\\\Software\\\\AIWR::Mode"
+    },
+    {
+      "seq": 4,
+      "component": "win32",
+      "action": "WaitForSingleObject",
+      "stage": "Error",
+      "detail": "timeout while waiting for bootstrap-ready event"
+    }
+  ]
+}

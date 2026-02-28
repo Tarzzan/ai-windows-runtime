@@ -17,11 +17,12 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 10)
+## Current scope (Phase 11)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
 3. Native runtime core prototype in Rust (PE loader + section mapping + import/export parser + relocations + API dispatcher + mini linker + NT process/thread primitives + memory + Win32 sync/file/registry simulation + telemetry hooks).
+4. Python telemetry adapter prototype to convert runtime telemetry artifacts into normalized trace artifacts.
 
 Core runtime capabilities in this phase:
 1. Parse execution traces.
@@ -47,6 +48,8 @@ Core runtime capabilities in this phase:
 21. Simulate minimal registry adapter calls (RegSetValueEx/RegQueryValueEx/RegDeleteValue).
 22. Emit structured runtime telemetry events (`start/success/error`) for each simulated Win32 call.
 23. Expose telemetry capture API for extraction/drain in deterministic validation flows.
+24. Adapt runtime telemetry artifacts into `trace.json` compatible events.
+25. Merge telemetry-derived events with baseline traces for unified gap/patch planning.
 
 ## Quick start
 ```bash
@@ -57,6 +60,11 @@ pip install -r requirements.txt
 python -m compat_runtime.trace_collector.cli --input examples/sample-trace.log --output out/trace.json
 python -m compat_runtime.gap_detector.cli --trace out/trace.json --output out/gaps.json
 python -m compat_runtime.patch_orchestrator.cli --gaps out/gaps.json --output out/patch-plan.json
+
+# Adapt runtime telemetry into trace artifact (optional)
+python -m compat_runtime.telemetry_adapter.cli --telemetry examples/sample-runtime-telemetry.json --output out/runtime-trace.json
+python -m compat_runtime.gap_detector.cli --trace out/runtime-trace.json --output out/runtime-gaps.json
+python -m compat_runtime.patch_orchestrator.cli --gaps out/runtime-gaps.json --output out/runtime-patch-plan.json
 pytest -q
 
 # Native runtime core checks

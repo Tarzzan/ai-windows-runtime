@@ -10,6 +10,9 @@ CATEGORY_PLAYBOOK = {
     "com": ("P0", "Implement or stub required COM activation path", "high"),
     "installer": ("P0", "Instrument installer bootstrap handshake and add targeted shim", "high"),
     "network": ("P1", "Improve winhttp/protocol compatibility layer", "medium"),
+    "sync": ("P1", "Harden synchronization object semantics and wait behavior", "medium"),
+    "file": ("P1", "Expand file adapter semantics and handle/path behavior", "medium"),
+    "registry": ("P1", "Expand registry adapter semantics and key/value behavior", "medium"),
     "unimplemented": ("P1", "Implement missing API stub with behavior tests", "medium"),
 }
 

@@ -22,6 +22,12 @@ def gap_summary(category: str, message: str) -> str:
         return f"Installer phase blocker: {message}"
     if category == "network":
         return f"Network negotiation limitation: {message}"
+    if category == "sync":
+        return f"Synchronization primitive limitation: {message}"
+    if category == "file":
+        return f"File subsystem limitation: {message}"
+    if category == "registry":
+        return f"Registry subsystem limitation: {message}"
     if category == "unimplemented":
         return f"Potential missing implementation: {message}"
     return f"General runtime issue: {message}"

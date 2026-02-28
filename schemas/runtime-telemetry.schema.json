@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Runtime Telemetry Artifact",
+  "type": "object",
+  "required": ["artifact_version", "events"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["seq", "component", "action", "stage"],
+        "properties": {
+          "seq": {"type": "integer"},
+          "timestamp": {"type": "string"},
+          "component": {"type": "string"},
+          "action": {"type": "string"},
+          "stage": {"type": "string"},
+          "detail": {"type": ["string", "null"]}
+        }
+      }
+    }
+  }
+}
