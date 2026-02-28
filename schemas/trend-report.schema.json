@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Trend Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "metrics", "history"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "current_status",
+        "baseline_status",
+        "status_delta",
+        "improved_metrics",
+        "regressed_metrics",
+        "stable_metrics"
+      ],
+      "properties": {
+        "current_status": {"type": "string"},
+        "baseline_status": {"type": "string"},
+        "status_delta": {"type": "integer"},
+        "improved_metrics": {"type": "array", "items": {"type": "string"}},
+        "regressed_metrics": {"type": "array", "items": {"type": "string"}},
+        "stable_metrics": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "current", "baseline", "delta", "better_when_lower", "direction"],
+        "properties": {
+          "name": {"type": "string"},
+          "current": {"type": "integer"},
+          "baseline": {"type": "integer"},
+          "delta": {"type": "integer"},
+          "better_when_lower": {"type": "boolean"},
+          "direction": {"type": "string"}
+        }
+      }
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "generated_at",
+          "status",
+          "base_trace_events",
+          "base_gaps",
+          "base_proposals",
+          "runtime_trace_events",
+          "runtime_gaps",
+          "runtime_proposals"
+        ],
+        "properties": {
+          "path": {"type": "string"},
+          "generated_at": {"type": ["string", "null"]},
+          "status": {"type": "string"},
+          "base_trace_events": {"type": "integer"},
+          "base_gaps": {"type": "integer"},
+          "base_proposals": {"type": "integer"},
+          "runtime_trace_events": {"type": "integer"},
+          "runtime_gaps": {"type": "integer"},
+          "runtime_proposals": {"type": "integer"}
+        }
+      }
+    }
+  }
+}

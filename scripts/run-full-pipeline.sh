@@ -8,6 +8,7 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 
 OUT_DIR="${1:-out}"
 VALIDATION_DIR="${OUT_DIR}/validation"
+BASELINE_EXECUTION_REPORT="${BASELINE_EXECUTION_REPORT:-}"
 mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
 
 "${PYTHON_BIN}" -m compat_runtime.trace_collector.cli \
@@ -53,5 +54,23 @@ scripts/validate-artifacts.sh "$OUT_DIR"
   --input "${OUT_DIR}/execution-report.json" \
   --schema schemas/execution-report.schema.json \
   --report "${VALIDATION_DIR}/execution-report-validation.json"
+
+if [[ -n "${BASELINE_EXECUTION_REPORT}" && -f "${BASELINE_EXECUTION_REPORT}" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.trend_report.cli \
+    --current "${OUT_DIR}/execution-report.json" \
+    --baseline "${BASELINE_EXECUTION_REPORT}" \
+    --history "${BASELINE_EXECUTION_REPORT}" "${OUT_DIR}/execution-report.json" \
+    --output "${OUT_DIR}/trend-report.json"
+else
+  "${PYTHON_BIN}" -m compat_runtime.trend_report.cli \
+    --current "${OUT_DIR}/execution-report.json" \
+    --history "${OUT_DIR}/execution-report.json" \
+    --output "${OUT_DIR}/trend-report.json"
+fi
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/trend-report.json" \
+  --schema schemas/trend-report.schema.json \
+  --report "${VALIDATION_DIR}/trend-report-validation.json"
 
 echo "full pipeline: ok"

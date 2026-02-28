@@ -32,4 +32,18 @@ if [[ -f "${OUT_DIR}/runtime-trace.json" ]]; then
     --report "${REPORT_DIR}/runtime-trace-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/execution-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/execution-report.json" \
+    --schema schemas/execution-report.schema.json \
+    --report "${REPORT_DIR}/execution-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/trend-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/trend-report.json" \
+    --schema schemas/trend-report.schema.json \
+    --report "${REPORT_DIR}/trend-report-validation.json"
+fi
+
 echo "artifact validation: ok"
