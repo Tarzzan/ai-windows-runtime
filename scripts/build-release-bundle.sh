@@ -73,6 +73,19 @@ fi
   --schema schemas/rollback-hints.schema.json \
   --report "${VALIDATION_DIR}/rollback-hints-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.proposal_review_checklist.cli \
+  --patch-plan "${OUT_DIR}/patch-plan.json" \
+  --proposal-provenance "${OUT_DIR}/proposal-provenance.json" \
+  --patch-plan-diff "${OUT_DIR}/patch-plan-diff.json" \
+  --test-impact "${OUT_DIR}/test-impact-report.json" \
+  --rollback-hints "${OUT_DIR}/rollback-hints.json" \
+  --output "${OUT_DIR}/proposal-review-checklist.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/proposal-review-checklist.json" \
+  --schema schemas/proposal-review-checklist.schema.json \
+  --report "${VALIDATION_DIR}/proposal-review-checklist-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.release_readiness.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
   --trend-report "${OUT_DIR}/trend-report.json" \
@@ -92,6 +105,7 @@ fi
     "${OUT_DIR}/root-cause-summary.json" \
     "${OUT_DIR}/test-impact-report.json" \
     "${OUT_DIR}/rollback-hints.json" \
+    "${OUT_DIR}/proposal-review-checklist.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
@@ -138,6 +152,7 @@ fi
     "${OUT_DIR}/root-cause-summary.json" \
     "${OUT_DIR}/test-impact-report.json" \
     "${OUT_DIR}/rollback-hints.json" \
+    "${OUT_DIR}/proposal-review-checklist.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
@@ -166,5 +181,6 @@ cp "${OUT_DIR}/patch-plan-diff.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/proposal-provenance.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/test-impact-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/rollback-hints.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/proposal-review-checklist.json" "${BUNDLE_DIR}/"
 
 echo "release bundle: ok"

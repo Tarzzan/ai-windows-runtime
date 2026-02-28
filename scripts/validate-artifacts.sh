@@ -67,6 +67,13 @@ if [[ -f "${OUT_DIR}/rollback-hints.json" ]]; then
     --report "${REPORT_DIR}/rollback-hints-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/proposal-review-checklist.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/proposal-review-checklist.json" \
+    --schema schemas/proposal-review-checklist.schema.json \
+    --report "${REPORT_DIR}/proposal-review-checklist-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/execution-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/execution-report.json" \

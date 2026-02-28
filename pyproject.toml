@@ -26,6 +26,7 @@ compat-plan-diff = "compat_runtime.patch_plan_diff.cli:main"
 compat-proposal-provenance = "compat_runtime.proposal_provenance.cli:main"
 compat-test-impact = "compat_runtime.test_impact.cli:main"
 compat-rollback-hints = "compat_runtime.rollback_hints.cli:main"
+compat-review-checklist = "compat_runtime.proposal_review_checklist.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
