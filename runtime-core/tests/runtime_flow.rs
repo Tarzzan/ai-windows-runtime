@@ -1,7 +1,7 @@
 use runtime_core::{
     ApiStatus, MemoryProtection, PeImportSymbol, ProcessState, RuntimeCore, STILL_ACTIVE,
-    ThreadState, WaitMultipleStatus, WaitStatus, Win32Call, Win32CallResult, load_pe_image,
-    parse_pe_metadata,
+    TelemetryStage, ThreadState, WaitMultipleStatus, WaitStatus, Win32Call, Win32CallResult,
+    load_pe_image, parse_pe_metadata,
 };
 
 fn pe_with_imports() -> Vec<u8> {
@@ -534,4 +534,48 @@ fn runtime_phase9_sync_file_registry_calls() {
         })
         .expect("reg query should succeed");
     assert_eq!(reg, Win32CallResult::Bytes(b"desktop".to_vec()));
+}
+
+#[test]
+fn runtime_phase10_telemetry_hook_captures_call_sequence() {
+    let mut core = RuntimeCore::new();
+    core.register_phase10_runtime_apis();
+
+    let trace_api = core
+        .dispatch_api("ntdll.NtTraceEvent")
+        .expect("phase10 trace API must be registered");
+    assert_eq!(trace_api.status, ApiStatus::Implemented);
+
+    let create = core
+        .simulate_win32_call(Win32Call::CreateProcess {
+            image_name: "traceable.exe".to_string(),
+            entry_point_rva: 0x1337,
+        })
+        .expect("create process should succeed");
+    let Win32CallResult::Process(launch) = create else {
+        panic!("expected process launch");
+    };
+
+    core.simulate_win32_call(Win32Call::CloseHandle {
+        handle: launch.process_handle,
+    })
+    .expect("close process handle should succeed");
+
+    core.simulate_win32_call(Win32Call::CreateThread {
+        process_handle: launch.process_handle,
+        start_rva: 0x1444,
+    })
+    .expect_err("create thread with closed handle should fail");
+
+    let events = core.telemetry_events();
+    assert_eq!(events.len(), 6);
+    assert_eq!(events[0].seq, 1);
+    assert_eq!(events[0].action, "CreateProcessW");
+    assert_eq!(events[0].stage, TelemetryStage::Start);
+    assert_eq!(events[5].action, "CreateThread");
+    assert_eq!(events[5].stage, TelemetryStage::Error);
+
+    let drained = core.take_telemetry_events();
+    assert_eq!(drained.len(), 6);
+    assert!(core.telemetry_events().is_empty());
 }

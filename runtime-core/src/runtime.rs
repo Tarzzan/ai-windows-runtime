@@ -7,6 +7,7 @@ use crate::ntcore::{
     WaitMultipleStatus, WaitStatus,
 };
 use crate::pe::{LoadedPeImage, PeError, PeExport, PeImportSymbol, PeMetadata, load_pe_image};
+use crate::telemetry::{RuntimeTelemetryEvent, TelemetryRecorder};
 use crate::win32::{STILL_ACTIVE, Win32Call, Win32CallResult};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -68,6 +69,7 @@ struct CachedLookup {
 pub struct RuntimeCore {
     dispatcher: ApiDispatcher,
     nt_core: NtCore,
+    telemetry: TelemetryRecorder,
 }
 
 fn normalize_dll_name(name: &str) -> String {
@@ -95,16 +97,74 @@ fn resolve_export<'a>(exports: &'a [PeExport], symbol: &PeImportSymbol) -> Optio
     }
 }
 
+fn win32_call_name(call: &Win32Call) -> &'static str {
+    match call {
+        Win32Call::CreateProcess { .. } => "CreateProcessW",
+        Win32Call::CreateThread { .. } => "CreateThread",
+        Win32Call::VirtualAlloc { .. } => "VirtualAlloc",
+        Win32Call::VirtualProtect { .. } => "VirtualProtect",
+        Win32Call::VirtualFree { .. } => "VirtualFree",
+        Win32Call::WriteProcessMemory { .. } => "WriteProcessMemory",
+        Win32Call::ReadProcessMemory { .. } => "ReadProcessMemory",
+        Win32Call::CreateEvent { .. } => "CreateEventW",
+        Win32Call::SetEvent { .. } => "SetEvent",
+        Win32Call::ResetEvent { .. } => "ResetEvent",
+        Win32Call::CreateMutex { .. } => "CreateMutexW",
+        Win32Call::ReleaseMutex { .. } => "ReleaseMutex",
+        Win32Call::WaitForSingleObject { .. } => "WaitForSingleObject",
+        Win32Call::WaitForMultipleObjects { .. } => "WaitForMultipleObjects",
+        Win32Call::OpenFile { .. } => "CreateFileW",
+        Win32Call::WriteFile { .. } => "WriteFile",
+        Win32Call::ReadFile { .. } => "ReadFile",
+        Win32Call::SetFilePointer { .. } => "SetFilePointerEx",
+        Win32Call::RegSetValue { .. } => "RegSetValueExW",
+        Win32Call::RegQueryValue { .. } => "RegQueryValueExW",
+        Win32Call::RegDeleteValue { .. } => "RegDeleteValueW",
+        Win32Call::TerminateProcess { .. } => "TerminateProcess",
+        Win32Call::GetExitCodeProcess { .. } => "GetExitCodeProcess",
+        Win32Call::CloseHandle { .. } => "CloseHandle",
+    }
+}
+
+fn win32_result_label(result: &Win32CallResult) -> &'static str {
+    match result {
+        Win32CallResult::Process(_) => "process",
+        Win32CallResult::Thread(_) => "thread",
+        Win32CallResult::MemoryRegion { .. } => "memory-region",
+        Win32CallResult::Handle(_) => "handle",
+        Win32CallResult::Wait(_) => "wait",
+        Win32CallResult::WaitMultiple(_) => "wait-multiple",
+        Win32CallResult::Bytes(_) => "bytes",
+        Win32CallResult::ExitCode(_) => "exit-code",
+        Win32CallResult::Size(_) => "size",
+        Win32CallResult::Position(_) => "position",
+        Win32CallResult::None => "none",
+    }
+}
+
 impl RuntimeCore {
     pub fn new() -> Self {
         Self {
             dispatcher: ApiDispatcher::new(),
             nt_core: NtCore::new(),
+            telemetry: TelemetryRecorder::new(),
         }
     }
 
     pub fn dispatcher_mut(&mut self) -> &mut ApiDispatcher {
         &mut self.dispatcher
+    }
+
+    pub fn telemetry_events(&self) -> &[RuntimeTelemetryEvent] {
+        self.telemetry.events()
+    }
+
+    pub fn take_telemetry_events(&mut self) -> Vec<RuntimeTelemetryEvent> {
+        self.telemetry.take_events()
+    }
+
+    pub fn clear_telemetry_events(&mut self) {
+        self.telemetry.clear();
     }
 
     pub fn launch_process(&mut self, image_name: &str, entry_point_rva: u32) -> ProcessLaunch {
@@ -337,8 +397,22 @@ impl RuntimeCore {
         }
     }
 
+    pub fn register_phase10_runtime_apis(&mut self) {
+        self.register_phase9_runtime_apis();
+        for api in [
+            "ntdll.NtTraceEvent",
+            "advapi32.EventWrite",
+            "advapi32.EventRegister",
+        ] {
+            self.dispatcher_mut().register_implemented(api);
+        }
+    }
+
     pub fn simulate_win32_call(&mut self, call: Win32Call) -> Result<Win32CallResult, NtError> {
-        match call {
+        let action = win32_call_name(&call).to_string();
+        self.telemetry.record_start("win32", &action);
+
+        let result: Result<Win32CallResult, NtError> = (|| match call {
             Win32Call::CreateProcess {
                 image_name,
                 entry_point_rva,
@@ -501,7 +575,20 @@ impl RuntimeCore {
                 self.close_handle(handle)?;
                 Ok(Win32CallResult::None)
             }
+        })();
+
+        match &result {
+            Ok(value) => self.telemetry.record_success(
+                "win32",
+                &action,
+                Some(win32_result_label(value).to_string()),
+            ),
+            Err(err) => self
+                .telemetry
+                .record_error("win32", &action, err.to_string()),
         }
+
+        result
     }
 
     pub fn load_pe_image(&self, bytes: &[u8]) -> Result<LoadReport, PeError> {
@@ -693,6 +780,7 @@ mod tests {
         MemoryProtection, ProcessState, ThreadState, WaitMultipleStatus, WaitStatus,
     };
     use crate::runtime::RuntimeCore;
+    use crate::telemetry::TelemetryStage;
     use crate::win32::{STILL_ACTIVE, Win32Call, Win32CallResult};
 
     fn minimal_export_pe() -> Vec<u8> {
@@ -946,5 +1034,44 @@ mod tests {
             })
             .expect("reg query should succeed");
         assert_eq!(reg, Win32CallResult::Bytes(b"beta".to_vec()));
+    }
+
+    #[test]
+    fn runtime_records_telemetry_for_success_and_error_paths() {
+        let mut core = RuntimeCore::new();
+
+        let create = core
+            .simulate_win32_call(Win32Call::CreateProcess {
+                image_name: "telemetry.exe".to_string(),
+                entry_point_rva: 0x1000,
+            })
+            .expect("process creation should succeed");
+        let Win32CallResult::Process(launch) = create else {
+            panic!("expected process launch");
+        };
+
+        core.simulate_win32_call(Win32Call::CloseHandle {
+            handle: launch.process_handle,
+        })
+        .expect("close handle should succeed");
+
+        let err = core
+            .simulate_win32_call(Win32Call::CreateThread {
+                process_handle: launch.process_handle,
+                start_rva: 0x2000,
+            })
+            .expect_err("closed process handle should fail");
+        assert_eq!(err.to_string(), "invalid process handle: 0x00000100");
+
+        let events = core.telemetry_events();
+        assert_eq!(events.len(), 6);
+        assert_eq!(events[0].action, "CreateProcessW");
+        assert_eq!(events[0].stage, TelemetryStage::Start);
+        assert_eq!(events[1].action, "CreateProcessW");
+        assert_eq!(events[1].stage, TelemetryStage::Success);
+        assert_eq!(events[4].action, "CreateThread");
+        assert_eq!(events[4].stage, TelemetryStage::Start);
+        assert_eq!(events[5].action, "CreateThread");
+        assert_eq!(events[5].stage, TelemetryStage::Error);
     }
 }

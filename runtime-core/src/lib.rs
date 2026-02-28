@@ -2,6 +2,7 @@ pub mod dispatcher;
 pub mod ntcore;
 pub mod pe;
 pub mod runtime;
+pub mod telemetry;
 pub mod win32;
 
 pub use dispatcher::{ApiDispatcher, ApiStatus, DispatchDecision, DispatchError};
@@ -17,4 +18,5 @@ pub use pe::{
 pub use runtime::{
     DllImportReport, ImportResolution, LinkReport, LoadReport, RuntimeCore, SymbolCollision,
 };
+pub use telemetry::{RuntimeTelemetryEvent, TelemetryRecorder, TelemetryStage};
 pub use win32::{STILL_ACTIVE, Win32Call, Win32CallResult};
