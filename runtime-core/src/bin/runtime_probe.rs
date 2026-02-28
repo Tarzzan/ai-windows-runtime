@@ -2,7 +2,7 @@ use std::env;
 use std::fs;
 use std::process::ExitCode;
 
-use runtime_core::load_pe_image;
+use runtime_core::{PeImportSymbol, load_pe_image};
 
 fn main() -> ExitCode {
     let path = match env::args().nth(1) {
@@ -31,6 +31,16 @@ fn main() -> ExitCode {
             println!("size_of_image: {}", image.metadata.size_of_image);
             for import in &image.imports {
                 println!("import dll: {}", import.dll_name);
+                for f in &import.functions {
+                    match &f.symbol {
+                        PeImportSymbol::Name { hint, name } => {
+                            println!("  - {name} (hint {hint})");
+                        }
+                        PeImportSymbol::Ordinal(ord) => {
+                            println!("  - ordinal #{ord}");
+                        }
+                    }
+                }
             }
             ExitCode::SUCCESS
         }

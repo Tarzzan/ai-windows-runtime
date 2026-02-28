@@ -17,11 +17,11 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 3)
+## Current scope (Phase 4)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
-3. Native runtime core prototype in Rust (PE loader + section mapping + import parser + API dispatcher).
+3. Native runtime core prototype in Rust (PE loader + section mapping + import DLL/API parser + API dispatcher).
 
 Core runtime capabilities in this phase:
 1. Parse execution traces.
@@ -29,8 +29,9 @@ Core runtime capabilities in this phase:
 3. Produce ranked patch proposals for engineering review.
 4. Parse core PE metadata from executable payloads.
 5. Map PE headers/sections into an in-memory image model.
-6. Parse minimal import table descriptors and extract imported DLL names.
-7. Dispatch known APIs as implemented/stubbed/missing decisions.
+6. Parse import descriptors and thunk lists (named APIs + ordinal imports).
+7. Produce per-DLL import symbol details in runtime load reports.
+8. Dispatch known APIs as implemented/stubbed/missing decisions.
 
 ## Quick start
 ```bash

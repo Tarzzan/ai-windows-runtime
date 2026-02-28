@@ -1,7 +1,7 @@
-use runtime_core::{ApiStatus, RuntimeCore, load_pe_image, parse_pe_metadata};
+use runtime_core::{ApiStatus, PeImportSymbol, RuntimeCore, load_pe_image, parse_pe_metadata};
 
 fn pe_with_imports() -> Vec<u8> {
-    let mut b = vec![0u8; 0x600];
+    let mut b = vec![0u8; 0x700];
     b[0] = b'M';
     b[1] = b'Z';
     b[0x3C..0x40].copy_from_slice(&(0x80u32).to_le_bytes());
@@ -30,19 +30,28 @@ fn pe_with_imports() -> Vec<u8> {
 
     let sh2 = sh + 40;
     b[sh2..sh2 + 8].copy_from_slice(b".rdata\0\0");
-    b[sh2 + 8..sh2 + 12].copy_from_slice(&0x200u32.to_le_bytes());
+    b[sh2 + 8..sh2 + 12].copy_from_slice(&0x300u32.to_le_bytes());
     b[sh2 + 12..sh2 + 16].copy_from_slice(&0x3000u32.to_le_bytes());
-    b[sh2 + 16..sh2 + 20].copy_from_slice(&0x200u32.to_le_bytes());
+    b[sh2 + 16..sh2 + 20].copy_from_slice(&0x300u32.to_le_bytes());
     b[sh2 + 20..sh2 + 24].copy_from_slice(&0x400u32.to_le_bytes());
 
     b[0x200] = 0xCC;
     b[0x201] = 0x90;
 
+    b[0x400..0x404].copy_from_slice(&0x3050u32.to_le_bytes());
     b[0x400 + 12..0x400 + 16].copy_from_slice(&0x3030u32.to_le_bytes());
-    b[0x400 + 16..0x400 + 20].copy_from_slice(&0x3040u32.to_le_bytes());
+    b[0x400 + 16..0x400 + 20].copy_from_slice(&0x3070u32.to_le_bytes());
 
-    let name = b"KERNEL32.dll\0";
-    b[0x430..0x430 + name.len()].copy_from_slice(name);
+    let dll = b"KERNEL32.dll\0";
+    b[0x430..0x430 + dll.len()].copy_from_slice(dll);
+
+    b[0x450..0x458].copy_from_slice(&0x3080u64.to_le_bytes());
+    b[0x458..0x460].copy_from_slice(&(0x8000_0000_0000_0123u64).to_le_bytes());
+    b[0x460..0x468].copy_from_slice(&0u64.to_le_bytes());
+
+    b[0x480..0x482].copy_from_slice(&7u16.to_le_bytes());
+    let name = b"Sleep\0";
+    b[0x482..0x482 + name.len()].copy_from_slice(name);
 
     b
 }
@@ -62,6 +71,21 @@ fn native_loader_maps_sections_and_import_table() {
     assert_eq!(loaded.sections.len(), 2);
     assert_eq!(loaded.imports.len(), 1);
     assert_eq!(loaded.imports[0].dll_name, "KERNEL32.dll");
+    assert_eq!(loaded.imports[0].functions.len(), 2);
+
+    match &loaded.imports[0].functions[0].symbol {
+        PeImportSymbol::Name { hint, name } => {
+            assert_eq!(*hint, 7);
+            assert_eq!(name, "Sleep");
+        }
+        _ => panic!("expected named import"),
+    }
+
+    match loaded.imports[0].functions[1].symbol {
+        PeImportSymbol::Ordinal(ord) => assert_eq!(ord, 0x0123),
+        _ => panic!("expected ordinal import"),
+    }
+
     assert_eq!(loaded.mapped_image[0x1000], 0xCC);
     assert_eq!(loaded.mapped_image[0x1001], 0x90);
 }
@@ -73,7 +97,7 @@ fn runtime_dispatcher_supports_stub_and_implemented() {
         .register_implemented("kernel32.GetTickCount");
     core.dispatcher_mut().register_stub(
         "winhttp.WinHttpOpen",
-        "phase-3 stub while transport layer is built",
+        "phase-4 stub while transport layer is built",
     );
 
     let ok = core
@@ -91,12 +115,17 @@ fn runtime_dispatcher_supports_stub_and_implemented() {
 }
 
 #[test]
-fn runtime_load_report_tracks_imports() {
+fn runtime_load_report_tracks_imports_and_symbols() {
     let core = RuntimeCore::new();
     let report = core
         .load_pe_image(&pe_with_imports())
         .expect("runtime must load test image");
     assert_eq!(report.sections_loaded, 2);
     assert_eq!(report.imports_checked, 1);
+    assert_eq!(report.import_symbol_count, 2);
     assert_eq!(report.imported_dlls, vec!["KERNEL32.dll".to_string()]);
+    assert_eq!(
+        report.import_details[0].symbols,
+        vec!["Sleep".to_string(), "#291".to_string()]
+    );
 }

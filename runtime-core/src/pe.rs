@@ -16,10 +16,23 @@ pub struct PeSection {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub enum PeImportSymbol {
+    Name { hint: u16, name: String },
+    Ordinal(u16),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PeImportFunction {
+    pub thunk_rva: u32,
+    pub symbol: PeImportSymbol,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PeImport {
     pub dll_name: String,
     pub name_rva: u32,
     pub first_thunk_rva: u32,
+    pub functions: Vec<PeImportFunction>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -45,6 +58,7 @@ pub enum PeError {
     SectionVirtualOutOfBounds,
     RvaNotMapped(u32),
     UnterminatedCString,
+    ImportThunkListTooLong,
 }
 
 #[derive(Debug, Clone)]
@@ -55,6 +69,7 @@ struct PeParsedHeaders {
     size_of_headers: u32,
     import_dir_rva: u32,
     import_dir_size: u32,
+    is_pe32_plus: bool,
 }
 
 const DOS_SIGNATURE: u16 = 0x5A4D;
@@ -62,6 +77,8 @@ const PE_SIGNATURE: u32 = 0x0000_4550;
 const DOS_E_LFANEW: usize = 0x3C;
 const SECTION_HEADER_SIZE: usize = 40;
 const MAX_IMAGE_SIZE: usize = 512 * 1024 * 1024;
+const MAX_IMPORT_DESCRIPTORS: usize = 256;
+const MAX_IMPORT_THUNKS: usize = 4096;
 
 fn read_u16_le(bytes: &[u8], offset: usize) -> Result<u16, PeError> {
     let end = offset.checked_add(2).ok_or(PeError::InvalidPeOffset)?;
@@ -81,6 +98,23 @@ fn read_u32_le(bytes: &[u8], offset: usize) -> Result<u32, PeError> {
         bytes[offset + 1],
         bytes[offset + 2],
         bytes[offset + 3],
+    ]))
+}
+
+fn read_u64_le(bytes: &[u8], offset: usize) -> Result<u64, PeError> {
+    let end = offset.checked_add(8).ok_or(PeError::InvalidPeOffset)?;
+    if end > bytes.len() {
+        return Err(PeError::TooSmall);
+    }
+    Ok(u64::from_le_bytes([
+        bytes[offset],
+        bytes[offset + 1],
+        bytes[offset + 2],
+        bytes[offset + 3],
+        bytes[offset + 4],
+        bytes[offset + 5],
+        bytes[offset + 6],
+        bytes[offset + 7],
     ]))
 }
 
@@ -119,9 +153,9 @@ fn parse_pe_headers(bytes: &[u8]) -> Result<PeParsedHeaders, PeError> {
     }
 
     let optional_magic = read_u16_le(bytes, optional_header)?;
-    let data_dir_start = match optional_magic {
-        0x10B => optional_header + 96,
-        0x20B => optional_header + 112,
+    let (data_dir_start, is_pe32_plus) = match optional_magic {
+        0x10B => (optional_header + 96, false),
+        0x20B => (optional_header + 112, true),
         other => return Err(PeError::UnsupportedOptionalHeaderMagic(other)),
     };
 
@@ -169,6 +203,7 @@ fn parse_pe_headers(bytes: &[u8]) -> Result<PeParsedHeaders, PeError> {
         size_of_headers,
         import_dir_rva,
         import_dir_size,
+        is_pe32_plus,
     })
 }
 
@@ -276,6 +311,64 @@ fn read_c_string(bytes: &[u8], offset: usize) -> Result<String, PeError> {
     Err(PeError::UnterminatedCString)
 }
 
+fn parse_import_thunks(
+    bytes: &[u8],
+    headers: &PeParsedHeaders,
+    sections: &[PeSection],
+    thunk_rva: u32,
+) -> Result<Vec<PeImportFunction>, PeError> {
+    if thunk_rva == 0 {
+        return Ok(Vec::new());
+    }
+
+    let thunk_size = if headers.is_pe32_plus { 8u32 } else { 4u32 };
+    let ordinal_flag = if headers.is_pe32_plus {
+        0x8000_0000_0000_0000u64
+    } else {
+        0x8000_0000u64
+    };
+
+    let mut out = Vec::new();
+    let mut current_rva = thunk_rva;
+
+    for _ in 0..MAX_IMPORT_THUNKS {
+        let off = rva_to_file_offset(current_rva, sections, headers.size_of_headers)
+            .ok_or(PeError::RvaNotMapped(current_rva))?;
+
+        let thunk_value = if headers.is_pe32_plus {
+            read_u64_le(bytes, off)?
+        } else {
+            read_u32_le(bytes, off)? as u64
+        };
+
+        if thunk_value == 0 {
+            return Ok(out);
+        }
+
+        let symbol = if (thunk_value & ordinal_flag) != 0 {
+            PeImportSymbol::Ordinal((thunk_value & 0xFFFF) as u16)
+        } else {
+            let name_rva = thunk_value as u32;
+            let name_off = rva_to_file_offset(name_rva, sections, headers.size_of_headers)
+                .ok_or(PeError::RvaNotMapped(name_rva))?;
+            let hint = read_u16_le(bytes, name_off)?;
+            let name = read_c_string(bytes, name_off + 2)?;
+            PeImportSymbol::Name { hint, name }
+        };
+
+        out.push(PeImportFunction {
+            thunk_rva: current_rva,
+            symbol,
+        });
+
+        current_rva = current_rva
+            .checked_add(thunk_size)
+            .ok_or(PeError::InvalidPeOffset)?;
+    }
+
+    Err(PeError::ImportThunkListTooLong)
+}
+
 fn parse_imports(
     bytes: &[u8],
     headers: &PeParsedHeaders,
@@ -291,7 +384,7 @@ fn parse_imports(
 
     let max_descriptors = usize::min(
         (headers.import_dir_size as usize / 20).saturating_add(1),
-        256,
+        MAX_IMPORT_DESCRIPTORS,
     );
     let mut imports = Vec::new();
 
@@ -324,10 +417,18 @@ fn parse_imports(
             .ok_or(PeError::RvaNotMapped(name_rva))?;
         let dll_name = read_c_string(bytes, name_offset)?;
 
+        let thunk_rva = if original_first_thunk != 0 {
+            original_first_thunk
+        } else {
+            first_thunk_rva
+        };
+        let functions = parse_import_thunks(bytes, headers, sections, thunk_rva)?;
+
         imports.push(PeImport {
             dll_name,
             name_rva,
             first_thunk_rva,
+            functions,
         });
     }
 
@@ -355,10 +456,10 @@ pub fn load_pe_image(bytes: &[u8]) -> Result<LoadedPeImage, PeError> {
 
 #[cfg(test)]
 mod tests {
-    use super::{PeError, load_pe_image, parse_pe_metadata};
+    use super::{PeError, PeImportSymbol, load_pe_image, parse_pe_metadata};
 
     fn minimal_pe_with_imports() -> Vec<u8> {
-        let mut b = vec![0u8; 0x600];
+        let mut b = vec![0u8; 0x700];
         b[0] = b'M';
         b[1] = b'Z';
         b[0x3C..0x40].copy_from_slice(&(0x80u32).to_le_bytes());
@@ -387,19 +488,28 @@ mod tests {
 
         let sh2 = sh + 40;
         b[sh2..sh2 + 8].copy_from_slice(b".rdata\0\0");
-        b[sh2 + 8..sh2 + 12].copy_from_slice(&0x200u32.to_le_bytes());
+        b[sh2 + 8..sh2 + 12].copy_from_slice(&0x300u32.to_le_bytes());
         b[sh2 + 12..sh2 + 16].copy_from_slice(&0x3000u32.to_le_bytes());
-        b[sh2 + 16..sh2 + 20].copy_from_slice(&0x200u32.to_le_bytes());
+        b[sh2 + 16..sh2 + 20].copy_from_slice(&0x300u32.to_le_bytes());
         b[sh2 + 20..sh2 + 24].copy_from_slice(&0x400u32.to_le_bytes());
 
         b[0x200] = 0xCC;
         b[0x201] = 0x90;
 
+        b[0x400..0x404].copy_from_slice(&0x3050u32.to_le_bytes());
         b[0x400 + 12..0x400 + 16].copy_from_slice(&0x3030u32.to_le_bytes());
-        b[0x400 + 16..0x400 + 20].copy_from_slice(&0x3040u32.to_le_bytes());
+        b[0x400 + 16..0x400 + 20].copy_from_slice(&0x3070u32.to_le_bytes());
 
-        let name = b"KERNEL32.dll\0";
-        b[0x430..0x430 + name.len()].copy_from_slice(name);
+        let dll = b"KERNEL32.dll\0";
+        b[0x430..0x430 + dll.len()].copy_from_slice(dll);
+
+        b[0x450..0x458].copy_from_slice(&0x3080u64.to_le_bytes());
+        b[0x458..0x460].copy_from_slice(&(0x8000_0000_0000_0123u64).to_le_bytes());
+        b[0x460..0x468].copy_from_slice(&0u64.to_le_bytes());
+
+        b[0x480..0x482].copy_from_slice(&7u16.to_le_bytes());
+        let name = b"Sleep\0";
+        b[0x482..0x482 + name.len()].copy_from_slice(name);
 
         b
     }
@@ -421,6 +531,21 @@ mod tests {
         assert_eq!(loaded.sections.len(), 2);
         assert_eq!(loaded.imports.len(), 1);
         assert_eq!(loaded.imports[0].dll_name, "KERNEL32.dll");
+        assert_eq!(loaded.imports[0].functions.len(), 2);
+
+        match &loaded.imports[0].functions[0].symbol {
+            PeImportSymbol::Name { hint, name } => {
+                assert_eq!(*hint, 7);
+                assert_eq!(name, "Sleep");
+            }
+            _ => panic!("expected named import"),
+        }
+
+        match loaded.imports[0].functions[1].symbol {
+            PeImportSymbol::Ordinal(ord) => assert_eq!(ord, 0x0123),
+            _ => panic!("expected ordinal import"),
+        }
+
         assert_eq!(loaded.mapped_image[0x1000], 0xCC);
         assert_eq!(loaded.mapped_image[0x1001], 0x90);
     }

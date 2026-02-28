@@ -9,7 +9,7 @@ cargo test --manifest-path runtime-core/Cargo.toml
 TMP_PE="$(mktemp /tmp/aiwr-minimal-pe.XXXXXX.exe)"
 python3 - <<'PY' > "$TMP_PE"
 import sys
-b = bytearray(0x600)
+b = bytearray(0x700)
 b[0:2] = b"MZ"
 b[0x3C:0x40] = (0x80).to_bytes(4, "little")
 b[0x80:0x84] = (0x00004550).to_bytes(4, "little")
@@ -32,14 +32,24 @@ b[sh+16:sh+20] = (0x200).to_bytes(4, "little")
 b[sh+20:sh+24] = (0x200).to_bytes(4, "little")
 sh2 = sh + 40
 b[sh2:sh2+8] = b".rdata\0\0"
-b[sh2+8:sh2+12] = (0x200).to_bytes(4, "little")
+b[sh2+8:sh2+12] = (0x300).to_bytes(4, "little")
 b[sh2+12:sh2+16] = (0x3000).to_bytes(4, "little")
-b[sh2+16:sh2+20] = (0x200).to_bytes(4, "little")
+b[sh2+16:sh2+20] = (0x300).to_bytes(4, "little")
 b[sh2+20:sh2+24] = (0x400).to_bytes(4, "little")
+# import descriptor
+b[0x400:0x404] = (0x3050).to_bytes(4, "little")
 b[0x400+12:0x400+16] = (0x3030).to_bytes(4, "little")
-b[0x400+16:0x400+20] = (0x3040).to_bytes(4, "little")
+b[0x400+16:0x400+20] = (0x3070).to_bytes(4, "little")
 name = b"KERNEL32.dll\0"
 b[0x430:0x430+len(name)] = name
+# thunk list: named + ordinal + terminator
+b[0x450:0x458] = (0x3080).to_bytes(8, "little")
+b[0x458:0x460] = (0x8000000000000123).to_bytes(8, "little")
+b[0x460:0x468] = (0).to_bytes(8, "little")
+# IMAGE_IMPORT_BY_NAME at RVA 0x3080
+b[0x480:0x482] = (7).to_bytes(2, "little")
+fn = b"Sleep\0"
+b[0x482:0x482+len(fn)] = fn
 sys.stdout.buffer.write(b)
 PY
 
@@ -48,5 +58,7 @@ printf '%s\n' "$OUT"
 
 echo "$OUT" | rg -q "imports: 1"
 echo "$OUT" | rg -q "import dll: KERNEL32.dll"
+echo "$OUT" | rg -q -- "- Sleep \\(hint 7\\)"
+echo "$OUT" | rg -q -- "- ordinal #291"
 
 rm -f "$TMP_PE"

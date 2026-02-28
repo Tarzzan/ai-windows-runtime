@@ -4,6 +4,7 @@ pub mod runtime;
 
 pub use dispatcher::{ApiDispatcher, ApiStatus, DispatchDecision, DispatchError};
 pub use pe::{
-    LoadedPeImage, PeError, PeImport, PeMetadata, PeSection, load_pe_image, parse_pe_metadata,
+    LoadedPeImage, PeError, PeImport, PeImportFunction, PeImportSymbol, PeMetadata, PeSection,
+    load_pe_image, parse_pe_metadata,
 };
-pub use runtime::{LoadReport, RuntimeCore};
+pub use runtime::{DllImportReport, LoadReport, RuntimeCore};
