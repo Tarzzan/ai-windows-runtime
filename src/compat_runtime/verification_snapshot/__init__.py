@@ -1,0 +1,1 @@
+"""Verification snapshot report module."""

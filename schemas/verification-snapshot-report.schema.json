@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Verification Snapshot Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "coverage_ratio",
+        "missing_reports",
+        "bootstrap_status",
+        "bootstrap_commands",
+        "signoff_status",
+        "dependency_blockers"
+      ],
+      "properties": {
+        "coverage_ratio": {"type": "number"},
+        "missing_reports": {"type": "integer"},
+        "bootstrap_status": {"type": "string"},
+        "bootstrap_commands": {"type": "integer"},
+        "signoff_status": {"type": "string"},
+        "dependency_blockers": {"type": "integer"}
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,1 @@
+"""Hotfix planner report module."""

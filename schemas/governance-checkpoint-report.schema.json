@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Governance Checkpoint Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "status", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "status": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["window_status", "hotfix_plan_mode", "missing_reports", "catalog_items"],
+      "properties": {
+        "window_status": {"type": "string"},
+        "hotfix_plan_mode": {"type": "string"},
+        "missing_reports": {"type": "integer"},
+        "catalog_items": {"type": "integer"}
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

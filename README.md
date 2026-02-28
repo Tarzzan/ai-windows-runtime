@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 60)
+## Current scope (Phase 65)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -191,6 +191,21 @@ Core runtime capabilities in this phase:
 164. Generate next-cycle bootstrap artifact (`next-cycle-bootstrap-report.json`) from retrospective, refreshed backlog, and validation commands.
 165. Classify next-cycle startup posture as `ready/guarded/blocked` before iteration kickoff.
 166. Validate next-cycle bootstrap artifacts automatically in pipeline, release bundle, and reproducible package flows.
+167. Generate stability window artifact (`stability-window-report.json`) from post-release monitor, gate trajectory, and readiness delta.
+168. Classify stabilization posture as `stable/watch/unstable` for hotfix governance.
+169. Validate stability window artifacts automatically in pipeline, release bundle, and reproducible package flows.
+170. Generate hotfix planner artifact (`hotfix-planner-report.json`) from stability window, incident feedback, and rollback hints.
+171. Classify hotfix execution mode as `routine/accelerated/urgent` with rollback awareness.
+172. Validate hotfix planner artifacts automatically in pipeline, release bundle, and reproducible package flows.
+173. Generate verification snapshot artifact (`verification-snapshot-report.json`) from validation coverage, bootstrap, and signoff evidence.
+174. Capture checkpoint-ready verification posture including missing reports and blockers.
+175. Validate verification snapshot artifacts automatically in pipeline, release bundle, and reproducible package flows.
+176. Generate evidence catalog artifact (`evidence-catalog-report.json`) from snapshot, release packet, and repro package inventory.
+177. Maintain auditable artifact/checksum catalog for governance and compliance review.
+178. Validate evidence catalog artifacts automatically in pipeline, release bundle, and reproducible package flows.
+179. Generate governance checkpoint artifact (`governance-checkpoint-report.json`) from stability, hotfix, snapshot, and evidence signals.
+180. Classify governance verdict as `pass/conditional/block` using explicit checkpoint rules.
+181. Validate governance checkpoint artifacts automatically in pipeline, release bundle, and reproducible package flows.
 
 ## Quick start
 ```bash
@@ -287,6 +302,16 @@ scripts/build-release-retrospective-report.sh out
 # out/release-retrospective-report.json is generated and schema-validated
 scripts/build-next-cycle-bootstrap-report.sh out
 # out/next-cycle-bootstrap-report.json is generated and schema-validated
+scripts/build-stability-window-report.sh out
+# out/stability-window-report.json is generated and schema-validated
+scripts/build-hotfix-planner-report.sh out
+# out/hotfix-planner-report.json is generated and schema-validated
+scripts/build-verification-snapshot-report.sh out
+# out/verification-snapshot-report.json is generated and schema-validated
+scripts/build-evidence-catalog-report.sh out
+# out/evidence-catalog-report.json is generated and schema-validated
+scripts/build-governance-checkpoint-report.sh out
+# out/governance-checkpoint-report.json is generated and schema-validated
 scripts/build-root-cause-summary.sh out
 # out/root-cause-summary.json is generated and schema-validated
 scripts/build-patch-plan-diff.sh out

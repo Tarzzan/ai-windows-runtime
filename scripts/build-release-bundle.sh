@@ -556,6 +556,62 @@ fi
   --schema schemas/next-cycle-bootstrap-report.schema.json \
   --report "${VALIDATION_DIR}/next-cycle-bootstrap-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.stability_window.cli \
+  --post-release-monitor-report "${OUT_DIR}/post-release-monitor-report.json" \
+  --release-gate-history-report "${OUT_DIR}/release-gate-history-report.json" \
+  --readiness-delta-report "${OUT_DIR}/readiness-delta-report.json" \
+  --output "${OUT_DIR}/stability-window-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/stability-window-report.json" \
+  --schema schemas/stability-window-report.schema.json \
+  --report "${VALIDATION_DIR}/stability-window-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.hotfix_planner.cli \
+  --stability-window-report "${OUT_DIR}/stability-window-report.json" \
+  --incident-feedback-report "${OUT_DIR}/incident-feedback-report.json" \
+  --rollback-hints-report "${OUT_DIR}/rollback-hints.json" \
+  --output "${OUT_DIR}/hotfix-planner-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/hotfix-planner-report.json" \
+  --schema schemas/hotfix-planner-report.schema.json \
+  --report "${VALIDATION_DIR}/hotfix-planner-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.verification_snapshot.cli \
+  --validation-coverage-report "${OUT_DIR}/validation-coverage-report.json" \
+  --next-cycle-bootstrap-report "${OUT_DIR}/next-cycle-bootstrap-report.json" \
+  --delivery-signoff-report "${OUT_DIR}/delivery-signoff-report.json" \
+  --output "${OUT_DIR}/verification-snapshot-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/verification-snapshot-report.json" \
+  --schema schemas/verification-snapshot-report.schema.json \
+  --report "${VALIDATION_DIR}/verification-snapshot-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.evidence_catalog.cli \
+  --verification-snapshot-report "${OUT_DIR}/verification-snapshot-report.json" \
+  --release-packet-report "${OUT_DIR}/release-packet-report.json" \
+  --repro-package "${OUT_DIR}/repro-package.json" \
+  --output "${OUT_DIR}/evidence-catalog-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/evidence-catalog-report.json" \
+  --schema schemas/evidence-catalog-report.schema.json \
+  --report "${VALIDATION_DIR}/evidence-catalog-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.governance_checkpoint.cli \
+  --stability-window-report "${OUT_DIR}/stability-window-report.json" \
+  --hotfix-planner-report "${OUT_DIR}/hotfix-planner-report.json" \
+  --verification-snapshot-report "${OUT_DIR}/verification-snapshot-report.json" \
+  --evidence-catalog-report "${OUT_DIR}/evidence-catalog-report.json" \
+  --output "${OUT_DIR}/governance-checkpoint-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/governance-checkpoint-report.json" \
+  --schema schemas/governance-checkpoint-report.schema.json \
+  --report "${VALIDATION_DIR}/governance-checkpoint-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
   --compatibility-matrix "${OUT_DIR}/compatibility-matrix.json" \
@@ -609,6 +665,11 @@ fi
     "${OUT_DIR}/backlog-refresh-report.json" \
     "${OUT_DIR}/release-retrospective-report.json" \
     "${OUT_DIR}/next-cycle-bootstrap-report.json" \
+    "${OUT_DIR}/stability-window-report.json" \
+    "${OUT_DIR}/hotfix-planner-report.json" \
+    "${OUT_DIR}/verification-snapshot-report.json" \
+    "${OUT_DIR}/evidence-catalog-report.json" \
+    "${OUT_DIR}/governance-checkpoint-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
@@ -661,6 +722,11 @@ cp "${OUT_DIR}/incident-feedback-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/backlog-refresh-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-retrospective-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/next-cycle-bootstrap-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/stability-window-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/hotfix-planner-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/verification-snapshot-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/evidence-catalog-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/governance-checkpoint-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/repro-package.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/root-cause-summary.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/patch-plan-diff.json" "${BUNDLE_DIR}/"

@@ -382,6 +382,41 @@ if [[ -f "${OUT_DIR}/next-cycle-bootstrap-report.json" ]]; then
     --report "${REPORT_DIR}/next-cycle-bootstrap-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/stability-window-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/stability-window-report.json" \
+    --schema schemas/stability-window-report.schema.json \
+    --report "${REPORT_DIR}/stability-window-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/hotfix-planner-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/hotfix-planner-report.json" \
+    --schema schemas/hotfix-planner-report.schema.json \
+    --report "${REPORT_DIR}/hotfix-planner-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/verification-snapshot-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/verification-snapshot-report.json" \
+    --schema schemas/verification-snapshot-report.schema.json \
+    --report "${REPORT_DIR}/verification-snapshot-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/evidence-catalog-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/evidence-catalog-report.json" \
+    --schema schemas/evidence-catalog-report.schema.json \
+    --report "${REPORT_DIR}/evidence-catalog-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/governance-checkpoint-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/governance-checkpoint-report.json" \
+    --schema schemas/governance-checkpoint-report.schema.json \
+    --report "${REPORT_DIR}/governance-checkpoint-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/repro-package.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/repro-package.json" \

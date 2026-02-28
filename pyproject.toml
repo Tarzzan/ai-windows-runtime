@@ -63,6 +63,11 @@ compat-incident-feedback = "compat_runtime.incident_feedback.cli:main"
 compat-backlog-refresh = "compat_runtime.backlog_refresh.cli:main"
 compat-release-retrospective = "compat_runtime.release_retrospective.cli:main"
 compat-next-cycle-bootstrap = "compat_runtime.next_cycle_bootstrap.cli:main"
+compat-stability-window = "compat_runtime.stability_window.cli:main"
+compat-hotfix-planner = "compat_runtime.hotfix_planner.cli:main"
+compat-verification-snapshot = "compat_runtime.verification_snapshot.cli:main"
+compat-evidence-catalog = "compat_runtime.evidence_catalog.cli:main"
+compat-governance-checkpoint = "compat_runtime.governance_checkpoint.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

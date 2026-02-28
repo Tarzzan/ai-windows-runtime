@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hotfix Planner Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "items", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["plan_mode", "window_status", "feedback_priority", "hotfix_items"],
+      "properties": {
+        "plan_mode": {"type": "string"},
+        "window_status": {"type": "string"},
+        "feedback_priority": {"type": "string"},
+        "hotfix_items": {"type": "integer"}
+      }
+    },
+    "items": {"type": "array", "items": {"type": "object"}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

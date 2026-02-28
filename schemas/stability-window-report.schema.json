@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Stability Window Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["window_status", "monitor_status", "trajectory", "readiness_score_delta"],
+      "properties": {
+        "window_status": {"type": "string"},
+        "monitor_status": {"type": "string"},
+        "trajectory": {"type": "string"},
+        "readiness_score_delta": {"type": "integer"}
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,1 @@
+"""Stability window report module."""

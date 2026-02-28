@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Catalog Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "catalog", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["catalog_items", "coverage_ratio", "packet_ready", "bundle_missing"],
+      "properties": {
+        "catalog_items": {"type": "integer"},
+        "coverage_ratio": {"type": "number"},
+        "packet_ready": {"type": "boolean"},
+        "bundle_missing": {"type": "integer"}
+      }
+    },
+    "catalog": {"type": "array", "items": {"type": "object"}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}
