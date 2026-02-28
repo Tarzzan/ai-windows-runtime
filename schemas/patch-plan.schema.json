@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Patch Plan Artifact",
+  "type": "object",
+  "required": ["artifact_version", "proposals"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["gap_id", "priority", "title", "validation"],
+        "properties": {
+          "gap_id": {"type": "string"},
+          "priority": {"type": "string"},
+          "title": {"type": "string"},
+          "risk": {"type": "string"},
+          "validation": {"type": "string"}
+        }
+      }
+    }
+  }
+}

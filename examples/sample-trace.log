@@ -1,0 +1,4 @@
+err:module:import_dll failed to load KERNELBASE.dll
+err:ole:CoCreateInstance no class object
+fixme:winhttp:WinHttpSendRequest stub
+C2R bootstrap handshake failed

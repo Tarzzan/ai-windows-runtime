@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Trace Artifact",
+  "type": "object",
+  "required": ["artifact_version", "events"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["category", "message", "severity"],
+        "properties": {
+          "timestamp": {"type": "string"},
+          "category": {"type": "string"},
+          "message": {"type": "string"},
+          "severity": {"type": "string"}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Gap Artifact",
+  "type": "object",
+  "required": ["artifact_version", "gaps"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "category", "severity", "summary"],
+        "properties": {
+          "id": {"type": "string"},
+          "category": {"type": "string"},
+          "severity": {"type": "string"},
+          "confidence": {"type": "number"},
+          "summary": {"type": "string"}
+        }
+      }
+    }
+  }
+}
