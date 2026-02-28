@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pilot Readiness Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "recommendation", "summary", "blockers", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "recommendation": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "productization_ready",
+        "quality_gate",
+        "release_decision",
+        "readiness_score",
+        "readiness_band",
+        "blocking_tasks",
+        "estimated_iterations_to_go",
+        "p0_watchlist_entries"
+      ],
+      "properties": {
+        "productization_ready": {"type": "boolean"},
+        "quality_gate": {"type": "string"},
+        "release_decision": {"type": "string"},
+        "readiness_score": {"type": "integer"},
+        "readiness_band": {"type": "string"},
+        "blocking_tasks": {"type": "integer"},
+        "estimated_iterations_to_go": {"type": "integer"},
+        "p0_watchlist_entries": {"type": "integer"}
+      }
+    },
+    "blockers": {"type": "array", "items": {"type": "string"}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

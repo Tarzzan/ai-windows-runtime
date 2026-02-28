@@ -207,6 +207,41 @@ if [[ -f "${OUT_DIR}/readiness-scorecard-report.json" ]]; then
     --report "${REPORT_DIR}/readiness-scorecard-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/execution-burndown-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/execution-burndown-report.json" \
+    --schema schemas/execution-burndown-report.schema.json \
+    --report "${REPORT_DIR}/execution-burndown-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/validation-command-pack.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/validation-command-pack.json" \
+    --schema schemas/validation-command-pack.schema.json \
+    --report "${REPORT_DIR}/validation-command-pack-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/risk-watchlist-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/risk-watchlist-report.json" \
+    --schema schemas/risk-watchlist-report.schema.json \
+    --report "${REPORT_DIR}/risk-watchlist-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/release-gate-history-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/release-gate-history-report.json" \
+    --schema schemas/release-gate-history-report.schema.json \
+    --report "${REPORT_DIR}/release-gate-history-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/pilot-readiness-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/pilot-readiness-report.json" \
+    --schema schemas/pilot-readiness-report.schema.json \
+    --report "${REPORT_DIR}/pilot-readiness-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/repro-package.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/repro-package.json" \

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Validation Command Pack Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "commands", "packs", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["commands_total", "blocking_commands", "quick_pack_commands", "full_pack_commands"],
+      "properties": {
+        "commands_total": {"type": "integer"},
+        "blocking_commands": {"type": "integer"},
+        "quick_pack_commands": {"type": "integer"},
+        "full_pack_commands": {"type": "integer"}
+      }
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "task_id", "priority", "blocking", "command", "reason"],
+        "properties": {
+          "id": {"type": "string"},
+          "task_id": {"type": "string"},
+          "priority": {"type": "string"},
+          "blocking": {"type": "boolean"},
+          "command": {"type": "string"},
+          "reason": {"type": "string"}
+        }
+      }
+    },
+    "packs": {
+      "type": "object",
+      "required": ["quick", "blocking", "full"],
+      "properties": {
+        "quick": {"type": "array", "items": {"type": "string"}},
+        "blocking": {"type": "array", "items": {"type": "string"}},
+        "full": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

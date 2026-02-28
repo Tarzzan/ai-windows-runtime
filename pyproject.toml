@@ -38,6 +38,11 @@ compat-hook-backlog = "compat_runtime.hook_backlog.cli:main"
 compat-iteration-plan = "compat_runtime.iteration_plan.cli:main"
 compat-release-forecast = "compat_runtime.release_forecast.cli:main"
 compat-readiness-scorecard = "compat_runtime.readiness_scorecard.cli:main"
+compat-execution-burndown = "compat_runtime.execution_burndown.cli:main"
+compat-validation-command-pack = "compat_runtime.validation_command_pack.cli:main"
+compat-risk-watchlist = "compat_runtime.risk_watchlist.cli:main"
+compat-release-gate-history = "compat_runtime.release_gate_history.cli:main"
+compat-pilot-readiness = "compat_runtime.pilot_readiness.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

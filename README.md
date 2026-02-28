@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 35)
+## Current scope (Phase 40)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -116,6 +116,21 @@ Core runtime capabilities in this phase:
 89. Generate readiness scorecard artifact (`readiness-scorecard-report.json`) with a normalized score (0-100).
 90. Classify overall posture in `red/amber/green` band with release-candidate flag and factor breakdown.
 91. Validate readiness scorecard artifacts automatically in pipeline, release bundle, and reproducible package flows.
+92. Generate execution burndown artifact (`execution-burndown-report.json`) from plan/forecast/scorecard signals.
+93. Project blocker reduction milestones and short-horizon readiness score movement.
+94. Validate execution burndown artifacts automatically in pipeline, release bundle, and reproducible package flows.
+95. Generate validation command pack artifact (`validation-command-pack.json`) with quick/blocking/full packs.
+96. Deduplicate and prioritize executable validation commands from iteration and test-impact signals.
+97. Validate validation command pack artifacts automatically in pipeline, release bundle, and reproducible package flows.
+98. Generate risk watchlist artifact (`risk-watchlist-report.json`) from proposal risk, hook backlog, and runtime issues.
+99. Consolidate P0/P1/P2 risk entries with evidence for triage governance workflows.
+100. Validate risk watchlist artifacts automatically in pipeline, release bundle, and reproducible package flows.
+101. Generate release gate history artifact (`release-gate-history-report.json`) from dashboard/trend/gate/decision/scorecard signals.
+102. Classify release gate trajectory (`improving/stable/degrading`) for iteration-level steering.
+103. Validate release gate history artifacts automatically in pipeline, release bundle, and reproducible package flows.
+104. Generate pilot readiness artifact (`pilot-readiness-report.json`) with `ready/limited_pilot/not_ready` recommendation.
+105. Correlate blockers, readiness posture, forecast horizon, and watchlist severity before pilot launch.
+106. Validate pilot readiness artifacts automatically in pipeline, release bundle, and reproducible package flows.
 
 ## Quick start
 ```bash
@@ -162,6 +177,16 @@ scripts/build-release-forecast-report.sh out
 # out/release-forecast-report.json is generated and schema-validated
 scripts/build-readiness-scorecard-report.sh out
 # out/readiness-scorecard-report.json is generated and schema-validated
+scripts/build-execution-burndown-report.sh out
+# out/execution-burndown-report.json is generated and schema-validated
+scripts/build-validation-command-pack.sh out
+# out/validation-command-pack.json is generated and schema-validated
+scripts/build-risk-watchlist-report.sh out
+# out/risk-watchlist-report.json is generated and schema-validated
+scripts/build-release-gate-history-report.sh out
+# out/release-gate-history-report.json is generated and schema-validated
+scripts/build-pilot-readiness-report.sh out
+# out/pilot-readiness-report.json is generated and schema-validated
 scripts/build-root-cause-summary.sh out
 # out/root-cause-summary.json is generated and schema-validated
 scripts/build-patch-plan-diff.sh out

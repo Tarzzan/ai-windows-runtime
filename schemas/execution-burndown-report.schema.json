@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Execution Burndown Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "milestones", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "total_tasks",
+        "blocking_tasks",
+        "estimated_total_hours",
+        "blocking_burn_target_per_iteration",
+        "iterations_to_clear_blockers",
+        "current_score",
+        "projected_score_iteration_1",
+        "projected_score_iteration_2",
+        "projected_band_iteration_2"
+      ],
+      "properties": {
+        "total_tasks": {"type": "integer"},
+        "blocking_tasks": {"type": "integer"},
+        "estimated_total_hours": {"type": "integer"},
+        "blocking_burn_target_per_iteration": {"type": "integer"},
+        "iterations_to_clear_blockers": {"type": "integer"},
+        "current_score": {"type": "integer"},
+        "projected_score_iteration_1": {"type": "integer"},
+        "projected_score_iteration_2": {"type": "integer"},
+        "projected_band_iteration_2": {"type": "string"}
+      }
+    },
+    "milestones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["iteration", "target_blocking_remaining", "target_score"],
+        "properties": {
+          "iteration": {"type": "integer"},
+          "target_blocking_remaining": {"type": "integer"},
+          "target_score": {"type": "integer"}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

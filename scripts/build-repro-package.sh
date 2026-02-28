@@ -39,6 +39,11 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/iteration-plan-report.json" \
     "${OUT_DIR}/release-forecast-report.json" \
     "${OUT_DIR}/readiness-scorecard-report.json" \
+    "${OUT_DIR}/execution-burndown-report.json" \
+    "${OUT_DIR}/validation-command-pack.json" \
+    "${OUT_DIR}/risk-watchlist-report.json" \
+    "${OUT_DIR}/release-gate-history-report.json" \
+    "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \

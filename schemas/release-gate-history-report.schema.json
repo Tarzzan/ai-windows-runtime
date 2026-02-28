@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Gate History Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "snapshots", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "snapshots",
+        "trend_improved_metrics",
+        "trend_regressed_metrics",
+        "trajectory",
+        "latest_quality_gate",
+        "latest_release_decision",
+        "latest_readiness_score"
+      ],
+      "properties": {
+        "snapshots": {"type": "integer"},
+        "trend_improved_metrics": {"type": "integer"},
+        "trend_regressed_metrics": {"type": "integer"},
+        "trajectory": {"type": "string"},
+        "latest_quality_gate": {"type": ["string", "null"]},
+        "latest_release_decision": {"type": ["string", "null"]},
+        "latest_readiness_score": {"type": ["integer", "null"]}
+      }
+    },
+    "snapshots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["index", "generated_at", "execution_status"],
+        "properties": {
+          "index": {"type": ["integer", "null"]},
+          "generated_at": {"type": ["string", "null"]},
+          "execution_status": {"type": ["string", "null"]},
+          "base_gaps": {"type": ["integer", "null"]},
+          "runtime_gaps": {"type": ["integer", "null"]},
+          "quality_gate": {"type": ["string", "null"]},
+          "release_decision": {"type": ["string", "null"]},
+          "readiness_score": {"type": ["integer", "null"]},
+          "readiness_band": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

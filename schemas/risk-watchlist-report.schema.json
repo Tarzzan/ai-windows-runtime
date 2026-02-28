@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Risk Watchlist Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "entries", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["entries_total", "p0_entries", "p1_entries", "p2_entries"],
+      "properties": {
+        "entries_total": {"type": "integer"},
+        "p0_entries": {"type": "integer"},
+        "p1_entries": {"type": "integer"},
+        "p2_entries": {"type": "integer"}
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "priority", "detail", "evidence"],
+        "properties": {
+          "id": {"type": "string"},
+          "kind": {"type": "string"},
+          "priority": {"type": "string"},
+          "detail": {"type": "string"},
+          "evidence": {"type": "string"}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

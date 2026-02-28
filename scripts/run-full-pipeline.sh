@@ -303,6 +303,66 @@ fi
   --schema schemas/readiness-scorecard-report.schema.json \
   --report "${VALIDATION_DIR}/readiness-scorecard-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.execution_burndown.cli \
+  --iteration-plan-report "${OUT_DIR}/iteration-plan-report.json" \
+  --release-forecast-report "${OUT_DIR}/release-forecast-report.json" \
+  --readiness-scorecard-report "${OUT_DIR}/readiness-scorecard-report.json" \
+  --output "${OUT_DIR}/execution-burndown-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/execution-burndown-report.json" \
+  --schema schemas/execution-burndown-report.schema.json \
+  --report "${VALIDATION_DIR}/execution-burndown-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.validation_command_pack.cli \
+  --iteration-plan-report "${OUT_DIR}/iteration-plan-report.json" \
+  --test-impact-report "${OUT_DIR}/test-impact-report.json" \
+  --output "${OUT_DIR}/validation-command-pack.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/validation-command-pack.json" \
+  --schema schemas/validation-command-pack.schema.json \
+  --report "${VALIDATION_DIR}/validation-command-pack-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.risk_watchlist.cli \
+  --proposal-risk-report "${OUT_DIR}/proposal-risk-report.json" \
+  --hook-backlog-report "${OUT_DIR}/hook-backlog-report.json" \
+  --runtime-signal-report "${OUT_DIR}/runtime-signal-report.json" \
+  --output "${OUT_DIR}/risk-watchlist-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/risk-watchlist-report.json" \
+  --schema schemas/risk-watchlist-report.schema.json \
+  --report "${VALIDATION_DIR}/risk-watchlist-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.release_gate_history.cli \
+  --dashboard-timeseries "${OUT_DIR}/dashboard-timeseries.json" \
+  --trend-report "${OUT_DIR}/trend-report.json" \
+  --quality-gate-report "${OUT_DIR}/quality-gate-report.json" \
+  --release-decision-report "${OUT_DIR}/release-decision-report.json" \
+  --readiness-scorecard-report "${OUT_DIR}/readiness-scorecard-report.json" \
+  --output "${OUT_DIR}/release-gate-history-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/release-gate-history-report.json" \
+  --schema schemas/release-gate-history-report.schema.json \
+  --report "${VALIDATION_DIR}/release-gate-history-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.pilot_readiness.cli \
+  --productization-readiness "${OUT_DIR}/productization-readiness.json" \
+  --quality-gate-report "${OUT_DIR}/quality-gate-report.json" \
+  --release-decision-report "${OUT_DIR}/release-decision-report.json" \
+  --readiness-scorecard-report "${OUT_DIR}/readiness-scorecard-report.json" \
+  --release-forecast-report "${OUT_DIR}/release-forecast-report.json" \
+  --iteration-plan-report "${OUT_DIR}/iteration-plan-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --output "${OUT_DIR}/pilot-readiness-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/pilot-readiness-report.json" \
+  --schema schemas/pilot-readiness-report.schema.json \
+  --report "${VALIDATION_DIR}/pilot-readiness-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
   --compatibility-matrix "${OUT_DIR}/compatibility-matrix.json" \
@@ -332,6 +392,11 @@ fi
     "${OUT_DIR}/iteration-plan-report.json" \
     "${OUT_DIR}/release-forecast-report.json" \
     "${OUT_DIR}/readiness-scorecard-report.json" \
+    "${OUT_DIR}/execution-burndown-report.json" \
+    "${OUT_DIR}/validation-command-pack.json" \
+    "${OUT_DIR}/risk-watchlist-report.json" \
+    "${OUT_DIR}/release-gate-history-report.json" \
+    "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \

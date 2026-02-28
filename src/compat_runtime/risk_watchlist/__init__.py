@@ -1,0 +1,1 @@
+"""Risk watchlist aggregation artifact."""

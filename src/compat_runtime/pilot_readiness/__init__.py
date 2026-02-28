@@ -1,0 +1,1 @@
+"""Pilot readiness recommendation artifact."""
