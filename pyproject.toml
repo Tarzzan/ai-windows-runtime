@@ -18,6 +18,7 @@ compat-validate = "compat_runtime.schema_validator.cli:main"
 compat-report = "compat_runtime.reporting.cli:main"
 compat-trend = "compat_runtime.trend_report.cli:main"
 compat-kpi = "compat_runtime.kpi_tracker.cli:main"
+compat-release-readiness = "compat_runtime.release_readiness.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

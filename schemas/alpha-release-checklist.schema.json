@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Alpha Release Checklist Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "release_ready", "summary", "items"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "release_ready": {"type": "boolean"},
+    "summary": {
+      "type": "object",
+      "required": ["total_items", "pass_items", "warn_items", "fail_items", "required_failures"],
+      "properties": {
+        "total_items": {"type": "integer"},
+        "pass_items": {"type": "integer"},
+        "warn_items": {"type": "integer"},
+        "fail_items": {"type": "integer"},
+        "required_failures": {"type": "integer"}
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "required", "status", "evidence"],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "required": {"type": "boolean"},
+          "status": {"type": "string"},
+          "evidence": {"type": "string"}
+        }
+      }
+    }
+  }
+}

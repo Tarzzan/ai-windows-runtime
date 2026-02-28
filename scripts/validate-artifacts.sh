@@ -60,4 +60,25 @@ if [[ -f "${OUT_DIR}/dashboard-timeseries.json" ]]; then
     --report "${REPORT_DIR}/dashboard-timeseries-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/compatibility-matrix.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/compatibility-matrix.json" \
+    --schema schemas/compatibility-matrix.schema.json \
+    --report "${REPORT_DIR}/compatibility-matrix-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/alpha-release-checklist.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/alpha-release-checklist.json" \
+    --schema schemas/alpha-release-checklist.schema.json \
+    --report "${REPORT_DIR}/alpha-release-checklist-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/release-bundle-manifest.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/release-bundle-manifest.json" \
+    --schema schemas/release-bundle-manifest.schema.json \
+    --report "${REPORT_DIR}/release-bundle-manifest-validation.json"
+fi
+
 echo "artifact validation: ok"

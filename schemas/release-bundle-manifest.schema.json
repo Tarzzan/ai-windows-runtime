@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Bundle Manifest Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "files", "missing"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "size_bytes", "sha256"],
+        "properties": {
+          "path": {"type": "string"},
+          "size_bytes": {"type": "integer"},
+          "sha256": {"type": "string"}
+        }
+      }
+    },
+    "missing": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}

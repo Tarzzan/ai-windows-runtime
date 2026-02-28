@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Compatibility Matrix Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "channel", "release_ready", "summary", "scenarios"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "channel": {"type": "string"},
+    "release_ready": {"type": "boolean"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "execution_status",
+        "risk_level",
+        "regressed_metrics_count",
+        "base_trace_events",
+        "runtime_trace_events"
+      ],
+      "properties": {
+        "execution_status": {"type": "string"},
+        "risk_level": {"type": "string"},
+        "regressed_metrics_count": {"type": "integer"},
+        "base_trace_events": {"type": "integer"},
+        "runtime_trace_events": {"type": "integer"}
+      }
+    },
+    "scenarios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "gaps", "proposals", "evidence"],
+        "properties": {
+          "id": {"type": "string"},
+          "status": {"type": "string"},
+          "gaps": {"type": "integer"},
+          "proposals": {"type": "integer"},
+          "evidence": {"type": "string"}
+        }
+      }
+    }
+  }
+}
