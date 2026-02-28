@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 12)
+## Current scope (Phase 13)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -52,6 +52,8 @@ Core runtime capabilities in this phase:
 25. Merge telemetry-derived events with baseline traces for unified gap/patch planning.
 26. Validate generated artifacts against repository schemas via native validator CLI.
 27. Produce machine-readable validation reports for trace/gaps/patch-plan outputs.
+28. Generate machine-readable end-to-end execution report artifacts.
+29. Run complete pipeline gate (base + runtime + schema validation + execution report) in one script.
 
 ## Quick start
 ```bash
@@ -74,6 +76,8 @@ python -m compat_runtime.schema_validator.cli --input out/runtime-trace.json --s
 
 # Validate full artifact batch with reports
 scripts/validate-artifacts.sh out
+scripts/run-full-pipeline.sh out
+# out/execution-report.json is generated and schema-validated
 pytest -q
 
 # Native runtime core checks

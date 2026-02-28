@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Execution Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "pipeline", "status"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "status": {"type": "string"},
+    "pipeline": {
+      "type": "object",
+      "required": ["base", "runtime"],
+      "properties": {
+        "base": {
+          "type": "object",
+          "required": ["trace_events", "gaps", "proposals", "validation"],
+          "properties": {
+            "trace_events": {"type": "integer"},
+            "gaps": {"type": "integer"},
+            "proposals": {"type": "integer"},
+            "validation": {
+              "type": "object",
+              "required": ["trace", "gaps", "patch_plan"],
+              "properties": {
+                "trace": {"type": "boolean"},
+                "gaps": {"type": "boolean"},
+                "patch_plan": {"type": "boolean"}
+              }
+            }
+          }
+        },
+        "runtime": {
+          "type": "object",
+          "required": ["trace_events", "gaps", "proposals", "validation"],
+          "properties": {
+            "trace_events": {"type": "integer"},
+            "gaps": {"type": "integer"},
+            "proposals": {"type": "integer"},
+            "validation": {
+              "type": "object",
+              "required": ["trace"],
+              "properties": {
+                "trace": {"type": "boolean"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

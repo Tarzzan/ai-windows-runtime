@@ -24,3 +24,7 @@ jobs:
         run: pytest -q
       - name: Runtime Core Tests
         run: cargo test --manifest-path runtime-core/Cargo.toml
+      - name: Runtime Core Smoke
+        run: bash scripts/runtime-core-smoke.sh
+      - name: Full Artifact Pipeline
+        run: bash scripts/run-full-pipeline.sh out

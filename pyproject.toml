@@ -15,6 +15,7 @@ compat-trace = "compat_runtime.trace_collector.cli:main"
 compat-gaps = "compat_runtime.gap_detector.cli:main"
 compat-plan = "compat_runtime.patch_orchestrator.cli:main"
 compat-validate = "compat_runtime.schema_validator.cli:main"
+compat-report = "compat_runtime.reporting.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
