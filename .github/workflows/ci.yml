@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -21,3 +22,5 @@ jobs:
         run: ruff check .
       - name: Test
         run: pytest -q
+      - name: Runtime Core Tests
+        run: cargo test --manifest-path runtime-core/Cargo.toml

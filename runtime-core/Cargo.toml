@@ -1,0 +1,16 @@
+[package]
+name = "runtime-core"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "Native runtime core prototype for AI Windows Runtime"
+
+[lib]
+name = "runtime_core"
+path = "src/lib.rs"
+
+[[bin]]
+name = "runtime_probe"
+path = "src/bin/runtime_probe.rs"
+
+[dependencies]

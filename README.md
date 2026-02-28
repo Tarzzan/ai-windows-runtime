@@ -11,16 +11,24 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 ## Repository map
 - `docs/` product and engineering strategy
 - `src/compat_runtime/` MVP tooling for trace -> gap -> patch proposal loop
+- `runtime-core/` native Rust runtime core prototype (PE loader metadata + API dispatcher)
 - `schemas/` JSON schemas for runtime evidence artifacts
 - `scripts/` reproducible workflows
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (MVP)
-This repository currently ships the planning baseline and a working AI compatibility loop prototype:
+## Current scope (Phase 2)
+This repository currently ships:
+1. Planning baseline (vision, architecture, roadmap, risk model).
+2. AI compatibility loop prototype (trace -> gaps -> patch plan).
+3. Native runtime core prototype in Rust (PE metadata loader + API dispatcher).
+
+Core runtime capabilities in this phase:
 1. Parse execution traces.
 2. Detect likely compatibility gaps.
 3. Produce ranked patch proposals for engineering review.
+4. Parse core PE metadata from executable payloads.
+5. Dispatch known APIs as implemented/stubbed/missing decisions.
 
 ## Quick start
 ```bash
@@ -32,6 +40,10 @@ python -m compat_runtime.trace_collector.cli --input examples/sample-trace.log -
 python -m compat_runtime.gap_detector.cli --trace out/trace.json --output out/gaps.json
 python -m compat_runtime.patch_orchestrator.cli --gaps out/gaps.json --output out/patch-plan.json
 pytest -q
+
+# Native runtime core checks
+cargo test --manifest-path runtime-core/Cargo.toml
+bash scripts/runtime-core-smoke.sh
 ```
 
 ## Product deliverables included
