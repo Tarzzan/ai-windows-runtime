@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 11)
+## Current scope (Phase 12)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -50,6 +50,8 @@ Core runtime capabilities in this phase:
 23. Expose telemetry capture API for extraction/drain in deterministic validation flows.
 24. Adapt runtime telemetry artifacts into `trace.json` compatible events.
 25. Merge telemetry-derived events with baseline traces for unified gap/patch planning.
+26. Validate generated artifacts against repository schemas via native validator CLI.
+27. Produce machine-readable validation reports for trace/gaps/patch-plan outputs.
 
 ## Quick start
 ```bash
@@ -60,11 +62,18 @@ pip install -r requirements.txt
 python -m compat_runtime.trace_collector.cli --input examples/sample-trace.log --output out/trace.json
 python -m compat_runtime.gap_detector.cli --trace out/trace.json --output out/gaps.json
 python -m compat_runtime.patch_orchestrator.cli --gaps out/gaps.json --output out/patch-plan.json
+python -m compat_runtime.schema_validator.cli --input out/trace.json --schema schemas/trace.schema.json
+python -m compat_runtime.schema_validator.cli --input out/gaps.json --schema schemas/gaps.schema.json
+python -m compat_runtime.schema_validator.cli --input out/patch-plan.json --schema schemas/patch-plan.schema.json
 
 # Adapt runtime telemetry into trace artifact (optional)
 python -m compat_runtime.telemetry_adapter.cli --telemetry examples/sample-runtime-telemetry.json --output out/runtime-trace.json
 python -m compat_runtime.gap_detector.cli --trace out/runtime-trace.json --output out/runtime-gaps.json
 python -m compat_runtime.patch_orchestrator.cli --gaps out/runtime-gaps.json --output out/runtime-patch-plan.json
+python -m compat_runtime.schema_validator.cli --input out/runtime-trace.json --schema schemas/trace.schema.json
+
+# Validate full artifact batch with reports
+scripts/validate-artifacts.sh out
 pytest -q
 
 # Native runtime core checks
