@@ -27,8 +27,14 @@ fn main() -> ExitCode {
             println!("machine: 0x{:04x}", image.metadata.machine);
             println!("sections: {}", image.sections.len());
             println!("imports: {}", image.imports.len());
+            println!("exports: {}", image.exports.len());
             println!("entry_point_rva: 0x{:08x}", image.metadata.entry_point_rva);
             println!("size_of_image: {}", image.metadata.size_of_image);
+
+            if let Some(name) = &image.export_dll_name {
+                println!("export dll: {name}");
+            }
+
             for import in &image.imports {
                 println!("import dll: {}", import.dll_name);
                 for f in &import.functions {
@@ -42,6 +48,17 @@ fn main() -> ExitCode {
                     }
                 }
             }
+
+            for export in &image.exports {
+                match &export.name {
+                    Some(name) => println!(
+                        "export: {name} (ord #{}) -> 0x{:08x}",
+                        export.ordinal, export.rva
+                    ),
+                    None => println!("export: ord #{} -> 0x{:08x}", export.ordinal, export.rva),
+                }
+            }
+
             ExitCode::SUCCESS
         }
         Err(err) => {

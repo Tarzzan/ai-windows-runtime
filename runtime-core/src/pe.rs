@@ -36,10 +36,19 @@ pub struct PeImport {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PeExport {
+    pub ordinal: u32,
+    pub rva: u32,
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadedPeImage {
     pub metadata: PeMetadata,
     pub sections: Vec<PeSection>,
     pub imports: Vec<PeImport>,
+    pub export_dll_name: Option<String>,
+    pub exports: Vec<PeExport>,
     pub mapped_image: Vec<u8>,
 }
 
@@ -59,6 +68,7 @@ pub enum PeError {
     RvaNotMapped(u32),
     UnterminatedCString,
     ImportThunkListTooLong,
+    ExportTableTooLarge,
 }
 
 #[derive(Debug, Clone)]
@@ -69,6 +79,8 @@ struct PeParsedHeaders {
     size_of_headers: u32,
     import_dir_rva: u32,
     import_dir_size: u32,
+    export_dir_rva: u32,
+    export_dir_size: u32,
     is_pe32_plus: bool,
 }
 
@@ -79,6 +91,8 @@ const SECTION_HEADER_SIZE: usize = 40;
 const MAX_IMAGE_SIZE: usize = 512 * 1024 * 1024;
 const MAX_IMPORT_DESCRIPTORS: usize = 256;
 const MAX_IMPORT_THUNKS: usize = 4096;
+const MAX_EXPORT_FUNCTIONS: usize = 65536;
+const MAX_EXPORT_NAMES: usize = 65536;
 
 fn read_u16_le(bytes: &[u8], offset: usize) -> Result<u16, PeError> {
     let end = offset.checked_add(2).ok_or(PeError::InvalidPeOffset)?;
@@ -177,6 +191,8 @@ fn parse_pe_headers(bytes: &[u8]) -> Result<PeParsedHeaders, PeError> {
         return Err(PeError::ImageTooLarge);
     }
 
+    let export_dir_rva = read_u32_le(bytes, data_dir_start)?;
+    let export_dir_size = read_u32_le(bytes, data_dir_start + 4)?;
     let import_dir_rva = read_u32_le(bytes, data_dir_start + 8)?;
     let import_dir_size = read_u32_le(bytes, data_dir_start + 12)?;
 
@@ -203,6 +219,8 @@ fn parse_pe_headers(bytes: &[u8]) -> Result<PeParsedHeaders, PeError> {
         size_of_headers,
         import_dir_rva,
         import_dir_size,
+        export_dir_rva,
+        export_dir_size,
         is_pe32_plus,
     })
 }
@@ -435,6 +453,85 @@ fn parse_imports(
     Ok(imports)
 }
 
+fn parse_exports(
+    bytes: &[u8],
+    headers: &PeParsedHeaders,
+    sections: &[PeSection],
+) -> Result<(Option<String>, Vec<PeExport>), PeError> {
+    if headers.export_dir_rva == 0 || headers.export_dir_size == 0 {
+        return Ok((None, Vec::new()));
+    }
+
+    let dir_off = rva_to_file_offset(headers.export_dir_rva, sections, headers.size_of_headers)
+        .ok_or(PeError::RvaNotMapped(headers.export_dir_rva))?;
+    let dir_end = dir_off.checked_add(40).ok_or(PeError::TooSmall)?;
+    if dir_end > bytes.len() {
+        return Err(PeError::TooSmall);
+    }
+
+    let name_rva = read_u32_le(bytes, dir_off + 12)?;
+    let base = read_u32_le(bytes, dir_off + 16)?;
+    let number_of_functions = read_u32_le(bytes, dir_off + 20)? as usize;
+    let number_of_names = read_u32_le(bytes, dir_off + 24)? as usize;
+    let addr_functions_rva = read_u32_le(bytes, dir_off + 28)?;
+    let addr_names_rva = read_u32_le(bytes, dir_off + 32)?;
+    let addr_ordinals_rva = read_u32_le(bytes, dir_off + 36)?;
+
+    if number_of_functions > MAX_EXPORT_FUNCTIONS || number_of_names > MAX_EXPORT_NAMES {
+        return Err(PeError::ExportTableTooLarge);
+    }
+
+    let export_dll_name = if name_rva != 0 {
+        let name_off = rva_to_file_offset(name_rva, sections, headers.size_of_headers)
+            .ok_or(PeError::RvaNotMapped(name_rva))?;
+        Some(read_c_string(bytes, name_off)?)
+    } else {
+        None
+    };
+
+    if number_of_functions == 0 {
+        return Ok((export_dll_name, Vec::new()));
+    }
+
+    let funcs_off = rva_to_file_offset(addr_functions_rva, sections, headers.size_of_headers)
+        .ok_or(PeError::RvaNotMapped(addr_functions_rva))?;
+
+    let mut names_by_func = vec![None::<String>; number_of_functions];
+    if number_of_names > 0 {
+        let names_off = rva_to_file_offset(addr_names_rva, sections, headers.size_of_headers)
+            .ok_or(PeError::RvaNotMapped(addr_names_rva))?;
+        let ord_off = rva_to_file_offset(addr_ordinals_rva, sections, headers.size_of_headers)
+            .ok_or(PeError::RvaNotMapped(addr_ordinals_rva))?;
+
+        for i in 0..number_of_names {
+            let name_rva_entry = read_u32_le(bytes, names_off + i * 4)?;
+            let ordinal_index = read_u16_le(bytes, ord_off + i * 2)? as usize;
+            if ordinal_index >= number_of_functions {
+                continue;
+            }
+            let name_off = rva_to_file_offset(name_rva_entry, sections, headers.size_of_headers)
+                .ok_or(PeError::RvaNotMapped(name_rva_entry))?;
+            names_by_func[ordinal_index] = Some(read_c_string(bytes, name_off)?);
+        }
+    }
+
+    let mut exports = Vec::new();
+    for idx in 0..number_of_functions {
+        let func_rva = read_u32_le(bytes, funcs_off + idx * 4)?;
+        if func_rva == 0 {
+            continue;
+        }
+
+        exports.push(PeExport {
+            ordinal: base + idx as u32,
+            rva: func_rva,
+            name: names_by_func[idx].clone(),
+        });
+    }
+
+    Ok((export_dll_name, exports))
+}
+
 pub fn parse_pe_metadata(bytes: &[u8]) -> Result<PeMetadata, PeError> {
     let headers = parse_pe_headers(bytes)?;
     Ok(headers.metadata)
@@ -445,11 +542,14 @@ pub fn load_pe_image(bytes: &[u8]) -> Result<LoadedPeImage, PeError> {
     let sections = parse_sections(bytes, &headers)?;
     let mapped_image = map_image(bytes, &headers, &sections)?;
     let imports = parse_imports(bytes, &headers, &sections)?;
+    let (export_dll_name, exports) = parse_exports(bytes, &headers, &sections)?;
 
     Ok(LoadedPeImage {
         metadata: headers.metadata,
         sections,
         imports,
+        export_dll_name,
+        exports,
         mapped_image,
     })
 }
@@ -514,6 +614,65 @@ mod tests {
         b
     }
 
+    fn minimal_pe_with_exports() -> Vec<u8> {
+        let mut b = vec![0u8; 0x800];
+        b[0] = b'M';
+        b[1] = b'Z';
+        b[0x3C..0x40].copy_from_slice(&(0x80u32).to_le_bytes());
+
+        b[0x80..0x84].copy_from_slice(&0x0000_4550u32.to_le_bytes());
+        b[0x84..0x86].copy_from_slice(&0x8664u16.to_le_bytes());
+        b[0x86..0x88].copy_from_slice(&2u16.to_le_bytes());
+        b[0x94..0x96].copy_from_slice(&0xF0u16.to_le_bytes());
+
+        let optional = 0x98usize;
+        b[optional..optional + 2].copy_from_slice(&0x20Bu16.to_le_bytes());
+        b[optional + 16..optional + 20].copy_from_slice(&0x1000u32.to_le_bytes());
+        b[optional + 56..optional + 60].copy_from_slice(&0x5000u32.to_le_bytes());
+        b[optional + 60..optional + 64].copy_from_slice(&0x200u32.to_le_bytes());
+        b[optional + 108..optional + 112].copy_from_slice(&16u32.to_le_bytes());
+        b[optional + 112..optional + 116].copy_from_slice(&0x3000u32.to_le_bytes());
+        b[optional + 116..optional + 120].copy_from_slice(&40u32.to_le_bytes());
+
+        let sh = optional + 0xF0;
+        b[sh..sh + 8].copy_from_slice(b".text\0\0\0");
+        b[sh + 8..sh + 12].copy_from_slice(&0x100u32.to_le_bytes());
+        b[sh + 12..sh + 16].copy_from_slice(&0x1000u32.to_le_bytes());
+        b[sh + 16..sh + 20].copy_from_slice(&0x200u32.to_le_bytes());
+        b[sh + 20..sh + 24].copy_from_slice(&0x200u32.to_le_bytes());
+
+        let sh2 = sh + 40;
+        b[sh2..sh2 + 8].copy_from_slice(b".edata\0\0");
+        b[sh2 + 8..sh2 + 12].copy_from_slice(&0x300u32.to_le_bytes());
+        b[sh2 + 12..sh2 + 16].copy_from_slice(&0x3000u32.to_le_bytes());
+        b[sh2 + 16..sh2 + 20].copy_from_slice(&0x300u32.to_le_bytes());
+        b[sh2 + 20..sh2 + 24].copy_from_slice(&0x400u32.to_le_bytes());
+
+        b[0x400 + 12..0x400 + 16].copy_from_slice(&0x3040u32.to_le_bytes());
+        b[0x400 + 16..0x400 + 20].copy_from_slice(&0x120u32.to_le_bytes());
+        b[0x400 + 20..0x400 + 24].copy_from_slice(&4u32.to_le_bytes());
+        b[0x400 + 24..0x400 + 28].copy_from_slice(&1u32.to_le_bytes());
+        b[0x400 + 28..0x400 + 32].copy_from_slice(&0x3050u32.to_le_bytes());
+        b[0x400 + 32..0x400 + 36].copy_from_slice(&0x3060u32.to_le_bytes());
+        b[0x400 + 36..0x400 + 40].copy_from_slice(&0x3064u32.to_le_bytes());
+
+        b[0x450..0x454].copy_from_slice(&0u32.to_le_bytes());
+        b[0x454..0x458].copy_from_slice(&0u32.to_le_bytes());
+        b[0x458..0x45C].copy_from_slice(&0u32.to_le_bytes());
+        b[0x45C..0x460].copy_from_slice(&0x2222u32.to_le_bytes());
+
+        b[0x460..0x464].copy_from_slice(&0x3068u32.to_le_bytes());
+        b[0x464..0x466].copy_from_slice(&3u16.to_le_bytes());
+
+        let dll = b"KERNEL32.dll\0";
+        b[0x440..0x440 + dll.len()].copy_from_slice(dll);
+
+        let name = b"Sleep\0";
+        b[0x468..0x468 + name.len()].copy_from_slice(name);
+
+        b
+    }
+
     #[test]
     fn parses_minimal_pe_metadata() {
         let pe = minimal_pe_with_imports();
@@ -548,6 +707,17 @@ mod tests {
 
         assert_eq!(loaded.mapped_image[0x1000], 0xCC);
         assert_eq!(loaded.mapped_image[0x1001], 0x90);
+    }
+
+    #[test]
+    fn parses_export_table() {
+        let pe = minimal_pe_with_exports();
+        let loaded = load_pe_image(&pe).expect("must load export PE");
+        assert_eq!(loaded.export_dll_name.as_deref(), Some("KERNEL32.dll"));
+        assert_eq!(loaded.exports.len(), 1);
+        assert_eq!(loaded.exports[0].ordinal, 0x123);
+        assert_eq!(loaded.exports[0].rva, 0x2222);
+        assert_eq!(loaded.exports[0].name.as_deref(), Some("Sleep"));
     }
 
     #[test]
