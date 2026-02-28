@@ -4,6 +4,25 @@ use std::fmt;
 pub type ProcessId = u32;
 pub type ThreadId = u32;
 pub type Handle = u32;
+pub type VirtualAddress = u64;
+
+const PAGE_SIZE: u64 = 0x1000;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MemoryProtection {
+    ReadOnly,
+    ReadWrite,
+    ReadExecute,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MemoryRegion {
+    pub owner_pid: ProcessId,
+    pub base: VirtualAddress,
+    pub size: usize,
+    pub protection: MemoryProtection,
+    pub label: Option<String>,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ProcessState {
@@ -56,6 +75,8 @@ pub struct NtSnapshot {
     pub waiting_threads: usize,
     pub terminated_threads: usize,
     pub handle_count: usize,
+    pub memory_region_count: usize,
+    pub allocated_bytes: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -64,6 +85,22 @@ pub enum NtError {
     UnknownThread(ThreadId),
     ProcessTerminated(ProcessId),
     ThreadTerminated(ThreadId),
+    UnknownMemoryRegion {
+        pid: ProcessId,
+        base: VirtualAddress,
+    },
+    MemoryOutOfBounds {
+        pid: ProcessId,
+        address: VirtualAddress,
+        size: usize,
+    },
+    MemoryProtectionViolation {
+        pid: ProcessId,
+        address: VirtualAddress,
+        protection: MemoryProtection,
+    },
+    InvalidMemorySize(usize),
+    InvalidHandle(Handle),
     InvalidProcessHandle(Handle),
     InvalidThreadHandle(Handle),
 }
@@ -75,6 +112,23 @@ impl fmt::Display for NtError {
             Self::UnknownThread(tid) => write!(f, "unknown thread id: {tid}"),
             Self::ProcessTerminated(pid) => write!(f, "process is terminated: {pid}"),
             Self::ThreadTerminated(tid) => write!(f, "thread is terminated: {tid}"),
+            Self::UnknownMemoryRegion { pid, base } => {
+                write!(f, "unknown memory region for pid {pid}: 0x{base:016X}")
+            }
+            Self::MemoryOutOfBounds { pid, address, size } => write!(
+                f,
+                "memory access out of bounds for pid {pid}: addr=0x{address:016X}, size={size}"
+            ),
+            Self::MemoryProtectionViolation {
+                pid,
+                address,
+                protection,
+            } => write!(
+                f,
+                "memory protection violation for pid {pid}: addr=0x{address:016X}, protection={protection:?}"
+            ),
+            Self::InvalidMemorySize(size) => write!(f, "invalid memory size: {size}"),
+            Self::InvalidHandle(handle) => write!(f, "invalid handle: 0x{handle:08X}"),
             Self::InvalidProcessHandle(handle) => {
                 write!(f, "invalid process handle: 0x{handle:08X}")
             }
@@ -93,14 +147,22 @@ enum HandleTarget {
     Thread(ThreadId),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct MemoryRegionRecord {
+    meta: MemoryRegion,
+    bytes: Vec<u8>,
+}
+
 #[derive(Debug)]
 pub struct NtCore {
     next_pid: ProcessId,
     next_tid: ThreadId,
     next_handle: Handle,
+    next_mem_base: VirtualAddress,
     processes: HashMap<ProcessId, ProcessRecord>,
     threads: HashMap<ThreadId, ThreadRecord>,
     handles: HashMap<Handle, HandleTarget>,
+    memory_regions: HashMap<ProcessId, Vec<MemoryRegionRecord>>,
 }
 
 impl Default for NtCore {
@@ -109,9 +171,11 @@ impl Default for NtCore {
             next_pid: 1_000,
             next_tid: 10_000,
             next_handle: 0x100,
+            next_mem_base: 0x0000_0000_1000_0000,
             processes: HashMap::new(),
             threads: HashMap::new(),
             handles: HashMap::new(),
+            memory_regions: HashMap::new(),
         }
     }
 }
@@ -119,6 +183,14 @@ impl Default for NtCore {
 impl NtCore {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    fn align_up(value: u64, align: u64) -> u64 {
+        if value % align == 0 {
+            value
+        } else {
+            value + (align - (value % align))
+        }
     }
 
     fn alloc_handle(&mut self, target: HandleTarget) -> Handle {
@@ -137,6 +209,23 @@ impl NtCore {
             return Err(NtError::ProcessTerminated(pid));
         }
         Ok(())
+    }
+
+    fn find_region_index(
+        regions: &[MemoryRegionRecord],
+        address: VirtualAddress,
+        size: usize,
+    ) -> Option<(usize, usize)> {
+        let end = address.checked_add(size as u64)?;
+        regions.iter().enumerate().find_map(|(idx, region)| {
+            let start = region.meta.base;
+            let region_end = start + region.meta.size as u64;
+            if address >= start && end <= region_end {
+                Some((idx, (address - start) as usize))
+            } else {
+                None
+            }
+        })
     }
 
     pub fn launch_process(&mut self, image_name: &str, entry_point_rva: u32) -> ProcessLaunch {
@@ -275,6 +364,7 @@ impl NtCore {
             if let Some(process) = self.processes.get_mut(&owner_pid) {
                 process.state = ProcessState::Terminated { exit_code };
             }
+            self.memory_regions.remove(&owner_pid);
         }
 
         Ok(())
@@ -297,6 +387,189 @@ impl NtCore {
             process.state = ProcessState::Terminated { exit_code };
         }
 
+        self.memory_regions.remove(&pid);
+        Ok(())
+    }
+
+    pub fn alloc_memory(
+        &mut self,
+        pid: ProcessId,
+        size: usize,
+        protection: MemoryProtection,
+        label: Option<&str>,
+    ) -> Result<MemoryRegion, NtError> {
+        self.process_running(pid)?;
+        if size == 0 {
+            return Err(NtError::InvalidMemorySize(size));
+        }
+
+        let aligned_size = Self::align_up(size as u64, PAGE_SIZE) as usize;
+        let base = Self::align_up(self.next_mem_base, PAGE_SIZE);
+        self.next_mem_base = base
+            .saturating_add(aligned_size as u64)
+            .saturating_add(PAGE_SIZE);
+
+        let meta = MemoryRegion {
+            owner_pid: pid,
+            base,
+            size: aligned_size,
+            protection,
+            label: label.map(|s| s.to_string()),
+        };
+
+        self.memory_regions
+            .entry(pid)
+            .or_default()
+            .push(MemoryRegionRecord {
+                meta: meta.clone(),
+                bytes: vec![0u8; aligned_size],
+            });
+
+        Ok(meta)
+    }
+
+    pub fn free_memory(&mut self, pid: ProcessId, base: VirtualAddress) -> Result<(), NtError> {
+        self.process_running(pid)?;
+
+        let regions = self
+            .memory_regions
+            .get_mut(&pid)
+            .ok_or(NtError::UnknownMemoryRegion { pid, base })?;
+
+        let Some(idx) = regions.iter().position(|r| r.meta.base == base) else {
+            return Err(NtError::UnknownMemoryRegion { pid, base });
+        };
+
+        regions.remove(idx);
+        if regions.is_empty() {
+            self.memory_regions.remove(&pid);
+        }
+
+        Ok(())
+    }
+
+    pub fn set_memory_protection(
+        &mut self,
+        pid: ProcessId,
+        base: VirtualAddress,
+        protection: MemoryProtection,
+    ) -> Result<MemoryRegion, NtError> {
+        self.process_running(pid)?;
+
+        let regions = self
+            .memory_regions
+            .get_mut(&pid)
+            .ok_or(NtError::UnknownMemoryRegion { pid, base })?;
+
+        let Some(region) = regions.iter_mut().find(|r| r.meta.base == base) else {
+            return Err(NtError::UnknownMemoryRegion { pid, base });
+        };
+
+        region.meta.protection = protection;
+        Ok(region.meta.clone())
+    }
+
+    pub fn write_memory(
+        &mut self,
+        pid: ProcessId,
+        address: VirtualAddress,
+        data: &[u8],
+    ) -> Result<usize, NtError> {
+        self.process_running(pid)?;
+
+        let regions = self
+            .memory_regions
+            .get_mut(&pid)
+            .ok_or(NtError::MemoryOutOfBounds {
+                pid,
+                address,
+                size: data.len(),
+            })?;
+
+        let Some((idx, offset)) = Self::find_region_index(regions, address, data.len()) else {
+            return Err(NtError::MemoryOutOfBounds {
+                pid,
+                address,
+                size: data.len(),
+            });
+        };
+
+        if matches!(regions[idx].meta.protection, MemoryProtection::ReadOnly) {
+            return Err(NtError::MemoryProtectionViolation {
+                pid,
+                address,
+                protection: regions[idx].meta.protection,
+            });
+        }
+
+        let end = offset + data.len();
+        regions[idx].bytes[offset..end].copy_from_slice(data);
+        Ok(data.len())
+    }
+
+    pub fn read_memory(
+        &self,
+        pid: ProcessId,
+        address: VirtualAddress,
+        size: usize,
+    ) -> Result<Vec<u8>, NtError> {
+        self.process_running(pid)?;
+
+        let regions = self
+            .memory_regions
+            .get(&pid)
+            .ok_or(NtError::MemoryOutOfBounds { pid, address, size })?;
+
+        let Some((idx, offset)) = Self::find_region_index(regions, address, size) else {
+            return Err(NtError::MemoryOutOfBounds { pid, address, size });
+        };
+
+        let end = offset + size;
+        Ok(regions[idx].bytes[offset..end].to_vec())
+    }
+
+    pub fn memory_region(
+        &self,
+        pid: ProcessId,
+        base: VirtualAddress,
+    ) -> Result<MemoryRegion, NtError> {
+        let process = self
+            .processes
+            .get(&pid)
+            .ok_or(NtError::UnknownProcess(pid))?;
+        if matches!(process.state, ProcessState::Terminated { .. }) {
+            return Err(NtError::ProcessTerminated(pid));
+        }
+
+        self.memory_regions
+            .get(&pid)
+            .and_then(|regions| regions.iter().find(|r| r.meta.base == base))
+            .map(|r| r.meta.clone())
+            .ok_or(NtError::UnknownMemoryRegion { pid, base })
+    }
+
+    pub fn list_memory_regions(&self, pid: ProcessId) -> Result<Vec<MemoryRegion>, NtError> {
+        let process = self
+            .processes
+            .get(&pid)
+            .ok_or(NtError::UnknownProcess(pid))?;
+        if matches!(process.state, ProcessState::Terminated { .. }) {
+            return Err(NtError::ProcessTerminated(pid));
+        }
+
+        let mut out = self
+            .memory_regions
+            .get(&pid)
+            .map(|regions| regions.iter().map(|r| r.meta.clone()).collect::<Vec<_>>())
+            .unwrap_or_default();
+        out.sort_by_key(|r| r.base);
+        Ok(out)
+    }
+
+    pub fn close_handle(&mut self, handle: Handle) -> Result<(), NtError> {
+        if self.handles.remove(&handle).is_none() {
+            return Err(NtError::InvalidHandle(handle));
+        }
         Ok(())
     }
 
@@ -335,6 +608,14 @@ impl NtCore {
             }
         }
 
+        let memory_region_count = self.memory_regions.values().map(Vec::len).sum();
+        let allocated_bytes = self
+            .memory_regions
+            .values()
+            .flat_map(|regions| regions.iter())
+            .map(|r| r.meta.size)
+            .sum();
+
         NtSnapshot {
             process_count: self.processes.len(),
             thread_count: self.threads.len(),
@@ -342,13 +623,15 @@ impl NtCore {
             waiting_threads,
             terminated_threads,
             handle_count: self.handles.len(),
+            memory_region_count,
+            allocated_bytes,
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{NtCore, NtError, ProcessState, ThreadState};
+    use super::{MemoryProtection, NtCore, NtError, ProcessState, ThreadState};
 
     #[test]
     fn launch_process_creates_primary_thread_and_handles() {
@@ -447,6 +730,83 @@ mod tests {
         let err = nt
             .spawn_thread(launch.pid, 0x2000)
             .expect_err("terminated process cannot spawn threads");
+        assert_eq!(err, NtError::ProcessTerminated(launch.pid));
+    }
+
+    #[test]
+    fn virtual_memory_alloc_write_read_protect_and_free() {
+        let mut nt = NtCore::new();
+        let launch = nt.launch_process("setup.exe", 0x1000);
+
+        let region = nt
+            .alloc_memory(
+                launch.pid,
+                3000,
+                MemoryProtection::ReadWrite,
+                Some("installer heap"),
+            )
+            .expect("allocation should succeed");
+        assert_eq!(region.size, 0x1000);
+
+        nt.write_memory(launch.pid, region.base, b"ABCD")
+            .expect("write should succeed");
+        let data = nt
+            .read_memory(launch.pid, region.base, 4)
+            .expect("read should succeed");
+        assert_eq!(data, b"ABCD".to_vec());
+
+        let ro = nt
+            .set_memory_protection(launch.pid, region.base, MemoryProtection::ReadOnly)
+            .expect("protect should succeed");
+        assert_eq!(ro.protection, MemoryProtection::ReadOnly);
+
+        let err = nt
+            .write_memory(launch.pid, region.base, b"E")
+            .expect_err("readonly memory must reject writes");
+        assert!(matches!(err, NtError::MemoryProtectionViolation { .. }));
+
+        nt.free_memory(launch.pid, region.base)
+            .expect("free should succeed");
+        let list = nt
+            .list_memory_regions(launch.pid)
+            .expect("list should succeed");
+        assert!(list.is_empty());
+    }
+
+    #[test]
+    fn closing_handle_invalidates_resolution() {
+        let mut nt = NtCore::new();
+        let launch = nt.launch_process("setup.exe", 0x1000);
+
+        nt.close_handle(launch.process_handle)
+            .expect("first close succeeds");
+        let err = nt
+            .process_id_from_handle(launch.process_handle)
+            .expect_err("closed handle should be invalid");
+        assert_eq!(err, NtError::InvalidProcessHandle(launch.process_handle));
+
+        let err = nt
+            .close_handle(launch.process_handle)
+            .expect_err("closing twice must fail");
+        assert_eq!(err, NtError::InvalidHandle(launch.process_handle));
+    }
+
+    #[test]
+    fn process_termination_releases_memory_regions() {
+        let mut nt = NtCore::new();
+        let launch = nt.launch_process("setup.exe", 0x1000);
+
+        nt.alloc_memory(launch.pid, 4096, MemoryProtection::ReadWrite, None)
+            .expect("allocation should succeed");
+        assert_eq!(nt.snapshot().memory_region_count, 1);
+
+        nt.terminate_process(launch.pid, 9)
+            .expect("process terminate should succeed");
+        assert_eq!(nt.snapshot().memory_region_count, 0);
+
+        let err = nt
+            .alloc_memory(launch.pid, 4096, MemoryProtection::ReadWrite, None)
+            .expect_err("terminated process should reject new memory alloc");
         assert_eq!(err, NtError::ProcessTerminated(launch.pid));
     }
 }

@@ -1,6 +1,6 @@
 use runtime_core::{
-    ApiStatus, PeImportSymbol, ProcessState, RuntimeCore, ThreadState, load_pe_image,
-    parse_pe_metadata,
+    ApiStatus, MemoryProtection, PeImportSymbol, ProcessState, RuntimeCore, STILL_ACTIVE,
+    ThreadState, Win32Call, Win32CallResult, load_pe_image, parse_pe_metadata,
 };
 
 fn pe_with_imports() -> Vec<u8> {
@@ -310,4 +310,111 @@ fn runtime_nt_core_process_thread_flow() {
     assert_eq!(snapshot.waiting_threads, 0);
     assert_eq!(snapshot.terminated_threads, 2);
     assert_eq!(snapshot.handle_count, 3);
+}
+
+#[test]
+fn runtime_simulated_win32_calls_cover_process_thread_and_memory() {
+    let mut core = RuntimeCore::new();
+    core.register_phase8_kernel32_apis();
+
+    let create = core
+        .simulate_win32_call(Win32Call::CreateProcess {
+            image_name: "office_setup.exe".to_string(),
+            entry_point_rva: 0x1400,
+        })
+        .expect("create process call should succeed");
+
+    let Win32CallResult::Process(launch) = create else {
+        panic!("expected process launch");
+    };
+
+    for api in [
+        "kernel32.CreateProcessW",
+        "kernel32.VirtualAlloc",
+        "kernel32.WriteProcessMemory",
+        "kernel32.ReadProcessMemory",
+        "kernel32.GetExitCodeProcess",
+        "kernel32.CloseHandle",
+    ] {
+        let decision = core.dispatch_api(api).expect("api must be implemented");
+        assert_eq!(decision.status, ApiStatus::Implemented);
+    }
+
+    let alloc = core
+        .simulate_win32_call(Win32Call::VirtualAlloc {
+            process_handle: launch.process_handle,
+            size: 4097,
+            protection: MemoryProtection::ReadWrite,
+            label: Some("c2r-bootstrap".to_string()),
+        })
+        .expect("virtual alloc should succeed");
+    let Win32CallResult::MemoryRegion { base, size } = alloc else {
+        panic!("expected memory region");
+    };
+    assert_eq!(size, 0x2000);
+
+    let write = core
+        .simulate_win32_call(Win32Call::WriteProcessMemory {
+            process_handle: launch.process_handle,
+            address: base + 32,
+            data: b"HELLO".to_vec(),
+        })
+        .expect("write process memory should succeed");
+    assert_eq!(write, Win32CallResult::Size(5));
+
+    let read = core
+        .simulate_win32_call(Win32Call::ReadProcessMemory {
+            process_handle: launch.process_handle,
+            address: base + 32,
+            size: 5,
+        })
+        .expect("read process memory should succeed");
+    assert_eq!(read, Win32CallResult::Bytes(b"HELLO".to_vec()));
+
+    let thread = core
+        .simulate_win32_call(Win32Call::CreateThread {
+            process_handle: launch.process_handle,
+            start_rva: 0x2800,
+        })
+        .expect("create thread should succeed");
+    let Win32CallResult::Thread(worker) = thread else {
+        panic!("expected thread launch");
+    };
+
+    let exit_running = core
+        .simulate_win32_call(Win32Call::GetExitCodeProcess {
+            process_handle: launch.process_handle,
+        })
+        .expect("get exit code should succeed");
+    assert_eq!(exit_running, Win32CallResult::ExitCode(STILL_ACTIVE));
+
+    core.simulate_win32_call(Win32Call::TerminateProcess {
+        process_handle: launch.process_handle,
+        exit_code: 55,
+    })
+    .expect("terminate process should succeed");
+
+    let exit_done = core
+        .simulate_win32_call(Win32Call::GetExitCodeProcess {
+            process_handle: launch.process_handle,
+        })
+        .expect("get exit code should succeed");
+    assert_eq!(exit_done, Win32CallResult::ExitCode(55));
+
+    core.simulate_win32_call(Win32Call::CloseHandle {
+        handle: launch.process_handle,
+    })
+    .expect("close process handle should succeed");
+    core.simulate_win32_call(Win32Call::CloseHandle {
+        handle: worker.thread_handle,
+    })
+    .expect("close worker handle should succeed");
+
+    let invalid = core
+        .simulate_win32_call(Win32Call::CreateThread {
+            process_handle: launch.process_handle,
+            start_rva: 0x3000,
+        })
+        .expect_err("closed process handle cannot be reused");
+    assert_eq!(invalid.to_string(), "invalid process handle: 0x00000100");
 }

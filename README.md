@@ -17,11 +17,11 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 7)
+## Current scope (Phase 8)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
-3. Native runtime core prototype in Rust (PE loader + section mapping + import/export parser + relocations + API dispatcher + mini linker + NT process/thread primitives).
+3. Native runtime core prototype in Rust (PE loader + section mapping + import/export parser + relocations + API dispatcher + mini linker + NT process/thread primitives + memory/Win32 simulation).
 
 Core runtime capabilities in this phase:
 1. Parse execution traces.
@@ -40,6 +40,8 @@ Core runtime capabilities in this phase:
 14. Launch synthetic runtime processes with primary thread + handles.
 15. Manage thread lifecycle transitions (running/waiting/resume/exit).
 16. Cascade process termination to owned threads with state snapshots.
+17. Manage virtual memory regions (alloc/protect/read/write/free) per synthetic process.
+18. Simulate first kernel32 calls (CreateProcess/CreateThread/VirtualAlloc/VirtualProtect/ReadWriteProcessMemory/GetExitCodeProcess/TerminateProcess/CloseHandle).
 
 ## Quick start
 ```bash

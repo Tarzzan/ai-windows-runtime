@@ -2,10 +2,11 @@ use std::collections::{HashMap, HashSet};
 
 use crate::dispatcher::{ApiDispatcher, DispatchDecision, DispatchError};
 use crate::ntcore::{
-    Handle, NtCore, NtError, NtSnapshot, ProcessId, ProcessLaunch, ProcessRecord, ThreadId,
-    ThreadLaunch, ThreadRecord,
+    Handle, MemoryProtection, MemoryRegion, NtCore, NtError, NtSnapshot, ProcessId, ProcessLaunch,
+    ProcessRecord, ProcessState, ThreadId, ThreadLaunch, ThreadRecord, VirtualAddress,
 };
 use crate::pe::{LoadedPeImage, PeError, PeExport, PeImportSymbol, PeMetadata, load_pe_image};
+use crate::win32::{STILL_ACTIVE, Win32Call, Win32CallResult};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DllImportReport {
@@ -151,6 +152,162 @@ impl RuntimeCore {
 
     pub fn nt_snapshot(&self) -> NtSnapshot {
         self.nt_core.snapshot()
+    }
+
+    pub fn alloc_memory(
+        &mut self,
+        pid: ProcessId,
+        size: usize,
+        protection: MemoryProtection,
+        label: Option<&str>,
+    ) -> Result<MemoryRegion, NtError> {
+        self.nt_core.alloc_memory(pid, size, protection, label)
+    }
+
+    pub fn free_memory(&mut self, pid: ProcessId, base: VirtualAddress) -> Result<(), NtError> {
+        self.nt_core.free_memory(pid, base)
+    }
+
+    pub fn set_memory_protection(
+        &mut self,
+        pid: ProcessId,
+        base: VirtualAddress,
+        protection: MemoryProtection,
+    ) -> Result<MemoryRegion, NtError> {
+        self.nt_core.set_memory_protection(pid, base, protection)
+    }
+
+    pub fn write_memory(
+        &mut self,
+        pid: ProcessId,
+        address: VirtualAddress,
+        data: &[u8],
+    ) -> Result<usize, NtError> {
+        self.nt_core.write_memory(pid, address, data)
+    }
+
+    pub fn read_memory(
+        &self,
+        pid: ProcessId,
+        address: VirtualAddress,
+        size: usize,
+    ) -> Result<Vec<u8>, NtError> {
+        self.nt_core.read_memory(pid, address, size)
+    }
+
+    pub fn close_handle(&mut self, handle: Handle) -> Result<(), NtError> {
+        self.nt_core.close_handle(handle)
+    }
+
+    pub fn process_exit_code(&self, pid: ProcessId) -> Result<u32, NtError> {
+        let process = self.process(pid).ok_or(NtError::UnknownProcess(pid))?;
+        Ok(match process.state {
+            ProcessState::Running => STILL_ACTIVE,
+            ProcessState::Terminated { exit_code } => exit_code,
+        })
+    }
+
+    pub fn register_phase8_kernel32_apis(&mut self) {
+        for api in [
+            "kernel32.CreateProcessW",
+            "kernel32.CreateThread",
+            "kernel32.VirtualAlloc",
+            "kernel32.VirtualProtect",
+            "kernel32.VirtualFree",
+            "kernel32.WriteProcessMemory",
+            "kernel32.ReadProcessMemory",
+            "kernel32.GetExitCodeProcess",
+            "kernel32.TerminateProcess",
+            "kernel32.CloseHandle",
+        ] {
+            self.dispatcher_mut().register_implemented(api);
+        }
+    }
+
+    pub fn simulate_win32_call(&mut self, call: Win32Call) -> Result<Win32CallResult, NtError> {
+        match call {
+            Win32Call::CreateProcess {
+                image_name,
+                entry_point_rva,
+            } => Ok(Win32CallResult::Process(
+                self.launch_process(&image_name, entry_point_rva),
+            )),
+            Win32Call::CreateThread {
+                process_handle,
+                start_rva,
+            } => {
+                let pid = self.process_id_from_handle(process_handle)?;
+                Ok(Win32CallResult::Thread(self.spawn_thread(pid, start_rva)?))
+            }
+            Win32Call::VirtualAlloc {
+                process_handle,
+                size,
+                protection,
+                label,
+            } => {
+                let pid = self.process_id_from_handle(process_handle)?;
+                let region = self.alloc_memory(pid, size, protection, label.as_deref())?;
+                Ok(Win32CallResult::MemoryRegion {
+                    base: region.base,
+                    size: region.size,
+                })
+            }
+            Win32Call::VirtualProtect {
+                process_handle,
+                base,
+                protection,
+            } => {
+                let pid = self.process_id_from_handle(process_handle)?;
+                let region = self.set_memory_protection(pid, base, protection)?;
+                Ok(Win32CallResult::MemoryRegion {
+                    base: region.base,
+                    size: region.size,
+                })
+            }
+            Win32Call::VirtualFree {
+                process_handle,
+                base,
+            } => {
+                let pid = self.process_id_from_handle(process_handle)?;
+                self.free_memory(pid, base)?;
+                Ok(Win32CallResult::None)
+            }
+            Win32Call::WriteProcessMemory {
+                process_handle,
+                address,
+                data,
+            } => {
+                let pid = self.process_id_from_handle(process_handle)?;
+                let written = self.write_memory(pid, address, &data)?;
+                Ok(Win32CallResult::Size(written))
+            }
+            Win32Call::ReadProcessMemory {
+                process_handle,
+                address,
+                size,
+            } => {
+                let pid = self.process_id_from_handle(process_handle)?;
+                Ok(Win32CallResult::Bytes(
+                    self.read_memory(pid, address, size)?,
+                ))
+            }
+            Win32Call::TerminateProcess {
+                process_handle,
+                exit_code,
+            } => {
+                let pid = self.process_id_from_handle(process_handle)?;
+                self.terminate_process(pid, exit_code)?;
+                Ok(Win32CallResult::None)
+            }
+            Win32Call::GetExitCodeProcess { process_handle } => {
+                let pid = self.process_id_from_handle(process_handle)?;
+                Ok(Win32CallResult::ExitCode(self.process_exit_code(pid)?))
+            }
+            Win32Call::CloseHandle { handle } => {
+                self.close_handle(handle)?;
+                Ok(Win32CallResult::None)
+            }
+        }
     }
 
     pub fn load_pe_image(&self, bytes: &[u8]) -> Result<LoadReport, PeError> {
@@ -338,8 +495,9 @@ impl RuntimeCore {
 
 #[cfg(test)]
 mod tests {
-    use crate::ntcore::{ProcessState, ThreadState};
+    use crate::ntcore::{MemoryProtection, ProcessState, ThreadState};
     use crate::runtime::RuntimeCore;
+    use crate::win32::{STILL_ACTIVE, Win32Call, Win32CallResult};
 
     fn minimal_export_pe() -> Vec<u8> {
         let mut b = vec![0u8; 0x800];
@@ -444,5 +602,57 @@ mod tests {
                 .state,
             ThreadState::Terminated { exit_code: 17 }
         );
+    }
+
+    #[test]
+    fn runtime_simulates_first_kernel32_calls() {
+        let mut core = RuntimeCore::new();
+
+        let process = core
+            .simulate_win32_call(Win32Call::CreateProcess {
+                image_name: "installer.exe".to_string(),
+                entry_point_rva: 0x1200,
+            })
+            .expect("create process should succeed");
+        let Win32CallResult::Process(launch) = process else {
+            panic!("expected process launch result");
+        };
+
+        let alloc = core
+            .simulate_win32_call(Win32Call::VirtualAlloc {
+                process_handle: launch.process_handle,
+                size: 128,
+                protection: MemoryProtection::ReadWrite,
+                label: Some("bootstrap-buffer".to_string()),
+            })
+            .expect("virtual alloc should succeed");
+        let Win32CallResult::MemoryRegion { base, .. } = alloc else {
+            panic!("expected memory region result");
+        };
+
+        let write = core
+            .simulate_win32_call(Win32Call::WriteProcessMemory {
+                process_handle: launch.process_handle,
+                address: base,
+                data: b"PING".to_vec(),
+            })
+            .expect("write process memory should succeed");
+        assert_eq!(write, Win32CallResult::Size(4));
+
+        let read = core
+            .simulate_win32_call(Win32Call::ReadProcessMemory {
+                process_handle: launch.process_handle,
+                address: base,
+                size: 4,
+            })
+            .expect("read process memory should succeed");
+        assert_eq!(read, Win32CallResult::Bytes(b"PING".to_vec()));
+
+        let code = core
+            .simulate_win32_call(Win32Call::GetExitCodeProcess {
+                process_handle: launch.process_handle,
+            })
+            .expect("get exit code should succeed");
+        assert_eq!(code, Win32CallResult::ExitCode(STILL_ACTIVE));
     }
 }
