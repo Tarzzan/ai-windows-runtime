@@ -475,6 +475,63 @@ fi
   --schema schemas/launch-readiness-report.schema.json \
   --report "${VALIDATION_DIR}/launch-readiness-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.release_packet.cli \
+  --launch-readiness-report "${OUT_DIR}/launch-readiness-report.json" \
+  --release-bundle-manifest "${OUT_DIR}/release-bundle-manifest.json" \
+  --stakeholder-update-report "${OUT_DIR}/stakeholder-update-report.json" \
+  --output "${OUT_DIR}/release-packet-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/release-packet-report.json" \
+  --schema schemas/release-packet-report.schema.json \
+  --report "${VALIDATION_DIR}/release-packet-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.ops_runbook.cli \
+  --rollout-guardrails-report "${OUT_DIR}/rollout-guardrails-report.json" \
+  --validation-command-pack "${OUT_DIR}/validation-command-pack.json" \
+  --handoff-checklist-report "${OUT_DIR}/handoff-checklist-report.json" \
+  --output "${OUT_DIR}/ops-runbook-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/ops-runbook-report.json" \
+  --schema schemas/ops-runbook-report.schema.json \
+  --report "${VALIDATION_DIR}/ops-runbook-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.dependency_watch.cli \
+  --productization-readiness "${OUT_DIR}/productization-readiness.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --execution-report "${OUT_DIR}/execution-report.json" \
+  --output "${OUT_DIR}/dependency-watch-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/dependency-watch-report.json" \
+  --schema schemas/dependency-watch-report.schema.json \
+  --report "${VALIDATION_DIR}/dependency-watch-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.readiness_delta.cli \
+  --launch-readiness-report "${OUT_DIR}/launch-readiness-report.json" \
+  --delivery-cockpit-report "${OUT_DIR}/delivery-cockpit-report.json" \
+  --release-gate-history-report "${OUT_DIR}/release-gate-history-report.json" \
+  --output "${OUT_DIR}/readiness-delta-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/readiness-delta-report.json" \
+  --schema schemas/readiness-delta-report.schema.json \
+  --report "${VALIDATION_DIR}/readiness-delta-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.delivery_signoff.cli \
+  --release-packet-report "${OUT_DIR}/release-packet-report.json" \
+  --ops-runbook-report "${OUT_DIR}/ops-runbook-report.json" \
+  --dependency-watch-report "${OUT_DIR}/dependency-watch-report.json" \
+  --readiness-delta-report "${OUT_DIR}/readiness-delta-report.json" \
+  --launch-readiness-report "${OUT_DIR}/launch-readiness-report.json" \
+  --output "${OUT_DIR}/delivery-signoff-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/delivery-signoff-report.json" \
+  --schema schemas/delivery-signoff-report.schema.json \
+  --report "${VALIDATION_DIR}/delivery-signoff-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
   --compatibility-matrix "${OUT_DIR}/compatibility-matrix.json" \
@@ -519,6 +576,11 @@ fi
     "${OUT_DIR}/handoff-checklist-report.json" \
     "${OUT_DIR}/validation-coverage-report.json" \
     "${OUT_DIR}/launch-readiness-report.json" \
+    "${OUT_DIR}/release-packet-report.json" \
+    "${OUT_DIR}/ops-runbook-report.json" \
+    "${OUT_DIR}/dependency-watch-report.json" \
+    "${OUT_DIR}/readiness-delta-report.json" \
+    "${OUT_DIR}/delivery-signoff-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \

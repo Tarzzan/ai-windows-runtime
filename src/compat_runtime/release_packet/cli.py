@@ -1,0 +1,56 @@
+from __future__ import annotations
+
+import argparse
+from datetime import datetime, timezone
+
+from compat_runtime.common.io import read_json, write_json
+
+
+def build_release_packet_report(
+    *, launch_readiness_report: dict, release_bundle_manifest: dict, stakeholder_update_report: dict
+) -> dict:
+    launch_status = str(launch_readiness_report.get("status", "blocked"))
+    launch_summary = launch_readiness_report.get("summary", {})
+    files = release_bundle_manifest.get("files", [])
+    missing = release_bundle_manifest.get("missing", [])
+    stakeholder_summary = stakeholder_update_report.get("summary", {})
+
+    packet_ready = launch_status in {"ready", "limited"} and len(missing) == 0
+
+    return {
+        "artifact_version": "1.0",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "summary": {
+            "packet_ready": packet_ready,
+            "launch_status": launch_status,
+            "release_decision": str(launch_summary.get("release_decision", "no-go")),
+            "bundle_files": len(files),
+            "bundle_missing": len(missing),
+            "stakeholder_delivery_status": str(stakeholder_summary.get("delivery_status", "at_risk")),
+        },
+        "missing": missing,
+        "actions": [
+            "Finalize release packet only when bundle_missing is zero.",
+            "Keep stakeholder update attached to packet handoff.",
+        ],
+    }
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Build release packet report")
+    parser.add_argument("--launch-readiness-report", required=True, help="Launch readiness report path")
+    parser.add_argument("--release-bundle-manifest", required=True, help="Release bundle manifest path")
+    parser.add_argument("--stakeholder-update-report", required=True, help="Stakeholder update report path")
+    parser.add_argument("--output", required=True, help="Output path")
+    args = parser.parse_args()
+
+    artifact = build_release_packet_report(
+        launch_readiness_report=read_json(args.launch_readiness_report),
+        release_bundle_manifest=read_json(args.release_bundle_manifest),
+        stakeholder_update_report=read_json(args.stakeholder_update_report),
+    )
+    write_json(args.output, artifact)
+
+
+if __name__ == "__main__":
+    main()

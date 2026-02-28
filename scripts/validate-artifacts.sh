@@ -312,6 +312,41 @@ if [[ -f "${OUT_DIR}/launch-readiness-report.json" ]]; then
     --report "${REPORT_DIR}/launch-readiness-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/release-packet-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/release-packet-report.json" \
+    --schema schemas/release-packet-report.schema.json \
+    --report "${REPORT_DIR}/release-packet-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/ops-runbook-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/ops-runbook-report.json" \
+    --schema schemas/ops-runbook-report.schema.json \
+    --report "${REPORT_DIR}/ops-runbook-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/dependency-watch-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/dependency-watch-report.json" \
+    --schema schemas/dependency-watch-report.schema.json \
+    --report "${REPORT_DIR}/dependency-watch-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/readiness-delta-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/readiness-delta-report.json" \
+    --schema schemas/readiness-delta-report.schema.json \
+    --report "${REPORT_DIR}/readiness-delta-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/delivery-signoff-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/delivery-signoff-report.json" \
+    --schema schemas/delivery-signoff-report.schema.json \
+    --report "${REPORT_DIR}/delivery-signoff-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/repro-package.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/repro-package.json" \

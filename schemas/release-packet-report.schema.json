@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Packet Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "missing", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "packet_ready",
+        "launch_status",
+        "release_decision",
+        "bundle_files",
+        "bundle_missing",
+        "stakeholder_delivery_status"
+      ],
+      "properties": {
+        "packet_ready": {"type": "boolean"},
+        "launch_status": {"type": "string"},
+        "release_decision": {"type": "string"},
+        "bundle_files": {"type": "integer"},
+        "bundle_missing": {"type": "integer"},
+        "stakeholder_delivery_status": {"type": "string"}
+      }
+    },
+    "missing": {"type": "array", "items": {}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

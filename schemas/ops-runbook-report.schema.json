@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ops Runbook Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "runbook", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "runbook_readiness",
+        "stop_conditions",
+        "safeguards",
+        "commands",
+        "handoff_failed_checks"
+      ],
+      "properties": {
+        "runbook_readiness": {"type": "string"},
+        "stop_conditions": {"type": "integer"},
+        "safeguards": {"type": "integer"},
+        "commands": {"type": "integer"},
+        "handoff_failed_checks": {"type": "integer"}
+      }
+    },
+    "runbook": {"type": "object"},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

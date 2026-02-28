@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Delivery Signoff Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "status", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "status": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "launch_status",
+        "packet_ready",
+        "runbook_readiness",
+        "dependency_blockers",
+        "readiness_score_delta"
+      ],
+      "properties": {
+        "launch_status": {"type": "string"},
+        "packet_ready": {"type": "boolean"},
+        "runbook_readiness": {"type": "string"},
+        "dependency_blockers": {"type": "integer"},
+        "readiness_score_delta": {"type": "integer"}
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

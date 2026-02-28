@@ -1,0 +1,1 @@
+"""Readiness delta report module."""

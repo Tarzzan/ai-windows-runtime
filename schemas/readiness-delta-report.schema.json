@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Readiness Delta Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "launch_status",
+        "cockpit_status",
+        "trajectory",
+        "readiness_score_delta",
+        "release_decision"
+      ],
+      "properties": {
+        "launch_status": {"type": "string"},
+        "cockpit_status": {"type": "string"},
+        "trajectory": {"type": "string"},
+        "readiness_score_delta": {"type": "integer"},
+        "release_decision": {"type": "string"}
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

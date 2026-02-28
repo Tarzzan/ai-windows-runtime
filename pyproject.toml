@@ -53,6 +53,11 @@ compat-stakeholder-update = "compat_runtime.stakeholder_update.cli:main"
 compat-handoff-checklist = "compat_runtime.handoff_checklist.cli:main"
 compat-validation-coverage = "compat_runtime.validation_coverage.cli:main"
 compat-launch-readiness = "compat_runtime.launch_readiness.cli:main"
+compat-release-packet = "compat_runtime.release_packet.cli:main"
+compat-ops-runbook = "compat_runtime.ops_runbook.cli:main"
+compat-dependency-watch = "compat_runtime.dependency_watch.cli:main"
+compat-readiness-delta = "compat_runtime.readiness_delta.cli:main"
+compat-delivery-signoff = "compat_runtime.delivery_signoff.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
