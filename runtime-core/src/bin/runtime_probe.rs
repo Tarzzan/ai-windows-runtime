@@ -2,7 +2,7 @@ use std::env;
 use std::fs;
 use std::process::ExitCode;
 
-use runtime_core::RuntimeCore;
+use runtime_core::load_pe_image;
 
 fn main() -> ExitCode {
     let path = match env::args().nth(1) {
@@ -21,14 +21,17 @@ fn main() -> ExitCode {
         }
     };
 
-    let core = RuntimeCore::new();
-    match core.load_pe_image(&bytes) {
-        Ok(report) => {
+    match load_pe_image(&bytes) {
+        Ok(image) => {
             println!("PE probe success");
-            println!("machine: 0x{:04x}", report.metadata.machine);
-            println!("sections: {}", report.metadata.number_of_sections);
-            println!("entry_point_rva: 0x{:08x}", report.metadata.entry_point_rva);
-            println!("size_of_image: {}", report.metadata.size_of_image);
+            println!("machine: 0x{:04x}", image.metadata.machine);
+            println!("sections: {}", image.sections.len());
+            println!("imports: {}", image.imports.len());
+            println!("entry_point_rva: 0x{:08x}", image.metadata.entry_point_rva);
+            println!("size_of_image: {}", image.metadata.size_of_image);
+            for import in &image.imports {
+                println!("import dll: {}", import.dll_name);
+            }
             ExitCode::SUCCESS
         }
         Err(err) => {

@@ -49,8 +49,7 @@ impl ApiDispatcher {
     }
 
     pub fn register_implemented(&mut self, api: &str) {
-        self.registry
-            .insert(api.to_string(), ApiSpec::Implemented);
+        self.registry.insert(api.to_string(), ApiSpec::Implemented);
     }
 
     pub fn register_stub(&mut self, api: &str, reason: &str) {
@@ -105,7 +104,10 @@ mod tests {
         d.register_stub("winhttp.WinHttpOpen", "placeholder during bootstrap");
         let decision = d.resolve("winhttp.WinHttpOpen");
         assert_eq!(decision.status, ApiStatus::Stubbed);
-        assert_eq!(decision.detail.as_deref(), Some("placeholder during bootstrap"));
+        assert_eq!(
+            decision.detail.as_deref(),
+            Some("placeholder during bootstrap")
+        );
     }
 
     #[test]
