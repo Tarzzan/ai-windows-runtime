@@ -60,6 +60,13 @@ if [[ -f "${OUT_DIR}/test-impact-report.json" ]]; then
     --report "${REPORT_DIR}/test-impact-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/rollback-hints.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/rollback-hints.json" \
+    --schema schemas/rollback-hints.schema.json \
+    --report "${REPORT_DIR}/rollback-hints-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/execution-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/execution-report.json" \

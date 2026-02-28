@@ -65,6 +65,12 @@ fi
   --proposal-provenance "${OUT_DIR}/proposal-provenance.json" \
   --output "${OUT_DIR}/test-impact-report.json"
 
+"${PYTHON_BIN}" -m compat_runtime.rollback_hints.cli \
+  --patch-plan "${OUT_DIR}/patch-plan.json" \
+  --gaps "${OUT_DIR}/gaps.json" \
+  --test-impact "${OUT_DIR}/test-impact-report.json" \
+  --output "${OUT_DIR}/rollback-hints.json"
+
 scripts/validate-artifacts.sh "$OUT_DIR"
 
 "${PYTHON_BIN}" -m compat_runtime.reporting.cli \
@@ -142,6 +148,7 @@ fi
     "${OUT_DIR}/runtime-patch-plan.json" \
     "${OUT_DIR}/root-cause-summary.json" \
     "${OUT_DIR}/test-impact-report.json" \
+    "${OUT_DIR}/rollback-hints.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
@@ -187,6 +194,7 @@ fi
     "${OUT_DIR}/runtime-patch-plan.json" \
     "${OUT_DIR}/root-cause-summary.json" \
     "${OUT_DIR}/test-impact-report.json" \
+    "${OUT_DIR}/rollback-hints.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \

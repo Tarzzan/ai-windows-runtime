@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Rollback Hints Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "hints", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "total_hints",
+        "full_rollbacks",
+        "partial_rollbacks",
+        "minimal_rollbacks",
+        "highest_priority",
+        "suggested_suites"
+      ],
+      "properties": {
+        "total_hints": {"type": "integer"},
+        "full_rollbacks": {"type": "integer"},
+        "partial_rollbacks": {"type": "integer"},
+        "minimal_rollbacks": {"type": "integer"},
+        "highest_priority": {"type": "string"},
+        "suggested_suites": {"type": "integer"}
+      }
+    },
+    "hints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "gap_id",
+          "priority",
+          "risk",
+          "category",
+          "rollback_level",
+          "trigger_signals",
+          "prechecks",
+          "rollback_steps",
+          "validation_commands"
+        ],
+        "properties": {
+          "gap_id": {"type": "string"},
+          "priority": {"type": "string"},
+          "risk": {"type": "string"},
+          "category": {"type": "string"},
+          "rollback_level": {"type": "string"},
+          "trigger_signals": {"type": "array", "items": {"type": "string"}},
+          "prechecks": {"type": "array", "items": {"type": "string"}},
+          "rollback_steps": {"type": "array", "items": {"type": "string"}},
+          "validation_commands": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}
+
