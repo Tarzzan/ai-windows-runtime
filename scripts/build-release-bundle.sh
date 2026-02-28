@@ -199,6 +199,18 @@ fi
   --schema schemas/quality-gate-report.schema.json \
   --report "${VALIDATION_DIR}/quality-gate-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.release_decision.cli \
+  --quality-gate-report "${OUT_DIR}/quality-gate-report.json" \
+  --alpha-release-checklist "${OUT_DIR}/alpha-release-checklist.json" \
+  --compatibility-matrix "${OUT_DIR}/compatibility-matrix.json" \
+  --productization-readiness "${OUT_DIR}/productization-readiness.json" \
+  --output "${OUT_DIR}/release-decision-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/release-decision-report.json" \
+  --schema schemas/release-decision-report.schema.json \
+  --report "${VALIDATION_DIR}/release-decision-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
   --compatibility-matrix "${OUT_DIR}/compatibility-matrix.json" \
@@ -222,6 +234,7 @@ fi
     "${OUT_DIR}/proposal-risk-report.json" \
     "${OUT_DIR}/proposal-review-checklist.json" \
     "${OUT_DIR}/quality-gate-report.json" \
+    "${OUT_DIR}/release-decision-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
@@ -245,6 +258,7 @@ cp "${OUT_DIR}/alpha-release-checklist.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-bundle-manifest.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/productization-readiness.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/quality-gate-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/release-decision-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/repro-package.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/root-cause-summary.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/patch-plan-diff.json" "${BUNDLE_DIR}/"

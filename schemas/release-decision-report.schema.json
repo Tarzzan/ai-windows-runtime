@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Decision Report Artifact",
+  "type": "object",
+  "required": [
+    "artifact_version",
+    "generated_at",
+    "decision",
+    "release_ready",
+    "summary",
+    "checks",
+    "actions"
+  ],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "decision": {"type": "string"},
+    "release_ready": {"type": "boolean"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "total_checks",
+        "pass_checks",
+        "warn_checks",
+        "fail_checks",
+        "blocking_failures",
+        "total_warnings"
+      ],
+      "properties": {
+        "total_checks": {"type": "integer"},
+        "pass_checks": {"type": "integer"},
+        "warn_checks": {"type": "integer"},
+        "fail_checks": {"type": "integer"},
+        "blocking_failures": {"type": "integer"},
+        "total_warnings": {"type": "integer"}
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "required", "status", "evidence", "detail"],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "required": {"type": "boolean"},
+          "status": {"type": "string"},
+          "evidence": {"type": "string"},
+          "detail": {"type": "string"}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}
