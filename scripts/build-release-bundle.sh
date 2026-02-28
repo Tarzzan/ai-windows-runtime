@@ -28,6 +28,16 @@ fi
   --schema schemas/patch-plan-diff.schema.json \
   --report "${VALIDATION_DIR}/patch-plan-diff-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.patch_template_library.cli \
+  --gaps "${OUT_DIR}/gaps.json" \
+  --patch-plan "${OUT_DIR}/patch-plan.json" \
+  --output "${OUT_DIR}/patch-template-catalog.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/patch-template-catalog.json" \
+  --schema schemas/patch-template-catalog.schema.json \
+  --report "${VALIDATION_DIR}/patch-template-catalog-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.proposal_provenance.cli \
   --patch-plan "${OUT_DIR}/patch-plan.json" \
   --gaps "${OUT_DIR}/gaps.json" \
@@ -97,6 +107,7 @@ fi
     "${OUT_DIR}/trace.json" \
     "${OUT_DIR}/gaps.json" \
     "${OUT_DIR}/patch-plan.json" \
+    "${OUT_DIR}/patch-template-catalog.json" \
     "${OUT_DIR}/proposal-provenance.json" \
     "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
@@ -144,6 +155,7 @@ fi
     "${OUT_DIR}/trace.json" \
     "${OUT_DIR}/gaps.json" \
     "${OUT_DIR}/patch-plan.json" \
+    "${OUT_DIR}/patch-template-catalog.json" \
     "${OUT_DIR}/proposal-provenance.json" \
     "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
@@ -182,5 +194,6 @@ cp "${OUT_DIR}/proposal-provenance.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/test-impact-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/rollback-hints.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/proposal-review-checklist.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/patch-template-catalog.json" "${BUNDLE_DIR}/"
 
 echo "release bundle: ok"

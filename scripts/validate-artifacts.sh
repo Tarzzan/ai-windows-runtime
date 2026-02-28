@@ -25,6 +25,13 @@ mkdir -p "$REPORT_DIR"
   --schema schemas/patch-plan.schema.json \
   --report "${REPORT_DIR}/patch-plan-validation.json"
 
+if [[ -f "${OUT_DIR}/patch-template-catalog.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/patch-template-catalog.json" \
+    --schema schemas/patch-template-catalog.schema.json \
+    --report "${REPORT_DIR}/patch-template-catalog-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/patch-plan-diff.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/patch-plan-diff.json" \

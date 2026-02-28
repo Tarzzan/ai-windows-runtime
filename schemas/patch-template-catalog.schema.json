@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Patch Template Catalog Artifact",
+  "type": "object",
+  "required": [
+    "artifact_version",
+    "generated_at",
+    "summary",
+    "unmapped_categories",
+    "templates",
+    "actions"
+  ],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "templates_total",
+        "used_templates",
+        "mapped_gaps",
+        "unmapped_gaps",
+        "proposals_linked"
+      ],
+      "properties": {
+        "templates_total": {"type": "integer"},
+        "used_templates": {"type": "integer"},
+        "mapped_gaps": {"type": "integer"},
+        "unmapped_gaps": {"type": "integer"},
+        "proposals_linked": {"type": "integer"}
+      }
+    },
+    "unmapped_categories": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "templates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "default_priority",
+          "default_risk",
+          "strategy",
+          "validation_focus",
+          "usage"
+        ],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "default_priority": {"type": "string"},
+          "default_risk": {"type": "string"},
+          "strategy": {"type": "string"},
+          "validation_focus": {"type": "string"},
+          "usage": {
+            "type": "object",
+            "required": ["gap_count", "categories", "priority_distribution", "example_gap_ids"],
+            "properties": {
+              "gap_count": {"type": "integer"},
+              "categories": {"type": "array", "items": {"type": "string"}},
+              "priority_distribution": {
+                "type": "object",
+                "required": ["P0", "P1", "P2", "other"],
+                "properties": {
+                  "P0": {"type": "integer"},
+                  "P1": {"type": "integer"},
+                  "P2": {"type": "integer"},
+                  "other": {"type": "integer"}
+                }
+              },
+              "example_gap_ids": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}
+

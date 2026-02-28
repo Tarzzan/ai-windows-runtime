@@ -24,6 +24,11 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
   --gaps "${OUT_DIR}/gaps.json" \
   --output "${OUT_DIR}/patch-plan.json"
 
+"${PYTHON_BIN}" -m compat_runtime.patch_template_library.cli \
+  --gaps "${OUT_DIR}/gaps.json" \
+  --patch-plan "${OUT_DIR}/patch-plan.json" \
+  --output "${OUT_DIR}/patch-template-catalog.json"
+
 "${PYTHON_BIN}" -m compat_runtime.proposal_provenance.cli \
   --patch-plan "${OUT_DIR}/patch-plan.json" \
   --gaps "${OUT_DIR}/gaps.json" \
@@ -149,6 +154,7 @@ fi
     "${OUT_DIR}/trace.json" \
     "${OUT_DIR}/gaps.json" \
     "${OUT_DIR}/patch-plan.json" \
+    "${OUT_DIR}/patch-template-catalog.json" \
     "${OUT_DIR}/proposal-provenance.json" \
     "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
@@ -196,6 +202,7 @@ fi
     "${OUT_DIR}/trace.json" \
     "${OUT_DIR}/gaps.json" \
     "${OUT_DIR}/patch-plan.json" \
+    "${OUT_DIR}/patch-template-catalog.json" \
     "${OUT_DIR}/proposal-provenance.json" \
     "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \

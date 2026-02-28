@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 24)
+## Current scope (Phase 25)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -83,6 +83,9 @@ Core runtime capabilities in this phase:
 56. Generate proposal review checklist artifacts for engineering approval workflows.
 57. Gate approval readiness using provenance, diff, rollback, and test-impact evidence.
 58. Validate proposal review checklist artifacts automatically in pipeline and release bundle gates.
+59. Generate patch template catalog artifacts with template metadata and usage analytics.
+60. Map gap categories to reusable patch templates with priority distribution tracking.
+61. Validate patch template catalog artifacts automatically in pipeline and release bundle gates.
 
 ## Quick start
 ```bash
@@ -127,6 +130,8 @@ scripts/build-rollback-hints.sh out
 # out/rollback-hints.json is generated and schema-validated
 scripts/build-proposal-review-checklist.sh out
 # out/proposal-review-checklist.json is generated and schema-validated
+scripts/build-patch-template-catalog.sh out
+# out/patch-template-catalog.json is generated and schema-validated
 scripts/build-repro-package.sh out
 # out/repro-package.json is generated and schema-validated
 pytest -q
