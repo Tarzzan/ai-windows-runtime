@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Incident Feedback Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "feedback", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["feedback_priority", "monitor_status", "p0_risks", "high_urgency_hooks"],
+      "properties": {
+        "feedback_priority": {"type": "string"},
+        "monitor_status": {"type": "string"},
+        "p0_risks": {"type": "integer"},
+        "high_urgency_hooks": {"type": "integer"}
+      }
+    },
+    "feedback": {"type": "array", "items": {"type": "object"}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

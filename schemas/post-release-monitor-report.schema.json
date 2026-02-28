@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Post Release Monitor Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "monitor_status",
+        "delivery_signoff_status",
+        "missing_hooks",
+        "high_priority_crash_signatures",
+        "runtime_events"
+      ],
+      "properties": {
+        "monitor_status": {"type": "string"},
+        "delivery_signoff_status": {"type": "string"},
+        "missing_hooks": {"type": "integer"},
+        "high_priority_crash_signatures": {"type": "integer"},
+        "runtime_events": {"type": "integer"}
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Next Cycle Bootstrap Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "status", "summary", "commands", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "status": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "signoff_status",
+        "feedback_priority",
+        "retrospective_trajectory",
+        "refreshed_items",
+        "bootstrap_commands"
+      ],
+      "properties": {
+        "signoff_status": {"type": "string"},
+        "feedback_priority": {"type": "string"},
+        "retrospective_trajectory": {"type": "string"},
+        "refreshed_items": {"type": "integer"},
+        "bootstrap_commands": {"type": "integer"}
+      }
+    },
+    "commands": {"type": "array", "items": {"type": "string"}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

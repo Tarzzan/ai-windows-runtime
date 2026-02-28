@@ -59,6 +59,11 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/dependency-watch-report.json" \
     "${OUT_DIR}/readiness-delta-report.json" \
     "${OUT_DIR}/delivery-signoff-report.json" \
+    "${OUT_DIR}/post-release-monitor-report.json" \
+    "${OUT_DIR}/incident-feedback-report.json" \
+    "${OUT_DIR}/backlog-refresh-report.json" \
+    "${OUT_DIR}/release-retrospective-report.json" \
+    "${OUT_DIR}/next-cycle-bootstrap-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \

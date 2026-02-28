@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 55)
+## Current scope (Phase 60)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -176,6 +176,21 @@ Core runtime capabilities in this phase:
 149. Generate delivery signoff artifact (`delivery-signoff-report.json`) from packet, runbook, dependency, and delta evidence.
 150. Classify final delivery status as `approved/conditional/blocked` using explicit gating rules.
 151. Validate delivery signoff artifacts automatically in pipeline, release bundle, and reproducible package flows.
+152. Generate post-release monitor artifact (`post-release-monitor-report.json`) from delivery signoff, runtime signals, and crash signatures.
+153. Classify post-release posture as `stable/watch/critical` for short-horizon operational supervision.
+154. Validate post-release monitor artifacts automatically in pipeline, release bundle, and reproducible package flows.
+155. Generate incident feedback artifact (`incident-feedback-report.json`) from post-release monitor, risk watchlist, and hook backlog signals.
+156. Prioritize incident feedback into `P0/P1/P2` for triage and corrective routing.
+157. Validate incident feedback artifacts automatically in pipeline, release bundle, and reproducible package flows.
+158. Generate backlog refresh artifact (`backlog-refresh-report.json`) from incident feedback, iteration plan, and remediation sprint context.
+159. Re-rank next-cycle backlog items based on blocking impact and feedback priority.
+160. Validate backlog refresh artifacts automatically in pipeline, release bundle, and reproducible package flows.
+161. Generate release retrospective artifact (`release-retrospective-report.json`) from signoff, readiness delta, and gate trajectory.
+162. Capture actionable lessons and recurrent failure patterns for governance improvement.
+163. Validate release retrospective artifacts automatically in pipeline, release bundle, and reproducible package flows.
+164. Generate next-cycle bootstrap artifact (`next-cycle-bootstrap-report.json`) from retrospective, refreshed backlog, and validation commands.
+165. Classify next-cycle startup posture as `ready/guarded/blocked` before iteration kickoff.
+166. Validate next-cycle bootstrap artifacts automatically in pipeline, release bundle, and reproducible package flows.
 
 ## Quick start
 ```bash
@@ -262,6 +277,16 @@ scripts/build-readiness-delta-report.sh out
 # out/readiness-delta-report.json is generated and schema-validated
 scripts/build-delivery-signoff-report.sh out
 # out/delivery-signoff-report.json is generated and schema-validated
+scripts/build-post-release-monitor-report.sh out
+# out/post-release-monitor-report.json is generated and schema-validated
+scripts/build-incident-feedback-report.sh out
+# out/incident-feedback-report.json is generated and schema-validated
+scripts/build-backlog-refresh-report.sh out
+# out/backlog-refresh-report.json is generated and schema-validated
+scripts/build-release-retrospective-report.sh out
+# out/release-retrospective-report.json is generated and schema-validated
+scripts/build-next-cycle-bootstrap-report.sh out
+# out/next-cycle-bootstrap-report.json is generated and schema-validated
 scripts/build-root-cause-summary.sh out
 # out/root-cause-summary.json is generated and schema-validated
 scripts/build-patch-plan-diff.sh out

@@ -347,6 +347,41 @@ if [[ -f "${OUT_DIR}/delivery-signoff-report.json" ]]; then
     --report "${REPORT_DIR}/delivery-signoff-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/post-release-monitor-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/post-release-monitor-report.json" \
+    --schema schemas/post-release-monitor-report.schema.json \
+    --report "${REPORT_DIR}/post-release-monitor-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/incident-feedback-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/incident-feedback-report.json" \
+    --schema schemas/incident-feedback-report.schema.json \
+    --report "${REPORT_DIR}/incident-feedback-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/backlog-refresh-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/backlog-refresh-report.json" \
+    --schema schemas/backlog-refresh-report.schema.json \
+    --report "${REPORT_DIR}/backlog-refresh-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/release-retrospective-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/release-retrospective-report.json" \
+    --schema schemas/release-retrospective-report.schema.json \
+    --report "${REPORT_DIR}/release-retrospective-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/next-cycle-bootstrap-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/next-cycle-bootstrap-report.json" \
+    --schema schemas/next-cycle-bootstrap-report.schema.json \
+    --report "${REPORT_DIR}/next-cycle-bootstrap-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/repro-package.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/repro-package.json" \

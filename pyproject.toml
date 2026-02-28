@@ -58,6 +58,11 @@ compat-ops-runbook = "compat_runtime.ops_runbook.cli:main"
 compat-dependency-watch = "compat_runtime.dependency_watch.cli:main"
 compat-readiness-delta = "compat_runtime.readiness_delta.cli:main"
 compat-delivery-signoff = "compat_runtime.delivery_signoff.cli:main"
+compat-post-release-monitor = "compat_runtime.post_release_monitor.cli:main"
+compat-incident-feedback = "compat_runtime.incident_feedback.cli:main"
+compat-backlog-refresh = "compat_runtime.backlog_refresh.cli:main"
+compat-release-retrospective = "compat_runtime.release_retrospective.cli:main"
+compat-next-cycle-bootstrap = "compat_runtime.next_cycle_bootstrap.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

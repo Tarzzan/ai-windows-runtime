@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Backlog Refresh Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "items", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["refreshed_items", "feedback_priority", "sprint_now_tasks", "sprint_next_tasks"],
+      "properties": {
+        "refreshed_items": {"type": "integer"},
+        "feedback_priority": {"type": "string"},
+        "sprint_now_tasks": {"type": "integer"},
+        "sprint_next_tasks": {"type": "integer"}
+      }
+    },
+    "items": {"type": "array", "items": {"type": "object"}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

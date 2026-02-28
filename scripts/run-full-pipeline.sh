@@ -532,6 +532,62 @@ fi
   --schema schemas/delivery-signoff-report.schema.json \
   --report "${VALIDATION_DIR}/delivery-signoff-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.post_release_monitor.cli \
+  --delivery-signoff-report "${OUT_DIR}/delivery-signoff-report.json" \
+  --runtime-signal-report "${OUT_DIR}/runtime-signal-report.json" \
+  --crash-signature-report "${OUT_DIR}/crash-signature-report.json" \
+  --output "${OUT_DIR}/post-release-monitor-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/post-release-monitor-report.json" \
+  --schema schemas/post-release-monitor-report.schema.json \
+  --report "${VALIDATION_DIR}/post-release-monitor-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.incident_feedback.cli \
+  --post-release-monitor-report "${OUT_DIR}/post-release-monitor-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --hook-backlog-report "${OUT_DIR}/hook-backlog-report.json" \
+  --output "${OUT_DIR}/incident-feedback-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/incident-feedback-report.json" \
+  --schema schemas/incident-feedback-report.schema.json \
+  --report "${VALIDATION_DIR}/incident-feedback-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.backlog_refresh.cli \
+  --incident-feedback-report "${OUT_DIR}/incident-feedback-report.json" \
+  --iteration-plan-report "${OUT_DIR}/iteration-plan-report.json" \
+  --remediation-sprint-report "${OUT_DIR}/remediation-sprint-report.json" \
+  --output "${OUT_DIR}/backlog-refresh-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/backlog-refresh-report.json" \
+  --schema schemas/backlog-refresh-report.schema.json \
+  --report "${VALIDATION_DIR}/backlog-refresh-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.release_retrospective.cli \
+  --delivery-signoff-report "${OUT_DIR}/delivery-signoff-report.json" \
+  --readiness-delta-report "${OUT_DIR}/readiness-delta-report.json" \
+  --release-gate-history-report "${OUT_DIR}/release-gate-history-report.json" \
+  --output "${OUT_DIR}/release-retrospective-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/release-retrospective-report.json" \
+  --schema schemas/release-retrospective-report.schema.json \
+  --report "${VALIDATION_DIR}/release-retrospective-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.next_cycle_bootstrap.cli \
+  --release-retrospective-report "${OUT_DIR}/release-retrospective-report.json" \
+  --backlog-refresh-report "${OUT_DIR}/backlog-refresh-report.json" \
+  --validation-command-pack "${OUT_DIR}/validation-command-pack.json" \
+  --delivery-signoff-report "${OUT_DIR}/delivery-signoff-report.json" \
+  --output "${OUT_DIR}/next-cycle-bootstrap-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/next-cycle-bootstrap-report.json" \
+  --schema schemas/next-cycle-bootstrap-report.schema.json \
+  --report "${VALIDATION_DIR}/next-cycle-bootstrap-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
   --compatibility-matrix "${OUT_DIR}/compatibility-matrix.json" \
@@ -581,6 +637,11 @@ fi
     "${OUT_DIR}/dependency-watch-report.json" \
     "${OUT_DIR}/readiness-delta-report.json" \
     "${OUT_DIR}/delivery-signoff-report.json" \
+    "${OUT_DIR}/post-release-monitor-report.json" \
+    "${OUT_DIR}/incident-feedback-report.json" \
+    "${OUT_DIR}/backlog-refresh-report.json" \
+    "${OUT_DIR}/release-retrospective-report.json" \
+    "${OUT_DIR}/next-cycle-bootstrap-report.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Retrospective Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "lessons", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["signoff_status", "trajectory", "readiness_score_delta", "dependency_blockers"],
+      "properties": {
+        "signoff_status": {"type": "string"},
+        "trajectory": {"type": "string"},
+        "readiness_score_delta": {"type": "integer"},
+        "dependency_blockers": {"type": "integer"}
+      }
+    },
+    "lessons": {"type": "array", "items": {"type": "string"}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}
