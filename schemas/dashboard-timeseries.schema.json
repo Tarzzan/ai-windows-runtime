@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dashboard Timeseries Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "points"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "index",
+          "path",
+          "generated_at",
+          "status",
+          "base_trace_events",
+          "base_gaps",
+          "base_proposals",
+          "runtime_trace_events",
+          "runtime_gaps",
+          "runtime_proposals"
+        ],
+        "properties": {
+          "index": {"type": "integer"},
+          "path": {"type": "string"},
+          "generated_at": {"type": ["string", "null"]},
+          "status": {"type": "string"},
+          "base_trace_events": {"type": "integer"},
+          "base_gaps": {"type": "integer"},
+          "base_proposals": {"type": "integer"},
+          "runtime_trace_events": {"type": "integer"},
+          "runtime_gaps": {"type": "integer"},
+          "runtime_proposals": {"type": "integer"}
+        }
+      }
+    }
+  }
+}

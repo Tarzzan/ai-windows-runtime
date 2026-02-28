@@ -73,4 +73,25 @@ fi
   --schema schemas/trend-report.schema.json \
   --report "${VALIDATION_DIR}/trend-report-validation.json"
 
+REPORT_LIST=("${OUT_DIR}/execution-report.json")
+if [[ -n "${BASELINE_EXECUTION_REPORT}" && -f "${BASELINE_EXECUTION_REPORT}" ]]; then
+  REPORT_LIST=("${BASELINE_EXECUTION_REPORT}" "${OUT_DIR}/execution-report.json")
+fi
+
+"${PYTHON_BIN}" -m compat_runtime.kpi_tracker.cli \
+  --reports "${REPORT_LIST[@]}" \
+  --trend "${OUT_DIR}/trend-report.json" \
+  --output "${OUT_DIR}/kpi-report.json" \
+  --dashboard-output "${OUT_DIR}/dashboard-timeseries.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/kpi-report.json" \
+  --schema schemas/kpi-report.schema.json \
+  --report "${VALIDATION_DIR}/kpi-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/dashboard-timeseries.json" \
+  --schema schemas/dashboard-timeseries.schema.json \
+  --report "${VALIDATION_DIR}/dashboard-timeseries-validation.json"
+
 echo "full pipeline: ok"

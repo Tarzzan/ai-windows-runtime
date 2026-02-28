@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 14)
+## Current scope (Phase 15)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -56,6 +56,8 @@ Core runtime capabilities in this phase:
 29. Run complete pipeline gate (base + runtime + schema validation + execution report) in one script.
 30. Generate trend reports from execution artifacts (current vs baseline).
 31. Track metric deltas (gaps/proposals/events) and regression/improvement direction.
+32. Generate KPI reports from execution/trend artifacts (run health, risk level, action hints).
+33. Export dashboard timeseries artifacts for observability and milestone tracking.
 
 ## Quick start
 ```bash
@@ -82,6 +84,8 @@ scripts/run-full-pipeline.sh out
 # out/execution-report.json is generated and schema-validated
 scripts/build-trend-report.sh out/execution-report.json
 # out/trend-report.json is generated and schema-validated
+scripts/build-kpi-report.sh out/execution-report.json out/trend-report.json
+# out/kpi-report.json and out/dashboard-timeseries.json are generated and schema-validated
 pytest -q
 
 # Native runtime core checks

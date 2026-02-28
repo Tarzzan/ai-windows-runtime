@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KPI Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "metrics", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["total_runs", "ok_runs", "failed_runs", "ok_rate", "latest_status", "risk_level"],
+      "properties": {
+        "total_runs": {"type": "integer"},
+        "ok_runs": {"type": "integer"},
+        "failed_runs": {"type": "integer"},
+        "ok_rate": {"type": "number"},
+        "latest_status": {"type": "string"},
+        "risk_level": {"type": "string"}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "latest_base_gaps": {"type": "integer"},
+        "latest_runtime_gaps": {"type": "integer"},
+        "avg_base_gaps": {"type": "number"},
+        "avg_runtime_gaps": {"type": "number"},
+        "avg_base_proposals": {"type": "number"},
+        "avg_runtime_proposals": {"type": "number"},
+        "regressed_metrics_count": {"type": "integer"},
+        "improved_metrics_count": {"type": "integer"}
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}

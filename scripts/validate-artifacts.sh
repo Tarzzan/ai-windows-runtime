@@ -46,4 +46,18 @@ if [[ -f "${OUT_DIR}/trend-report.json" ]]; then
     --report "${REPORT_DIR}/trend-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/kpi-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/kpi-report.json" \
+    --schema schemas/kpi-report.schema.json \
+    --report "${REPORT_DIR}/kpi-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/dashboard-timeseries.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/dashboard-timeseries.json" \
+    --schema schemas/dashboard-timeseries.schema.json \
+    --report "${REPORT_DIR}/dashboard-timeseries-validation.json"
+fi
+
 echo "artifact validation: ok"
