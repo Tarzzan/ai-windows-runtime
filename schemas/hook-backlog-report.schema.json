@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hook Backlog Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "items", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "domains_considered",
+        "missing_hooks",
+        "missing_hooks_with_errors",
+        "p0_items",
+        "related_proposals",
+        "related_high_risk_proposals"
+      ],
+      "properties": {
+        "domains_considered": {"type": "integer"},
+        "missing_hooks": {"type": "integer"},
+        "missing_hooks_with_errors": {"type": "integer"},
+        "p0_items": {"type": "integer"},
+        "related_proposals": {"type": "integer"},
+        "related_high_risk_proposals": {"type": "integer"}
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "domain",
+          "missing_hook",
+          "urgency",
+          "impact_score",
+          "events",
+          "errors",
+          "related_proposals",
+          "related_high_risk",
+          "recommended_hook",
+          "rationale"
+        ],
+        "properties": {
+          "domain": {"type": "string"},
+          "missing_hook": {"type": "boolean"},
+          "urgency": {"type": "string"},
+          "impact_score": {"type": "integer"},
+          "events": {"type": "integer"},
+          "errors": {"type": "integer"},
+          "related_proposals": {"type": "integer"},
+          "related_high_risk": {"type": "integer"},
+          "recommended_hook": {"type": "string"},
+          "rationale": {"type": "string"}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -104,6 +104,17 @@ fi
   --rollback-hints "${OUT_DIR}/rollback-hints.json" \
   --output "${OUT_DIR}/proposal-risk-report.json"
 
+"${PYTHON_BIN}" -m compat_runtime.hook_backlog.cli \
+  --runtime-signal-report "${OUT_DIR}/runtime-signal-report.json" \
+  --patch-plan "${OUT_DIR}/patch-plan.json" \
+  --proposal-risk-report "${OUT_DIR}/proposal-risk-report.json" \
+  --output "${OUT_DIR}/hook-backlog-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/hook-backlog-report.json" \
+  --schema schemas/hook-backlog-report.schema.json \
+  --report "${VALIDATION_DIR}/hook-backlog-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.proposal_review_checklist.cli \
   --patch-plan "${OUT_DIR}/patch-plan.json" \
   --proposal-provenance "${OUT_DIR}/proposal-provenance.json" \
@@ -196,6 +207,7 @@ fi
     "${OUT_DIR}/test-impact-report.json" \
     "${OUT_DIR}/rollback-hints.json" \
     "${OUT_DIR}/proposal-risk-report.json" \
+    "${OUT_DIR}/hook-backlog-report.json" \
     "${OUT_DIR}/proposal-review-checklist.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
@@ -276,6 +288,7 @@ fi
     "${OUT_DIR}/test-impact-report.json" \
     "${OUT_DIR}/rollback-hints.json" \
     "${OUT_DIR}/proposal-risk-report.json" \
+    "${OUT_DIR}/hook-backlog-report.json" \
     "${OUT_DIR}/proposal-review-checklist.json" \
     "${OUT_DIR}/quality-gate-report.json" \
     "${OUT_DIR}/release-decision-report.json" \

@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 31)
+## Current scope (Phase 32)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -104,6 +104,9 @@ Core runtime capabilities in this phase:
 77. Generate runtime signal report artifact (`runtime-signal-report.json`) from base/runtime traces.
 78. Enrich COM/WinRT/registry/network/installer/crash-like failures with hook coverage metrics.
 79. Validate runtime signal artifacts automatically in pipeline, release bundle, and reproducible package flows.
+80. Generate hook backlog report artifact (`hook-backlog-report.json`) from runtime signals + patch/risk evidence.
+81. Prioritize missing runtime hooks with urgency (`P0/P1/P2`) and impact scoring per domain.
+82. Validate hook backlog artifacts automatically in pipeline, release bundle, and reproducible package flows.
 
 ## Quick start
 ```bash
@@ -142,6 +145,8 @@ scripts/build-release-decision-report.sh out
 # out/release-decision-report.json is generated and schema-validated
 scripts/build-runtime-signal-report.sh out
 # out/runtime-signal-report.json is generated and schema-validated
+scripts/build-hook-backlog-report.sh out
+# out/hook-backlog-report.json is generated and schema-validated
 scripts/build-root-cause-summary.sh out
 # out/root-cause-summary.json is generated and schema-validated
 scripts/build-patch-plan-diff.sh out

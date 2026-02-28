@@ -34,6 +34,7 @@ compat-installer-phases = "compat_runtime.installer_phases.cli:main"
 compat-quality-gate = "compat_runtime.quality_gate.cli:main"
 compat-release-decision = "compat_runtime.release_decision.cli:main"
 compat-runtime-signals = "compat_runtime.runtime_signals.cli:main"
+compat-hook-backlog = "compat_runtime.hook_backlog.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

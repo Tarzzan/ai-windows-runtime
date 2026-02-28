@@ -102,6 +102,13 @@ if [[ -f "${OUT_DIR}/proposal-risk-report.json" ]]; then
     --report "${REPORT_DIR}/proposal-risk-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/hook-backlog-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/hook-backlog-report.json" \
+    --schema schemas/hook-backlog-report.schema.json \
+    --report "${REPORT_DIR}/hook-backlog-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/proposal-review-checklist.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/proposal-review-checklist.json" \
