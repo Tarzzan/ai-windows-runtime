@@ -4,6 +4,7 @@ pub struct PeMetadata {
     pub number_of_sections: u16,
     pub entry_point_rva: u32,
     pub size_of_image: u32,
+    pub image_base: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -43,12 +44,20 @@ pub struct PeExport {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PeRelocationEntry {
+    pub kind: u8,
+    pub offset: u16,
+    pub target_rva: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadedPeImage {
     pub metadata: PeMetadata,
     pub sections: Vec<PeSection>,
     pub imports: Vec<PeImport>,
     pub export_dll_name: Option<String>,
     pub exports: Vec<PeExport>,
+    pub relocations: Vec<PeRelocationEntry>,
     pub mapped_image: Vec<u8>,
 }
 
@@ -69,6 +78,7 @@ pub enum PeError {
     UnterminatedCString,
     ImportThunkListTooLong,
     ExportTableTooLarge,
+    RelocationOutOfBounds(u32),
 }
 
 #[derive(Debug, Clone)]
@@ -81,6 +91,8 @@ struct PeParsedHeaders {
     import_dir_size: u32,
     export_dir_rva: u32,
     export_dir_size: u32,
+    reloc_dir_rva: u32,
+    reloc_dir_size: u32,
     is_pe32_plus: bool,
 }
 
@@ -174,13 +186,18 @@ fn parse_pe_headers(bytes: &[u8]) -> Result<PeParsedHeaders, PeError> {
     };
 
     let needed_for_data_dir = data_dir_start
-        .checked_add(16)
+        .checked_add(48)
         .ok_or(PeError::OptionalHeaderTooSmall)?;
     if needed_for_data_dir > optional_end {
         return Err(PeError::OptionalHeaderTooSmall);
     }
 
     let entry_point_rva = read_u32_le(bytes, optional_header + 16)?;
+    let image_base = if is_pe32_plus {
+        read_u64_le(bytes, optional_header + 24)?
+    } else {
+        read_u32_le(bytes, optional_header + 28)? as u64
+    };
     let size_of_image = read_u32_le(bytes, optional_header + 56)?;
     let size_of_headers = read_u32_le(bytes, optional_header + 60)?;
 
@@ -195,6 +212,8 @@ fn parse_pe_headers(bytes: &[u8]) -> Result<PeParsedHeaders, PeError> {
     let export_dir_size = read_u32_le(bytes, data_dir_start + 4)?;
     let import_dir_rva = read_u32_le(bytes, data_dir_start + 8)?;
     let import_dir_size = read_u32_le(bytes, data_dir_start + 12)?;
+    let reloc_dir_rva = read_u32_le(bytes, data_dir_start + 40)?;
+    let reloc_dir_size = read_u32_le(bytes, data_dir_start + 44)?;
 
     let section_table_offset = optional_end;
     let section_table_size = (number_of_sections as usize)
@@ -213,6 +232,7 @@ fn parse_pe_headers(bytes: &[u8]) -> Result<PeParsedHeaders, PeError> {
             number_of_sections,
             entry_point_rva,
             size_of_image,
+            image_base,
         },
         section_table_offset,
         number_of_sections,
@@ -221,6 +241,8 @@ fn parse_pe_headers(bytes: &[u8]) -> Result<PeParsedHeaders, PeError> {
         import_dir_size,
         export_dir_rva,
         export_dir_size,
+        reloc_dir_rva,
+        reloc_dir_size,
         is_pe32_plus,
     })
 }
@@ -532,6 +554,121 @@ fn parse_exports(
     Ok((export_dll_name, exports))
 }
 
+fn parse_relocations(
+    bytes: &[u8],
+    headers: &PeParsedHeaders,
+    sections: &[PeSection],
+) -> Result<Vec<PeRelocationEntry>, PeError> {
+    if headers.reloc_dir_rva == 0 || headers.reloc_dir_size == 0 {
+        return Ok(Vec::new());
+    }
+
+    let table_offset = rva_to_file_offset(headers.reloc_dir_rva, sections, headers.size_of_headers)
+        .ok_or(PeError::RvaNotMapped(headers.reloc_dir_rva))?;
+
+    let mut cursor = table_offset;
+    let table_end = table_offset
+        .checked_add(headers.reloc_dir_size as usize)
+        .ok_or(PeError::TooSmall)?;
+    if table_end > bytes.len() {
+        return Err(PeError::TooSmall);
+    }
+
+    let mut relocations = Vec::new();
+    while cursor + 8 <= table_end {
+        let block_va = read_u32_le(bytes, cursor)?;
+        let block_size = read_u32_le(bytes, cursor + 4)? as usize;
+        if block_va == 0 && block_size == 0 {
+            break;
+        }
+        if block_size < 8 {
+            break;
+        }
+
+        let block_end = cursor.checked_add(block_size).ok_or(PeError::TooSmall)?;
+        if block_end > table_end {
+            return Err(PeError::TooSmall);
+        }
+
+        let entry_count = (block_size - 8) / 2;
+        let mut off = cursor + 8;
+        for _ in 0..entry_count {
+            let raw = read_u16_le(bytes, off)?;
+            let kind = ((raw >> 12) & 0x0F) as u8;
+            let offset = raw & 0x0FFF;
+            off += 2;
+            if kind == 0 {
+                continue;
+            }
+            relocations.push(PeRelocationEntry {
+                kind,
+                offset,
+                target_rva: block_va.wrapping_add(offset as u32),
+            });
+        }
+
+        cursor = block_end;
+    }
+
+    Ok(relocations)
+}
+
+pub fn apply_relocations(image: &mut LoadedPeImage, new_image_base: u64) -> Result<usize, PeError> {
+    let old_base = image.metadata.image_base;
+    if old_base == new_image_base {
+        return Ok(0);
+    }
+
+    let delta = new_image_base as i128 - old_base as i128;
+    let mut applied = 0usize;
+
+    for entry in &image.relocations {
+        let target = entry.target_rva as usize;
+        match entry.kind {
+            10 => {
+                let end = target
+                    .checked_add(8)
+                    .ok_or(PeError::RelocationOutOfBounds(entry.target_rva))?;
+                if end > image.mapped_image.len() {
+                    return Err(PeError::RelocationOutOfBounds(entry.target_rva));
+                }
+                let mut raw = [0u8; 8];
+                raw.copy_from_slice(&image.mapped_image[target..end]);
+                let value = u64::from_le_bytes(raw);
+                let patched = if delta >= 0 {
+                    value.wrapping_add(delta as u64)
+                } else {
+                    value.wrapping_sub((-delta) as u64)
+                };
+                image.mapped_image[target..end].copy_from_slice(&patched.to_le_bytes());
+                applied += 1;
+            }
+            3 => {
+                let end = target
+                    .checked_add(4)
+                    .ok_or(PeError::RelocationOutOfBounds(entry.target_rva))?;
+                if end > image.mapped_image.len() {
+                    return Err(PeError::RelocationOutOfBounds(entry.target_rva));
+                }
+                let mut raw = [0u8; 4];
+                raw.copy_from_slice(&image.mapped_image[target..end]);
+                let value = u32::from_le_bytes(raw);
+                let patched = if delta >= 0 {
+                    value.wrapping_add(delta as u32)
+                } else {
+                    value.wrapping_sub((-delta) as u32)
+                };
+                image.mapped_image[target..end].copy_from_slice(&patched.to_le_bytes());
+                applied += 1;
+            }
+            _ => {}
+        }
+    }
+
+    image.metadata.image_base = new_image_base;
+    Ok(applied)
+}
+
 pub fn parse_pe_metadata(bytes: &[u8]) -> Result<PeMetadata, PeError> {
     let headers = parse_pe_headers(bytes)?;
     Ok(headers.metadata)
@@ -543,6 +680,7 @@ pub fn load_pe_image(bytes: &[u8]) -> Result<LoadedPeImage, PeError> {
     let mapped_image = map_image(bytes, &headers, &sections)?;
     let imports = parse_imports(bytes, &headers, &sections)?;
     let (export_dll_name, exports) = parse_exports(bytes, &headers, &sections)?;
+    let relocations = parse_relocations(bytes, &headers, &sections)?;
 
     Ok(LoadedPeImage {
         metadata: headers.metadata,
@@ -550,6 +688,7 @@ pub fn load_pe_image(bytes: &[u8]) -> Result<LoadedPeImage, PeError> {
         imports,
         export_dll_name,
         exports,
+        relocations,
         mapped_image,
     })
 }
@@ -571,6 +710,7 @@ mod tests {
 
         let optional = 0x98usize;
         b[optional..optional + 2].copy_from_slice(&0x20Bu16.to_le_bytes());
+        b[optional + 24..optional + 32].copy_from_slice(&0x0000_0001_8000_0000u64.to_le_bytes());
         b[optional + 16..optional + 20].copy_from_slice(&0x1000u32.to_le_bytes());
         b[optional + 56..optional + 60].copy_from_slice(&0x4000u32.to_le_bytes());
         b[optional + 60..optional + 64].copy_from_slice(&0x200u32.to_le_bytes());
@@ -627,6 +767,7 @@ mod tests {
 
         let optional = 0x98usize;
         b[optional..optional + 2].copy_from_slice(&0x20Bu16.to_le_bytes());
+        b[optional + 24..optional + 32].copy_from_slice(&0x0000_0001_8000_0000u64.to_le_bytes());
         b[optional + 16..optional + 20].copy_from_slice(&0x1000u32.to_le_bytes());
         b[optional + 56..optional + 60].copy_from_slice(&0x5000u32.to_le_bytes());
         b[optional + 60..optional + 64].copy_from_slice(&0x200u32.to_le_bytes());
@@ -673,6 +814,51 @@ mod tests {
         b
     }
 
+    fn minimal_pe_with_relocs() -> Vec<u8> {
+        let mut b = vec![0u8; 0x800];
+        b[0] = b'M';
+        b[1] = b'Z';
+        b[0x3C..0x40].copy_from_slice(&(0x80u32).to_le_bytes());
+
+        b[0x80..0x84].copy_from_slice(&0x0000_4550u32.to_le_bytes());
+        b[0x84..0x86].copy_from_slice(&0x8664u16.to_le_bytes());
+        b[0x86..0x88].copy_from_slice(&2u16.to_le_bytes());
+        b[0x94..0x96].copy_from_slice(&0xF0u16.to_le_bytes());
+
+        let optional = 0x98usize;
+        b[optional..optional + 2].copy_from_slice(&0x20Bu16.to_le_bytes());
+        b[optional + 24..optional + 32].copy_from_slice(&0x0000_0001_8000_0000u64.to_le_bytes());
+        b[optional + 16..optional + 20].copy_from_slice(&0x1000u32.to_le_bytes());
+        b[optional + 56..optional + 60].copy_from_slice(&0x5000u32.to_le_bytes());
+        b[optional + 60..optional + 64].copy_from_slice(&0x200u32.to_le_bytes());
+        b[optional + 108..optional + 112].copy_from_slice(&16u32.to_le_bytes());
+        b[optional + 152..optional + 156].copy_from_slice(&0x3000u32.to_le_bytes());
+        b[optional + 156..optional + 160].copy_from_slice(&12u32.to_le_bytes());
+
+        let sh = optional + 0xF0;
+        b[sh..sh + 8].copy_from_slice(b".text\0\0\0");
+        b[sh + 8..sh + 12].copy_from_slice(&0x100u32.to_le_bytes());
+        b[sh + 12..sh + 16].copy_from_slice(&0x1000u32.to_le_bytes());
+        b[sh + 16..sh + 20].copy_from_slice(&0x200u32.to_le_bytes());
+        b[sh + 20..sh + 24].copy_from_slice(&0x200u32.to_le_bytes());
+
+        let sh2 = sh + 40;
+        b[sh2..sh2 + 8].copy_from_slice(b".reloc\0\0");
+        b[sh2 + 8..sh2 + 12].copy_from_slice(&0x100u32.to_le_bytes());
+        b[sh2 + 12..sh2 + 16].copy_from_slice(&0x3000u32.to_le_bytes());
+        b[sh2 + 16..sh2 + 20].copy_from_slice(&0x200u32.to_le_bytes());
+        b[sh2 + 20..sh2 + 24].copy_from_slice(&0x400u32.to_le_bytes());
+
+        b[0x200..0x208].copy_from_slice(&0x0000_0001_8000_1000u64.to_le_bytes());
+
+        b[0x400..0x404].copy_from_slice(&0x1000u32.to_le_bytes());
+        b[0x404..0x408].copy_from_slice(&12u32.to_le_bytes());
+        b[0x408..0x40A].copy_from_slice(&0xA000u16.to_le_bytes());
+        b[0x40A..0x40C].copy_from_slice(&0u16.to_le_bytes());
+
+        b
+    }
+
     #[test]
     fn parses_minimal_pe_metadata() {
         let pe = minimal_pe_with_imports();
@@ -681,6 +867,7 @@ mod tests {
         assert_eq!(meta.number_of_sections, 2);
         assert_eq!(meta.entry_point_rva, 0x1000);
         assert_eq!(meta.size_of_image, 0x4000);
+        assert_eq!(meta.image_base, 0x0000_0001_8000_0000);
     }
 
     #[test]
@@ -718,6 +905,29 @@ mod tests {
         assert_eq!(loaded.exports[0].ordinal, 0x123);
         assert_eq!(loaded.exports[0].rva, 0x2222);
         assert_eq!(loaded.exports[0].name.as_deref(), Some("Sleep"));
+    }
+
+    #[test]
+    fn applies_dir64_relocation_delta() {
+        let mut image = load_pe_image(&minimal_pe_with_relocs()).expect("must load reloc PE");
+        assert_eq!(image.relocations.len(), 1);
+        assert_eq!(image.relocations[0].kind, 10);
+        assert_eq!(image.relocations[0].target_rva, 0x1000);
+
+        let mut before_raw = [0u8; 8];
+        before_raw.copy_from_slice(&image.mapped_image[0x1000..0x1008]);
+        let before = u64::from_le_bytes(before_raw);
+        assert_eq!(before, 0x0000_0001_8000_1000);
+
+        let applied = super::apply_relocations(&mut image, 0x0000_0001_9000_0000)
+            .expect("relocation apply must succeed");
+        assert_eq!(applied, 1);
+        assert_eq!(image.metadata.image_base, 0x0000_0001_9000_0000);
+
+        let mut after_raw = [0u8; 8];
+        after_raw.copy_from_slice(&image.mapped_image[0x1000..0x1008]);
+        let after = u64::from_le_bytes(after_raw);
+        assert_eq!(after, 0x0000_0001_9000_1000);
     }
 
     #[test]

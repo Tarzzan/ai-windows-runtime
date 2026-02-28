@@ -28,8 +28,10 @@ fn main() -> ExitCode {
             println!("sections: {}", image.sections.len());
             println!("imports: {}", image.imports.len());
             println!("exports: {}", image.exports.len());
+            println!("relocations: {}", image.relocations.len());
             println!("entry_point_rva: 0x{:08x}", image.metadata.entry_point_rva);
             println!("size_of_image: {}", image.metadata.size_of_image);
+            println!("image_base: 0x{:016x}", image.metadata.image_base);
 
             if let Some(name) = &image.export_dll_name {
                 println!("export dll: {name}");

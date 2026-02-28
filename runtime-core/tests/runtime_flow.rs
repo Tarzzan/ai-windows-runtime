@@ -13,6 +13,7 @@ fn pe_with_imports() -> Vec<u8> {
 
     let optional = 0x98usize;
     b[optional..optional + 2].copy_from_slice(&0x20Bu16.to_le_bytes());
+    b[optional + 24..optional + 32].copy_from_slice(&0x0000_0001_8000_0000u64.to_le_bytes());
     b[optional + 16..optional + 20].copy_from_slice(&0x2000u32.to_le_bytes());
     b[optional + 56..optional + 60].copy_from_slice(&0x4000u32.to_le_bytes());
     b[optional + 60..optional + 64].copy_from_slice(&0x200u32.to_le_bytes());
@@ -21,7 +22,6 @@ fn pe_with_imports() -> Vec<u8> {
     b[optional + 124..optional + 128].copy_from_slice(&40u32.to_le_bytes());
 
     let sh = optional + 0xF0;
-
     b[sh..sh + 8].copy_from_slice(b".text\0\0\0");
     b[sh + 8..sh + 12].copy_from_slice(&0x100u32.to_le_bytes());
     b[sh + 12..sh + 16].copy_from_slice(&0x1000u32.to_le_bytes());
@@ -56,6 +56,15 @@ fn pe_with_imports() -> Vec<u8> {
     b
 }
 
+fn pe_with_duplicate_imports() -> Vec<u8> {
+    let mut b = pe_with_imports();
+    b[0x450..0x458].copy_from_slice(&0x3080u64.to_le_bytes());
+    b[0x458..0x460].copy_from_slice(&0x3080u64.to_le_bytes());
+    b[0x460..0x468].copy_from_slice(&(0x8000_0000_0000_0123u64).to_le_bytes());
+    b[0x468..0x470].copy_from_slice(&0u64.to_le_bytes());
+    b
+}
+
 fn pe_with_exports() -> Vec<u8> {
     let mut b = vec![0u8; 0x800];
     b[0] = b'M';
@@ -69,6 +78,7 @@ fn pe_with_exports() -> Vec<u8> {
 
     let optional = 0x98usize;
     b[optional..optional + 2].copy_from_slice(&0x20Bu16.to_le_bytes());
+    b[optional + 24..optional + 32].copy_from_slice(&0x0000_0001_8000_0000u64.to_le_bytes());
     b[optional + 16..optional + 20].copy_from_slice(&0x1000u32.to_le_bytes());
     b[optional + 56..optional + 60].copy_from_slice(&0x5000u32.to_le_bytes());
     b[optional + 60..optional + 64].copy_from_slice(&0x200u32.to_le_bytes());
@@ -118,6 +128,7 @@ fn pe_parser_extracts_core_metadata() {
     assert_eq!(meta.number_of_sections, 2);
     assert_eq!(meta.entry_point_rva, 0x2000);
     assert_eq!(meta.size_of_image, 0x4000);
+    assert_eq!(meta.image_base, 0x0000_0001_8000_0000);
 }
 
 #[test]
@@ -152,7 +163,7 @@ fn runtime_dispatcher_supports_stub_and_implemented() {
         .register_implemented("kernel32.GetTickCount");
     core.dispatcher_mut().register_stub(
         "winhttp.WinHttpOpen",
-        "phase-5 stub while transport layer is built",
+        "phase-6 stub while transport layer is built",
     );
 
     let ok = core
@@ -170,7 +181,7 @@ fn runtime_dispatcher_supports_stub_and_implemented() {
 }
 
 #[test]
-fn runtime_load_report_tracks_imports_and_symbols() {
+fn runtime_load_report_tracks_imports_exports_and_relocs() {
     let core = RuntimeCore::new();
     let report = core
         .load_pe_image(&pe_with_imports())
@@ -179,6 +190,8 @@ fn runtime_load_report_tracks_imports_and_symbols() {
     assert_eq!(report.imports_checked, 1);
     assert_eq!(report.import_symbol_count, 2);
     assert_eq!(report.imported_dlls, vec!["KERNEL32.dll".to_string()]);
+    assert_eq!(report.exports_checked, 0);
+    assert_eq!(report.relocations_count, 0);
     assert_eq!(
         report.import_details[0].symbols,
         vec!["Sleep".to_string(), "#291".to_string()]
@@ -195,6 +208,7 @@ fn mini_linker_resolves_named_and_ordinal_imports() {
     assert_eq!(link.total_symbols, 2);
     assert_eq!(link.resolved_symbols, 2);
     assert_eq!(link.unresolved_symbols, 0);
+    assert_eq!(link.ambiguous_symbols, 0);
 
     assert_eq!(link.resolutions[0].symbol, "Sleep");
     assert!(link.resolutions[0].resolved);
@@ -203,4 +217,32 @@ fn mini_linker_resolves_named_and_ordinal_imports() {
     assert_eq!(link.resolutions[1].symbol, "#291");
     assert!(link.resolutions[1].resolved);
     assert_eq!(link.resolutions[1].target_rva, Some(0x2222));
+}
+
+#[test]
+fn linker_uses_cache_for_duplicate_symbols() {
+    let core = RuntimeCore::new();
+    let consumer = load_pe_image(&pe_with_duplicate_imports()).expect("consumer image");
+    let provider = load_pe_image(&pe_with_exports()).expect("provider image");
+
+    let link = core.resolve_imports(&consumer, &[provider]);
+    assert_eq!(link.total_symbols, 3);
+    assert_eq!(link.resolved_symbols, 3);
+    assert_eq!(link.cache_hits, 1);
+    assert_eq!(link.ambiguous_symbols, 0);
+}
+
+#[test]
+fn linker_reports_ambiguity_with_multiple_candidate_modules() {
+    let core = RuntimeCore::new();
+    let consumer = load_pe_image(&pe_with_imports()).expect("consumer image");
+    let provider_a = load_pe_image(&pe_with_exports()).expect("provider a");
+    let provider_b = load_pe_image(&pe_with_exports()).expect("provider b");
+
+    let link = core.resolve_imports(&consumer, &[provider_a, provider_b]);
+    assert_eq!(link.total_symbols, 2);
+    assert_eq!(link.resolved_symbols, 0);
+    assert_eq!(link.unresolved_symbols, 2);
+    assert_eq!(link.ambiguous_symbols, 2);
+    assert_eq!(link.collisions.len(), 2);
 }

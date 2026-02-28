@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 use crate::dispatcher::{ApiDispatcher, DispatchDecision, DispatchError};
 use crate::pe::{LoadedPeImage, PeError, PeExport, PeImportSymbol, PeMetadata, load_pe_image};
 
@@ -10,6 +12,7 @@ pub struct DllImportReport {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadReport {
     pub metadata: PeMetadata,
+    pub image_base: u64,
     pub mapped_image_size: usize,
     pub sections_loaded: usize,
     pub imports_checked: usize,
@@ -18,6 +21,7 @@ pub struct LoadReport {
     pub import_details: Vec<DllImportReport>,
     pub exports_checked: usize,
     pub exported_dll: Option<String>,
+    pub relocations_count: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -27,6 +31,14 @@ pub struct ImportResolution {
     pub resolved: bool,
     pub target_module: Option<String>,
     pub target_rva: Option<u32>,
+    pub ambiguous: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SymbolCollision {
+    pub dll_name: String,
+    pub symbol: String,
+    pub candidate_modules: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -34,7 +46,16 @@ pub struct LinkReport {
     pub total_symbols: usize,
     pub resolved_symbols: usize,
     pub unresolved_symbols: usize,
+    pub ambiguous_symbols: usize,
+    pub cache_hits: usize,
     pub resolutions: Vec<ImportResolution>,
+    pub collisions: Vec<SymbolCollision>,
+}
+
+#[derive(Debug, Clone)]
+struct CachedLookup {
+    resolution: ImportResolution,
+    collision_modules: Vec<String>,
 }
 
 #[derive(Debug, Default)]
@@ -98,7 +119,8 @@ impl RuntimeCore {
         let import_symbol_count = import_details.iter().map(|d| d.symbols.len()).sum();
 
         Ok(LoadReport {
-            metadata: loaded.metadata,
+            metadata: loaded.metadata.clone(),
+            image_base: loaded.metadata.image_base,
             mapped_image_size: loaded.mapped_image.len(),
             sections_loaded: loaded.sections.len(),
             imports_checked: loaded.imports.len(),
@@ -107,67 +129,151 @@ impl RuntimeCore {
             import_details,
             exports_checked: loaded.exports.len(),
             exported_dll: loaded.export_dll_name,
+            relocations_count: loaded.relocations.len(),
         })
     }
 
     pub fn resolve_imports(&self, image: &LoadedPeImage, modules: &[LoadedPeImage]) -> LinkReport {
+        let mut providers: HashMap<String, Vec<(String, &LoadedPeImage)>> = HashMap::new();
+        for (idx, module) in modules.iter().enumerate() {
+            if let Some(dll_name) = module.export_dll_name.as_deref() {
+                let module_name = module
+                    .export_dll_name
+                    .clone()
+                    .unwrap_or_else(|| format!("module@{idx}"));
+                providers
+                    .entry(normalize_dll_name(dll_name))
+                    .or_default()
+                    .push((module_name, module));
+            }
+        }
+
+        let mut cache: HashMap<(String, String), CachedLookup> = HashMap::new();
+        let mut cache_hits = 0usize;
         let mut resolutions = Vec::new();
+        let mut collisions = Vec::new();
+        let mut collision_keys = HashSet::new();
 
         for imp in &image.imports {
-            let import_dll_key = normalize_dll_name(&imp.dll_name);
-            let provider = modules.iter().find(|m| {
-                m.export_dll_name
-                    .as_deref()
-                    .map(normalize_dll_name)
-                    .is_some_and(|k| k == import_dll_key)
-            });
+            let dll_key = normalize_dll_name(&imp.dll_name);
 
             for func in &imp.functions {
                 let symbol = symbol_label(&func.symbol);
+                let cache_key = (dll_key.clone(), symbol.clone());
 
-                if let Some(module) = provider {
-                    let module_name = module
-                        .export_dll_name
-                        .clone()
-                        .unwrap_or_else(|| "unknown-module".to_string());
+                if let Some(cached) = cache.get(&cache_key) {
+                    cache_hits += 1;
+                    resolutions.push(cached.resolution.clone());
+                    if !cached.collision_modules.is_empty() {
+                        let key = format!("{}|{}", imp.dll_name, symbol);
+                        if collision_keys.insert(key) {
+                            collisions.push(SymbolCollision {
+                                dll_name: imp.dll_name.clone(),
+                                symbol: symbol.clone(),
+                                candidate_modules: cached.collision_modules.clone(),
+                            });
+                        }
+                    }
+                    continue;
+                }
 
-                    if let Some(export) = resolve_export(&module.exports, &func.symbol) {
-                        resolutions.push(ImportResolution {
-                            dll_name: imp.dll_name.clone(),
-                            symbol,
-                            resolved: true,
-                            target_module: Some(module_name),
-                            target_rva: Some(export.rva),
-                        });
+                let lookup = if let Some(candidates) = providers.get(&dll_key) {
+                    let mut matches: Vec<(String, u32)> = Vec::new();
+                    for (module_name, module) in candidates {
+                        if let Some(exp) = resolve_export(&module.exports, &func.symbol) {
+                            matches.push((module_name.clone(), exp.rva));
+                        }
+                    }
+
+                    if matches.len() == 1 {
+                        let (module_name, rva) = &matches[0];
+                        CachedLookup {
+                            resolution: ImportResolution {
+                                dll_name: imp.dll_name.clone(),
+                                symbol: symbol.clone(),
+                                resolved: true,
+                                target_module: Some(module_name.clone()),
+                                target_rva: Some(*rva),
+                                ambiguous: false,
+                            },
+                            collision_modules: Vec::new(),
+                        }
+                    } else if matches.len() > 1 {
+                        let mut modules: Vec<String> =
+                            matches.into_iter().map(|(m, _)| m).collect();
+                        modules.sort();
+                        modules.dedup();
+                        CachedLookup {
+                            resolution: ImportResolution {
+                                dll_name: imp.dll_name.clone(),
+                                symbol: symbol.clone(),
+                                resolved: false,
+                                target_module: None,
+                                target_rva: None,
+                                ambiguous: true,
+                            },
+                            collision_modules: modules,
+                        }
                     } else {
-                        resolutions.push(ImportResolution {
-                            dll_name: imp.dll_name.clone(),
-                            symbol,
-                            resolved: false,
-                            target_module: Some(module_name),
-                            target_rva: None,
-                        });
+                        let provider_hint = if candidates.len() == 1 {
+                            Some(candidates[0].0.clone())
+                        } else {
+                            None
+                        };
+                        CachedLookup {
+                            resolution: ImportResolution {
+                                dll_name: imp.dll_name.clone(),
+                                symbol: symbol.clone(),
+                                resolved: false,
+                                target_module: provider_hint,
+                                target_rva: None,
+                                ambiguous: false,
+                            },
+                            collision_modules: Vec::new(),
+                        }
                     }
                 } else {
-                    resolutions.push(ImportResolution {
-                        dll_name: imp.dll_name.clone(),
-                        symbol,
-                        resolved: false,
-                        target_module: None,
-                        target_rva: None,
-                    });
+                    CachedLookup {
+                        resolution: ImportResolution {
+                            dll_name: imp.dll_name.clone(),
+                            symbol: symbol.clone(),
+                            resolved: false,
+                            target_module: None,
+                            target_rva: None,
+                            ambiguous: false,
+                        },
+                        collision_modules: Vec::new(),
+                    }
+                };
+
+                if !lookup.collision_modules.is_empty() {
+                    let key = format!("{}|{}", imp.dll_name, symbol);
+                    if collision_keys.insert(key) {
+                        collisions.push(SymbolCollision {
+                            dll_name: imp.dll_name.clone(),
+                            symbol: symbol.clone(),
+                            candidate_modules: lookup.collision_modules.clone(),
+                        });
+                    }
                 }
+
+                resolutions.push(lookup.resolution.clone());
+                cache.insert(cache_key, lookup);
             }
         }
 
         let total_symbols = resolutions.len();
         let resolved_symbols = resolutions.iter().filter(|r| r.resolved).count();
+        let ambiguous_symbols = resolutions.iter().filter(|r| r.ambiguous).count();
 
         LinkReport {
             total_symbols,
             resolved_symbols,
             unresolved_symbols: total_symbols.saturating_sub(resolved_symbols),
+            ambiguous_symbols,
+            cache_hits,
             resolutions,
+            collisions,
         }
     }
 
@@ -193,6 +299,7 @@ mod tests {
 
         let optional = 0x98usize;
         b[optional..optional + 2].copy_from_slice(&0x20Bu16.to_le_bytes());
+        b[optional + 24..optional + 32].copy_from_slice(&0x0000_0001_8000_0000u64.to_le_bytes());
         b[optional + 16..optional + 20].copy_from_slice(&0x1000u32.to_le_bytes());
         b[optional + 56..optional + 60].copy_from_slice(&0x5000u32.to_le_bytes());
         b[optional + 60..optional + 64].copy_from_slice(&0x200u32.to_le_bytes());
@@ -243,5 +350,6 @@ mod tests {
             .expect("must parse PE");
         assert_eq!(report.exports_checked, 1);
         assert_eq!(report.exported_dll.as_deref(), Some("KERNEL32.dll"));
+        assert_eq!(report.image_base, 0x0000_0001_8000_0000);
     }
 }
