@@ -31,6 +31,7 @@ compat-template-catalog = "compat_runtime.patch_template_library.cli:main"
 compat-proposal-risk = "compat_runtime.proposal_risk.cli:main"
 compat-crash-signatures = "compat_runtime.crash_signatures.cli:main"
 compat-installer-phases = "compat_runtime.installer_phases.cli:main"
+compat-quality-gate = "compat_runtime.quality_gate.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 28)
+## Current scope (Phase 29)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -95,6 +95,9 @@ Core runtime capabilities in this phase:
 68. Generate installer phase report artifacts from base/runtime traces.
 69. Track installer phase timelines with per-phase status rollups.
 70. Validate installer phase report artifacts automatically in pipeline and release bundle gates.
+71. Generate quality gate aggregation artifact (`quality-gate-report.json`) from execution/KPI/trend/risk/crash/installer/review/productization evidence.
+72. Compute release gate status (`pass/warn/fail`) with required vs optional checks and remediation actions.
+73. Validate quality gate artifacts automatically in pipeline, release bundle, and reproducible package flows.
 
 ## Quick start
 ```bash
@@ -127,6 +130,8 @@ scripts/build-release-bundle.sh out out/release-bundle
 # out/compatibility-matrix.json, out/alpha-release-checklist.json and out/release-bundle-manifest.json are generated and schema-validated
 scripts/check-productization-readiness.sh out
 # out/productization-readiness.json is generated and schema-validated
+scripts/build-quality-gate-report.sh out
+# out/quality-gate-report.json is generated and schema-validated
 scripts/build-root-cause-summary.sh out
 # out/root-cause-summary.json is generated and schema-validated
 scripts/build-patch-plan-diff.sh out

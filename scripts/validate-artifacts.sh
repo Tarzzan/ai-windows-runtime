@@ -158,6 +158,13 @@ if [[ -f "${OUT_DIR}/productization-readiness.json" ]]; then
     --report "${REPORT_DIR}/productization-readiness-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/quality-gate-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/quality-gate-report.json" \
+    --schema schemas/quality-gate-report.schema.json \
+    --report "${REPORT_DIR}/quality-gate-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/repro-package.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/repro-package.json" \

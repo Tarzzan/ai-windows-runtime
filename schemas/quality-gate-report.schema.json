@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Quality Gate Report Artifact",
+  "type": "object",
+  "required": [
+    "artifact_version",
+    "generated_at",
+    "gate",
+    "ready_for_release",
+    "summary",
+    "checks",
+    "actions"
+  ],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "gate": {"type": "string"},
+    "ready_for_release": {"type": "boolean"},
+    "summary": {
+      "type": "object",
+      "required": ["total_items", "pass_items", "warn_items", "fail_items", "required_failures"],
+      "properties": {
+        "total_items": {"type": "integer"},
+        "pass_items": {"type": "integer"},
+        "warn_items": {"type": "integer"},
+        "fail_items": {"type": "integer"},
+        "required_failures": {"type": "integer"}
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "required", "status", "evidence", "detail"],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "required": {"type": "boolean"},
+          "status": {"type": "string"},
+          "evidence": {"type": "string"},
+          "detail": {"type": "string"}
+        }
+      }
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  }
+}
+
