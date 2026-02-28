@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Deterministic Reproduction Package",
+  "type": "object",
+  "required": [
+    "artifact_version",
+    "generated_at",
+    "deterministic_id",
+    "ready_for_repro",
+    "summary",
+    "environment",
+    "failure_targets",
+    "reproduction_steps",
+    "artifacts"
+  ],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "deterministic_id": {"type": "string"},
+    "ready_for_repro": {"type": "boolean"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "failure_count",
+        "artifact_count",
+        "existing_artifacts",
+        "missing_artifacts"
+      ],
+      "properties": {
+        "failure_count": {"type": "integer"},
+        "artifact_count": {"type": "integer"},
+        "existing_artifacts": {"type": "integer"},
+        "missing_artifacts": {"type": "integer"}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "required": ["platform", "platform_release", "machine", "python_version"],
+      "properties": {
+        "platform": {"type": "string"},
+        "platform_release": {"type": "string"},
+        "machine": {"type": "string"},
+        "python_version": {"type": "string"}
+      }
+    },
+    "failure_targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "id", "status", "details"],
+        "properties": {
+          "source": {"type": "string"},
+          "id": {"type": "string"},
+          "status": {"type": "string"},
+          "details": {"type": "object"}
+        }
+      }
+    },
+    "reproduction_steps": {
+      "type": "object",
+      "required": ["recommended_commands", "notes"],
+      "properties": {
+        "recommended_commands": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "notes": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "exists", "size_bytes", "sha256"],
+        "properties": {
+          "path": {"type": "string"},
+          "exists": {"type": "boolean"},
+          "size_bytes": {"type": "integer"},
+          "sha256": {"type": "string"}
+        }
+      }
+    }
+  }
+}
+

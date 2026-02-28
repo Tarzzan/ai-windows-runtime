@@ -88,4 +88,11 @@ if [[ -f "${OUT_DIR}/productization-readiness.json" ]]; then
     --report "${REPORT_DIR}/productization-readiness-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/repro-package.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/repro-package.json" \
+    --schema schemas/repro-package.schema.json \
+    --report "${REPORT_DIR}/repro-package-validation.json"
+fi
+
 echo "artifact validation: ok"
