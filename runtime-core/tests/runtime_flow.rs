@@ -1,4 +1,7 @@
-use runtime_core::{ApiStatus, PeImportSymbol, RuntimeCore, load_pe_image, parse_pe_metadata};
+use runtime_core::{
+    ApiStatus, PeImportSymbol, ProcessState, RuntimeCore, ThreadState, load_pe_image,
+    parse_pe_metadata,
+};
 
 fn pe_with_imports() -> Vec<u8> {
     let mut b = vec![0u8; 0x700];
@@ -245,4 +248,66 @@ fn linker_reports_ambiguity_with_multiple_candidate_modules() {
     assert_eq!(link.unresolved_symbols, 2);
     assert_eq!(link.ambiguous_symbols, 2);
     assert_eq!(link.collisions.len(), 2);
+}
+
+#[test]
+fn runtime_nt_core_process_thread_flow() {
+    let mut core = RuntimeCore::new();
+
+    let launch = core.launch_process("installer.exe", 0x1500);
+    assert_eq!(
+        core.process_id_from_handle(launch.process_handle)
+            .expect("process handle resolves"),
+        launch.pid
+    );
+    assert_eq!(
+        core.thread_id_from_handle(launch.primary_thread_handle)
+            .expect("thread handle resolves"),
+        launch.primary_thread_id
+    );
+
+    let worker = core
+        .spawn_thread(launch.pid, 0x2200)
+        .expect("worker thread starts");
+    core.set_thread_waiting(worker.tid, "network io")
+        .expect("worker enters waiting");
+    assert_eq!(
+        core.thread(worker.tid).expect("worker exists").state,
+        ThreadState::Waiting {
+            reason: "network io".to_string()
+        }
+    );
+
+    core.resume_thread(worker.tid).expect("worker resumes");
+    core.exit_thread(worker.tid, 0)
+        .expect("worker exits cleanly");
+    assert_eq!(
+        core.thread(worker.tid).expect("worker exists").state,
+        ThreadState::Terminated { exit_code: 0 }
+    );
+    assert_eq!(
+        core.process(launch.pid).expect("process exists").state,
+        ProcessState::Running
+    );
+
+    core.terminate_process(launch.pid, 33)
+        .expect("process termination succeeds");
+    assert_eq!(
+        core.process(launch.pid).expect("process exists").state,
+        ProcessState::Terminated { exit_code: 33 }
+    );
+    assert_eq!(
+        core.thread(launch.primary_thread_id)
+            .expect("primary thread exists")
+            .state,
+        ThreadState::Terminated { exit_code: 33 }
+    );
+
+    let snapshot = core.nt_snapshot();
+    assert_eq!(snapshot.process_count, 1);
+    assert_eq!(snapshot.thread_count, 2);
+    assert_eq!(snapshot.running_threads, 0);
+    assert_eq!(snapshot.waiting_threads, 0);
+    assert_eq!(snapshot.terminated_threads, 2);
+    assert_eq!(snapshot.handle_count, 3);
 }

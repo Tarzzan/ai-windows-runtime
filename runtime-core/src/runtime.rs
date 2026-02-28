@@ -1,6 +1,10 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::dispatcher::{ApiDispatcher, DispatchDecision, DispatchError};
+use crate::ntcore::{
+    Handle, NtCore, NtError, NtSnapshot, ProcessId, ProcessLaunch, ProcessRecord, ThreadId,
+    ThreadLaunch, ThreadRecord,
+};
 use crate::pe::{LoadedPeImage, PeError, PeExport, PeImportSymbol, PeMetadata, load_pe_image};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -61,6 +65,7 @@ struct CachedLookup {
 #[derive(Debug, Default)]
 pub struct RuntimeCore {
     dispatcher: ApiDispatcher,
+    nt_core: NtCore,
 }
 
 fn normalize_dll_name(name: &str) -> String {
@@ -92,11 +97,60 @@ impl RuntimeCore {
     pub fn new() -> Self {
         Self {
             dispatcher: ApiDispatcher::new(),
+            nt_core: NtCore::new(),
         }
     }
 
     pub fn dispatcher_mut(&mut self) -> &mut ApiDispatcher {
         &mut self.dispatcher
+    }
+
+    pub fn launch_process(&mut self, image_name: &str, entry_point_rva: u32) -> ProcessLaunch {
+        self.nt_core.launch_process(image_name, entry_point_rva)
+    }
+
+    pub fn spawn_thread(
+        &mut self,
+        pid: ProcessId,
+        start_rva: u32,
+    ) -> Result<ThreadLaunch, NtError> {
+        self.nt_core.spawn_thread(pid, start_rva)
+    }
+
+    pub fn set_thread_waiting(&mut self, tid: ThreadId, reason: &str) -> Result<(), NtError> {
+        self.nt_core.set_thread_waiting(tid, reason)
+    }
+
+    pub fn resume_thread(&mut self, tid: ThreadId) -> Result<(), NtError> {
+        self.nt_core.resume_thread(tid)
+    }
+
+    pub fn exit_thread(&mut self, tid: ThreadId, exit_code: u32) -> Result<(), NtError> {
+        self.nt_core.exit_thread(tid, exit_code)
+    }
+
+    pub fn terminate_process(&mut self, pid: ProcessId, exit_code: u32) -> Result<(), NtError> {
+        self.nt_core.terminate_process(pid, exit_code)
+    }
+
+    pub fn process(&self, pid: ProcessId) -> Option<&ProcessRecord> {
+        self.nt_core.process(pid)
+    }
+
+    pub fn thread(&self, tid: ThreadId) -> Option<&ThreadRecord> {
+        self.nt_core.thread(tid)
+    }
+
+    pub fn process_id_from_handle(&self, handle: Handle) -> Result<ProcessId, NtError> {
+        self.nt_core.process_id_from_handle(handle)
+    }
+
+    pub fn thread_id_from_handle(&self, handle: Handle) -> Result<ThreadId, NtError> {
+        self.nt_core.thread_id_from_handle(handle)
+    }
+
+    pub fn nt_snapshot(&self) -> NtSnapshot {
+        self.nt_core.snapshot()
     }
 
     pub fn load_pe_image(&self, bytes: &[u8]) -> Result<LoadReport, PeError> {
@@ -284,6 +338,7 @@ impl RuntimeCore {
 
 #[cfg(test)]
 mod tests {
+    use crate::ntcore::{ProcessState, ThreadState};
     use crate::runtime::RuntimeCore;
 
     fn minimal_export_pe() -> Vec<u8> {
@@ -351,5 +406,43 @@ mod tests {
         assert_eq!(report.exports_checked, 1);
         assert_eq!(report.exported_dll.as_deref(), Some("KERNEL32.dll"));
         assert_eq!(report.image_base, 0x0000_0001_8000_0000);
+    }
+
+    #[test]
+    fn runtime_tracks_process_and_thread_lifecycle() {
+        let mut core = RuntimeCore::new();
+        let launch = core.launch_process("setup.exe", 0x1000);
+        let worker = core
+            .spawn_thread(launch.pid, 0x2000)
+            .expect("worker thread must launch");
+
+        core.set_thread_waiting(worker.tid, "io wait")
+            .expect("worker switches to waiting");
+        assert_eq!(
+            core.thread(worker.tid).expect("worker exists").state,
+            ThreadState::Waiting {
+                reason: "io wait".to_string()
+            }
+        );
+
+        core.resume_thread(worker.tid)
+            .expect("worker resumes to running");
+        assert_eq!(
+            core.thread(worker.tid).expect("worker exists").state,
+            ThreadState::Running
+        );
+
+        core.terminate_process(launch.pid, 17)
+            .expect("process termination should succeed");
+        assert_eq!(
+            core.process(launch.pid).expect("process exists").state,
+            ProcessState::Terminated { exit_code: 17 }
+        );
+        assert_eq!(
+            core.thread(launch.primary_thread_id)
+                .expect("primary thread exists")
+                .state,
+            ThreadState::Terminated { exit_code: 17 }
+        );
     }
 }
