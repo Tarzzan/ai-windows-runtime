@@ -23,6 +23,7 @@ compat-productization = "compat_runtime.productization.cli:main"
 compat-repro-package = "compat_runtime.repro_package.cli:main"
 compat-root-cause = "compat_runtime.root_cause.cli:main"
 compat-plan-diff = "compat_runtime.patch_plan_diff.cli:main"
+compat-proposal-provenance = "compat_runtime.proposal_provenance.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

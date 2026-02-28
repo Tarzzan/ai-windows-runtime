@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proposal Provenance Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "proposals", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "total_proposals",
+        "matched_gaps",
+        "unmatched_gaps",
+        "events_considered",
+        "weak_provenance_entries"
+      ],
+      "properties": {
+        "total_proposals": {"type": "integer"},
+        "matched_gaps": {"type": "integer"},
+        "unmatched_gaps": {"type": "integer"},
+        "events_considered": {"type": "integer"},
+        "weak_provenance_entries": {"type": "integer"}
+      }
+    },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["gap_id", "priority", "title", "risk", "gap", "provenance"],
+        "properties": {
+          "gap_id": {"type": "string"},
+          "priority": {"type": "string"},
+          "title": {"type": "string"},
+          "risk": {"type": "string"},
+          "gap": {
+            "type": "object",
+            "required": ["found", "category", "severity", "confidence", "summary"],
+            "properties": {
+              "found": {"type": "boolean"},
+              "category": {"type": "string"},
+              "severity": {"type": "string"},
+              "confidence": {"type": "number"},
+              "summary": {"type": "string"}
+            }
+          },
+          "provenance": {
+            "type": "object",
+            "required": [
+              "lineage",
+              "source_artifacts",
+              "trace_event_count",
+              "evidence_messages",
+              "provenance_score"
+            ],
+            "properties": {
+              "lineage": {"type": "string"},
+              "source_artifacts": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "trace_event_count": {"type": "integer"},
+              "evidence_messages": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "provenance_score": {"type": "number"}
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}
+

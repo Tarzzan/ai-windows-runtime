@@ -32,6 +32,13 @@ if [[ -f "${OUT_DIR}/patch-plan-diff.json" ]]; then
     --report "${REPORT_DIR}/patch-plan-diff-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/proposal-provenance.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/proposal-provenance.json" \
+    --schema schemas/proposal-provenance.schema.json \
+    --report "${REPORT_DIR}/proposal-provenance-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/runtime-trace.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/runtime-trace.json" \

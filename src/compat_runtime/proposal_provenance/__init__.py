@@ -1,0 +1,2 @@
+"""Proposal provenance artifact generation."""
+

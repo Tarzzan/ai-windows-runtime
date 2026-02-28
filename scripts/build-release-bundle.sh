@@ -28,6 +28,17 @@ fi
   --schema schemas/patch-plan-diff.schema.json \
   --report "${VALIDATION_DIR}/patch-plan-diff-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.proposal_provenance.cli \
+  --patch-plan "${OUT_DIR}/patch-plan.json" \
+  --gaps "${OUT_DIR}/gaps.json" \
+  --trace "${OUT_DIR}/trace.json" \
+  --output "${OUT_DIR}/proposal-provenance.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/proposal-provenance.json" \
+  --schema schemas/proposal-provenance.schema.json \
+  --report "${VALIDATION_DIR}/proposal-provenance-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.root_cause.cli \
   --gaps "${OUT_DIR}/gaps.json" "${OUT_DIR}/runtime-gaps.json" \
   --patch-plans "${OUT_DIR}/patch-plan.json" "${OUT_DIR}/runtime-patch-plan.json" \
@@ -50,6 +61,7 @@ fi
     "${OUT_DIR}/trace.json" \
     "${OUT_DIR}/gaps.json" \
     "${OUT_DIR}/patch-plan.json" \
+    "${OUT_DIR}/proposal-provenance.json" \
     "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \
@@ -93,6 +105,7 @@ fi
     "${OUT_DIR}/trace.json" \
     "${OUT_DIR}/gaps.json" \
     "${OUT_DIR}/patch-plan.json" \
+    "${OUT_DIR}/proposal-provenance.json" \
     "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \
@@ -123,5 +136,6 @@ cp "${OUT_DIR}/productization-readiness.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/repro-package.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/root-cause-summary.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/patch-plan-diff.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/proposal-provenance.json" "${BUNDLE_DIR}/"
 
 echo "release bundle: ok"

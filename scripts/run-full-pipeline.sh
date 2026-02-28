@@ -24,6 +24,12 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
   --gaps "${OUT_DIR}/gaps.json" \
   --output "${OUT_DIR}/patch-plan.json"
 
+"${PYTHON_BIN}" -m compat_runtime.proposal_provenance.cli \
+  --patch-plan "${OUT_DIR}/patch-plan.json" \
+  --gaps "${OUT_DIR}/gaps.json" \
+  --trace "${OUT_DIR}/trace.json" \
+  --output "${OUT_DIR}/proposal-provenance.json"
+
 PATCH_PLAN_DIFF_ARGS=(
   --current "${OUT_DIR}/patch-plan.json"
   --current-label "current-base"
@@ -122,6 +128,7 @@ fi
     "${OUT_DIR}/trace.json" \
     "${OUT_DIR}/gaps.json" \
     "${OUT_DIR}/patch-plan.json" \
+    "${OUT_DIR}/proposal-provenance.json" \
     "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \
@@ -165,6 +172,7 @@ fi
     "${OUT_DIR}/trace.json" \
     "${OUT_DIR}/gaps.json" \
     "${OUT_DIR}/patch-plan.json" \
+    "${OUT_DIR}/proposal-provenance.json" \
     "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \

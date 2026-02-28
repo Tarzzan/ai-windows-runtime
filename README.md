@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 20)
+## Current scope (Phase 21)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -71,6 +71,9 @@ Core runtime capabilities in this phase:
 44. Generate patch-plan diff artifacts against optional baseline plans.
 45. Detect added/removed/changed proposals with reviewer-focused action hints.
 46. Validate patch-plan diff artifacts automatically in pipeline and bundle gates.
+47. Generate proposal provenance artifacts linking patch proposals back to gaps and traces.
+48. Compute per-proposal provenance scores and evidence excerpts for reviewer traceability.
+49. Validate proposal provenance artifacts automatically in pipeline and bundle gates.
 
 ## Quick start
 ```bash
@@ -107,6 +110,8 @@ scripts/build-root-cause-summary.sh out
 # out/root-cause-summary.json is generated and schema-validated
 scripts/build-patch-plan-diff.sh out
 # out/patch-plan-diff.json is generated and schema-validated
+scripts/build-proposal-provenance.sh out
+# out/proposal-provenance.json is generated and schema-validated
 scripts/build-repro-package.sh out
 # out/repro-package.json is generated and schema-validated
 pytest -q
