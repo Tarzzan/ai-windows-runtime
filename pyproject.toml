@@ -21,6 +21,7 @@ compat-kpi = "compat_runtime.kpi_tracker.cli:main"
 compat-release-readiness = "compat_runtime.release_readiness.cli:main"
 compat-productization = "compat_runtime.productization.cli:main"
 compat-repro-package = "compat_runtime.repro_package.cli:main"
+compat-root-cause = "compat_runtime.root_cause.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 18)
+## Current scope (Phase 19)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -65,6 +65,9 @@ Core runtime capabilities in this phase:
 38. Generate deterministic reproduction packages for failing scenarios.
 39. Capture environment fingerprint and artifact checksum inventory in repro packages.
 40. Validate repro-package artifacts automatically in full pipeline and release bundle flows.
+41. Generate root-cause clustering summary artifacts from base/runtime gaps.
+42. Correlate gap clusters with patch priorities for actionable triage.
+43. Validate root-cause summary artifacts automatically in pipeline gates.
 
 ## Quick start
 ```bash
@@ -97,6 +100,8 @@ scripts/build-release-bundle.sh out out/release-bundle
 # out/compatibility-matrix.json, out/alpha-release-checklist.json and out/release-bundle-manifest.json are generated and schema-validated
 scripts/check-productization-readiness.sh out
 # out/productization-readiness.json is generated and schema-validated
+scripts/build-root-cause-summary.sh out
+# out/root-cause-summary.json is generated and schema-validated
 scripts/build-repro-package.sh out
 # out/repro-package.json is generated and schema-validated
 pytest -q

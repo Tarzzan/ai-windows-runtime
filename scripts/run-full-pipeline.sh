@@ -35,6 +35,12 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
   --gaps "${OUT_DIR}/runtime-gaps.json" \
   --output "${OUT_DIR}/runtime-patch-plan.json"
 
+"${PYTHON_BIN}" -m compat_runtime.root_cause.cli \
+  --gaps "${OUT_DIR}/gaps.json" "${OUT_DIR}/runtime-gaps.json" \
+  --patch-plans "${OUT_DIR}/patch-plan.json" "${OUT_DIR}/runtime-patch-plan.json" \
+  --labels "base" "runtime" \
+  --output "${OUT_DIR}/root-cause-summary.json"
+
 scripts/validate-artifacts.sh "$OUT_DIR"
 
 "${PYTHON_BIN}" -m compat_runtime.reporting.cli \
@@ -108,6 +114,7 @@ fi
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
+    "${OUT_DIR}/root-cause-summary.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
@@ -149,6 +156,7 @@ fi
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
+    "${OUT_DIR}/root-cause-summary.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \

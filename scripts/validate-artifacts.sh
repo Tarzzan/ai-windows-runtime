@@ -32,6 +32,13 @@ if [[ -f "${OUT_DIR}/runtime-trace.json" ]]; then
     --report "${REPORT_DIR}/runtime-trace-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/root-cause-summary.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/root-cause-summary.json" \
+    --schema schemas/root-cause-summary.schema.json \
+    --report "${REPORT_DIR}/root-cause-summary-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/execution-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/execution-report.json" \

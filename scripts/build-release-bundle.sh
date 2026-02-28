@@ -12,6 +12,17 @@ VALIDATION_DIR="${OUT_DIR}/validation"
 
 mkdir -p "${BUNDLE_DIR}" "${VALIDATION_DIR}"
 
+"${PYTHON_BIN}" -m compat_runtime.root_cause.cli \
+  --gaps "${OUT_DIR}/gaps.json" "${OUT_DIR}/runtime-gaps.json" \
+  --patch-plans "${OUT_DIR}/patch-plan.json" "${OUT_DIR}/runtime-patch-plan.json" \
+  --labels "base" "runtime" \
+  --output "${OUT_DIR}/root-cause-summary.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/root-cause-summary.json" \
+  --schema schemas/root-cause-summary.schema.json \
+  --report "${VALIDATION_DIR}/root-cause-summary-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.release_readiness.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
   --trend-report "${OUT_DIR}/trend-report.json" \
@@ -26,6 +37,7 @@ mkdir -p "${BUNDLE_DIR}" "${VALIDATION_DIR}"
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
+    "${OUT_DIR}/root-cause-summary.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
@@ -67,6 +79,7 @@ mkdir -p "${BUNDLE_DIR}" "${VALIDATION_DIR}"
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
+    "${OUT_DIR}/root-cause-summary.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
@@ -90,5 +103,6 @@ cp "${OUT_DIR}/alpha-release-checklist.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-bundle-manifest.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/productization-readiness.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/repro-package.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/root-cause-summary.json" "${BUNDLE_DIR}/"
 
 echo "release bundle: ok"

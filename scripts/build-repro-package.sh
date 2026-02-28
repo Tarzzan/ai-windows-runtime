@@ -22,6 +22,7 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
+    "${OUT_DIR}/root-cause-summary.json" \
     "${OUT_DIR}/execution-report.json" \
     "${OUT_DIR}/trend-report.json" \
     "${OUT_DIR}/kpi-report.json" \
@@ -37,4 +38,3 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
   --report "${VALIDATION_DIR}/repro-package-validation.json"
 
 echo "repro package: ok"
-
