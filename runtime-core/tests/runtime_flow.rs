@@ -1,6 +1,7 @@
 use runtime_core::{
     ApiStatus, MemoryProtection, PeImportSymbol, ProcessState, RuntimeCore, STILL_ACTIVE,
-    ThreadState, Win32Call, Win32CallResult, load_pe_image, parse_pe_metadata,
+    ThreadState, WaitMultipleStatus, WaitStatus, Win32Call, Win32CallResult, load_pe_image,
+    parse_pe_metadata,
 };
 
 fn pe_with_imports() -> Vec<u8> {
@@ -417,4 +418,120 @@ fn runtime_simulated_win32_calls_cover_process_thread_and_memory() {
         })
         .expect_err("closed process handle cannot be reused");
     assert_eq!(invalid.to_string(), "invalid process handle: 0x00000100");
+}
+
+#[test]
+fn runtime_phase9_sync_file_registry_calls() {
+    let mut core = RuntimeCore::new();
+    core.register_phase9_runtime_apis();
+
+    for api in [
+        "kernel32.WaitForSingleObject",
+        "kernel32.CreateEventW",
+        "kernel32.CreateFileW",
+        "advapi32.RegSetValueExW",
+    ] {
+        let decision = core.dispatch_api(api).expect("api should be registered");
+        assert_eq!(decision.status, ApiStatus::Implemented);
+    }
+
+    let create = core
+        .simulate_win32_call(Win32Call::CreateProcess {
+            image_name: "phase9.exe".to_string(),
+            entry_point_rva: 0x1111,
+        })
+        .expect("process creation should succeed");
+    let Win32CallResult::Process(launch) = create else {
+        panic!("expected process launch");
+    };
+
+    let event = core
+        .simulate_win32_call(Win32Call::CreateEvent {
+            manual_reset: false,
+            initial_state: false,
+            name: Some("ready".to_string()),
+        })
+        .expect("create event should succeed");
+    let Win32CallResult::Handle(event_handle) = event else {
+        panic!("expected event handle");
+    };
+
+    let timeout = core
+        .simulate_win32_call(Win32Call::WaitForSingleObject {
+            handle: event_handle,
+            timeout_ms: 0,
+            waiter_tid: Some(launch.primary_thread_id),
+        })
+        .expect("wait single should succeed");
+    assert_eq!(timeout, Win32CallResult::Wait(WaitStatus::Timeout));
+
+    core.simulate_win32_call(Win32Call::SetEvent { event_handle })
+        .expect("set event should succeed");
+
+    let mutex = core
+        .simulate_win32_call(Win32Call::CreateMutex {
+            initial_owner_tid: None,
+            name: Some("phase9-lock".to_string()),
+        })
+        .expect("create mutex should succeed");
+    let Win32CallResult::Handle(mutex_handle) = mutex else {
+        panic!("expected mutex handle");
+    };
+
+    let all = core
+        .simulate_win32_call(Win32Call::WaitForMultipleObjects {
+            handles: vec![event_handle, mutex_handle],
+            wait_all: true,
+            timeout_ms: 0,
+            waiter_tid: Some(launch.primary_thread_id),
+        })
+        .expect("wait multiple should succeed");
+    assert_eq!(
+        all,
+        Win32CallResult::WaitMultiple(WaitMultipleStatus::AllSignaled)
+    );
+
+    core.simulate_win32_call(Win32Call::ReleaseMutex { mutex_handle })
+        .expect("release mutex should succeed");
+
+    let file = core
+        .simulate_win32_call(Win32Call::OpenFile {
+            path: "C:/phase9/install.log".to_string(),
+            create_if_missing: true,
+        })
+        .expect("open file should succeed");
+    let Win32CallResult::Handle(file_handle) = file else {
+        panic!("expected file handle");
+    };
+    core.simulate_win32_call(Win32Call::WriteFile {
+        file_handle,
+        data: b"stage=ready".to_vec(),
+    })
+    .expect("write file should succeed");
+    core.simulate_win32_call(Win32Call::SetFilePointer {
+        file_handle,
+        position: 0,
+    })
+    .expect("seek file should succeed");
+    let read = core
+        .simulate_win32_call(Win32Call::ReadFile {
+            file_handle,
+            size: 11,
+        })
+        .expect("read file should succeed");
+    assert_eq!(read, Win32CallResult::Bytes(b"stage=ready".to_vec()));
+
+    core.simulate_win32_call(Win32Call::RegSetValue {
+        key_path: "HKCU\\Software\\AIWR".to_string(),
+        value_name: "Mode".to_string(),
+        data: b"desktop".to_vec(),
+    })
+    .expect("reg set should succeed");
+    let reg = core
+        .simulate_win32_call(Win32Call::RegQueryValue {
+            key_path: "HKCU\\Software\\AIWR".to_string(),
+            value_name: "Mode".to_string(),
+        })
+        .expect("reg query should succeed");
+    assert_eq!(reg, Win32CallResult::Bytes(b"desktop".to_vec()));
 }

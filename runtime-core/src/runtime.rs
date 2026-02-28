@@ -4,6 +4,7 @@ use crate::dispatcher::{ApiDispatcher, DispatchDecision, DispatchError};
 use crate::ntcore::{
     Handle, MemoryProtection, MemoryRegion, NtCore, NtError, NtSnapshot, ProcessId, ProcessLaunch,
     ProcessRecord, ProcessState, ThreadId, ThreadLaunch, ThreadRecord, VirtualAddress,
+    WaitMultipleStatus, WaitStatus,
 };
 use crate::pe::{LoadedPeImage, PeError, PeExport, PeImportSymbol, PeMetadata, load_pe_image};
 use crate::win32::{STILL_ACTIVE, Win32Call, Win32CallResult};
@@ -195,6 +196,96 @@ impl RuntimeCore {
         self.nt_core.read_memory(pid, address, size)
     }
 
+    pub fn create_event(
+        &mut self,
+        manual_reset: bool,
+        initial_state: bool,
+        name: Option<&str>,
+    ) -> Handle {
+        self.nt_core.create_event(manual_reset, initial_state, name)
+    }
+
+    pub fn create_mutex(
+        &mut self,
+        initial_owner_tid: Option<ThreadId>,
+        name: Option<&str>,
+    ) -> Handle {
+        self.nt_core.create_mutex(initial_owner_tid, name)
+    }
+
+    pub fn set_event(&mut self, event_handle: Handle) -> Result<(), NtError> {
+        self.nt_core.set_event(event_handle)
+    }
+
+    pub fn reset_event(&mut self, event_handle: Handle) -> Result<(), NtError> {
+        self.nt_core.reset_event(event_handle)
+    }
+
+    pub fn release_mutex(&mut self, mutex_handle: Handle) -> Result<(), NtError> {
+        self.nt_core.release_mutex(mutex_handle)
+    }
+
+    pub fn wait_for_single_object(
+        &mut self,
+        handle: Handle,
+        timeout_ms: u32,
+        waiter_tid: Option<ThreadId>,
+    ) -> Result<WaitStatus, NtError> {
+        self.nt_core
+            .wait_for_single_object(handle, timeout_ms, waiter_tid)
+    }
+
+    pub fn wait_for_multiple_objects(
+        &mut self,
+        handles: &[Handle],
+        wait_all: bool,
+        timeout_ms: u32,
+        waiter_tid: Option<ThreadId>,
+    ) -> Result<WaitMultipleStatus, NtError> {
+        self.nt_core
+            .wait_for_multiple_objects(handles, wait_all, timeout_ms, waiter_tid)
+    }
+
+    pub fn open_file(&mut self, path: &str, create_if_missing: bool) -> Result<Handle, NtError> {
+        self.nt_core.open_file(path, create_if_missing)
+    }
+
+    pub fn write_file(&mut self, file_handle: Handle, data: &[u8]) -> Result<usize, NtError> {
+        self.nt_core.write_file(file_handle, data)
+    }
+
+    pub fn read_file(&mut self, file_handle: Handle, size: usize) -> Result<Vec<u8>, NtError> {
+        self.nt_core.read_file(file_handle, size)
+    }
+
+    pub fn set_file_pointer(
+        &mut self,
+        file_handle: Handle,
+        position: usize,
+    ) -> Result<u64, NtError> {
+        self.nt_core.set_file_pointer(file_handle, position)
+    }
+
+    pub fn file_content(&self, path: &str) -> Option<Vec<u8>> {
+        self.nt_core.file_content(path)
+    }
+
+    pub fn registry_set_value(&mut self, key_path: &str, value_name: &str, data: &[u8]) {
+        self.nt_core.registry_set_value(key_path, value_name, data)
+    }
+
+    pub fn registry_get_value(&self, key_path: &str, value_name: &str) -> Result<Vec<u8>, NtError> {
+        self.nt_core.registry_get_value(key_path, value_name)
+    }
+
+    pub fn registry_delete_value(
+        &mut self,
+        key_path: &str,
+        value_name: &str,
+    ) -> Result<(), NtError> {
+        self.nt_core.registry_delete_value(key_path, value_name)
+    }
+
     pub fn close_handle(&mut self, handle: Handle) -> Result<(), NtError> {
         self.nt_core.close_handle(handle)
     }
@@ -219,6 +310,28 @@ impl RuntimeCore {
             "kernel32.GetExitCodeProcess",
             "kernel32.TerminateProcess",
             "kernel32.CloseHandle",
+        ] {
+            self.dispatcher_mut().register_implemented(api);
+        }
+    }
+
+    pub fn register_phase9_runtime_apis(&mut self) {
+        self.register_phase8_kernel32_apis();
+        for api in [
+            "kernel32.CreateEventW",
+            "kernel32.SetEvent",
+            "kernel32.ResetEvent",
+            "kernel32.CreateMutexW",
+            "kernel32.ReleaseMutex",
+            "kernel32.WaitForSingleObject",
+            "kernel32.WaitForMultipleObjects",
+            "kernel32.CreateFileW",
+            "kernel32.ReadFile",
+            "kernel32.WriteFile",
+            "kernel32.SetFilePointerEx",
+            "advapi32.RegSetValueExW",
+            "advapi32.RegQueryValueExW",
+            "advapi32.RegDeleteValueW",
         ] {
             self.dispatcher_mut().register_implemented(api);
         }
@@ -290,6 +403,87 @@ impl RuntimeCore {
                 Ok(Win32CallResult::Bytes(
                     self.read_memory(pid, address, size)?,
                 ))
+            }
+            Win32Call::CreateEvent {
+                manual_reset,
+                initial_state,
+                name,
+            } => Ok(Win32CallResult::Handle(self.create_event(
+                manual_reset,
+                initial_state,
+                name.as_deref(),
+            ))),
+            Win32Call::SetEvent { event_handle } => {
+                self.set_event(event_handle)?;
+                Ok(Win32CallResult::None)
+            }
+            Win32Call::ResetEvent { event_handle } => {
+                self.reset_event(event_handle)?;
+                Ok(Win32CallResult::None)
+            }
+            Win32Call::CreateMutex {
+                initial_owner_tid,
+                name,
+            } => Ok(Win32CallResult::Handle(
+                self.create_mutex(initial_owner_tid, name.as_deref()),
+            )),
+            Win32Call::ReleaseMutex { mutex_handle } => {
+                self.release_mutex(mutex_handle)?;
+                Ok(Win32CallResult::None)
+            }
+            Win32Call::WaitForSingleObject {
+                handle,
+                timeout_ms,
+                waiter_tid,
+            } => Ok(Win32CallResult::Wait(
+                self.wait_for_single_object(handle, timeout_ms, waiter_tid)?,
+            )),
+            Win32Call::WaitForMultipleObjects {
+                handles,
+                wait_all,
+                timeout_ms,
+                waiter_tid,
+            } => Ok(Win32CallResult::WaitMultiple(
+                self.wait_for_multiple_objects(&handles, wait_all, timeout_ms, waiter_tid)?,
+            )),
+            Win32Call::OpenFile {
+                path,
+                create_if_missing,
+            } => Ok(Win32CallResult::Handle(
+                self.open_file(&path, create_if_missing)?,
+            )),
+            Win32Call::WriteFile { file_handle, data } => {
+                Ok(Win32CallResult::Size(self.write_file(file_handle, &data)?))
+            }
+            Win32Call::ReadFile { file_handle, size } => {
+                Ok(Win32CallResult::Bytes(self.read_file(file_handle, size)?))
+            }
+            Win32Call::SetFilePointer {
+                file_handle,
+                position,
+            } => Ok(Win32CallResult::Position(
+                self.set_file_pointer(file_handle, position)?,
+            )),
+            Win32Call::RegSetValue {
+                key_path,
+                value_name,
+                data,
+            } => {
+                self.registry_set_value(&key_path, &value_name, &data);
+                Ok(Win32CallResult::None)
+            }
+            Win32Call::RegQueryValue {
+                key_path,
+                value_name,
+            } => Ok(Win32CallResult::Bytes(
+                self.registry_get_value(&key_path, &value_name)?,
+            )),
+            Win32Call::RegDeleteValue {
+                key_path,
+                value_name,
+            } => {
+                self.registry_delete_value(&key_path, &value_name)?;
+                Ok(Win32CallResult::None)
             }
             Win32Call::TerminateProcess {
                 process_handle,
@@ -495,7 +689,9 @@ impl RuntimeCore {
 
 #[cfg(test)]
 mod tests {
-    use crate::ntcore::{MemoryProtection, ProcessState, ThreadState};
+    use crate::ntcore::{
+        MemoryProtection, ProcessState, ThreadState, WaitMultipleStatus, WaitStatus,
+    };
     use crate::runtime::RuntimeCore;
     use crate::win32::{STILL_ACTIVE, Win32Call, Win32CallResult};
 
@@ -654,5 +850,101 @@ mod tests {
             })
             .expect("get exit code should succeed");
         assert_eq!(code, Win32CallResult::ExitCode(STILL_ACTIVE));
+    }
+
+    #[test]
+    fn runtime_simulates_wait_file_and_registry_calls() {
+        let mut core = RuntimeCore::new();
+        let launch = core.launch_process("bootstrap.exe", 0x1000);
+
+        let evt = core
+            .simulate_win32_call(Win32Call::CreateEvent {
+                manual_reset: false,
+                initial_state: false,
+                name: Some("ready".to_string()),
+            })
+            .expect("create event should succeed");
+        let Win32CallResult::Handle(event_handle) = evt else {
+            panic!("expected handle");
+        };
+
+        let wait = core
+            .simulate_win32_call(Win32Call::WaitForSingleObject {
+                handle: event_handle,
+                timeout_ms: 0,
+                waiter_tid: Some(launch.primary_thread_id),
+            })
+            .expect("wait should succeed");
+        assert_eq!(wait, Win32CallResult::Wait(WaitStatus::Timeout));
+
+        core.simulate_win32_call(Win32Call::SetEvent { event_handle })
+            .expect("set event should succeed");
+
+        let mutex = core
+            .simulate_win32_call(Win32Call::CreateMutex {
+                initial_owner_tid: None,
+                name: Some("lock".to_string()),
+            })
+            .expect("create mutex should succeed");
+        let Win32CallResult::Handle(mutex_handle) = mutex else {
+            panic!("expected handle");
+        };
+
+        let wait_multi = core
+            .simulate_win32_call(Win32Call::WaitForMultipleObjects {
+                handles: vec![event_handle, mutex_handle],
+                wait_all: true,
+                timeout_ms: 0,
+                waiter_tid: Some(launch.primary_thread_id),
+            })
+            .expect("wait multiple should succeed");
+        assert_eq!(
+            wait_multi,
+            Win32CallResult::WaitMultiple(WaitMultipleStatus::AllSignaled)
+        );
+
+        let file = core
+            .simulate_win32_call(Win32Call::OpenFile {
+                path: "C:/temp/phase9.log".to_string(),
+                create_if_missing: true,
+            })
+            .expect("open file should succeed");
+        let Win32CallResult::Handle(file_handle) = file else {
+            panic!("expected handle");
+        };
+
+        let write = core
+            .simulate_win32_call(Win32Call::WriteFile {
+                file_handle,
+                data: b"phase9".to_vec(),
+            })
+            .expect("write file should succeed");
+        assert_eq!(write, Win32CallResult::Size(6));
+        core.simulate_win32_call(Win32Call::SetFilePointer {
+            file_handle,
+            position: 0,
+        })
+        .expect("set file pointer should succeed");
+        let read = core
+            .simulate_win32_call(Win32Call::ReadFile {
+                file_handle,
+                size: 6,
+            })
+            .expect("read file should succeed");
+        assert_eq!(read, Win32CallResult::Bytes(b"phase9".to_vec()));
+
+        core.simulate_win32_call(Win32Call::RegSetValue {
+            key_path: "HKCU\\Software\\AIWR".to_string(),
+            value_name: "Channel".to_string(),
+            data: b"beta".to_vec(),
+        })
+        .expect("reg set should succeed");
+        let reg = core
+            .simulate_win32_call(Win32Call::RegQueryValue {
+                key_path: "HKCU\\Software\\AIWR".to_string(),
+                value_name: "Channel".to_string(),
+            })
+            .expect("reg query should succeed");
+        assert_eq!(reg, Win32CallResult::Bytes(b"beta".to_vec()));
     }
 }

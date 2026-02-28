@@ -24,6 +24,19 @@ pub struct MemoryRegion {
     pub label: Option<String>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum WaitStatus {
+    Signaled,
+    Timeout,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum WaitMultipleStatus {
+    SignaledIndex(usize),
+    AllSignaled,
+    Timeout,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ProcessState {
     Running,
@@ -77,6 +90,10 @@ pub struct NtSnapshot {
     pub handle_count: usize,
     pub memory_region_count: usize,
     pub allocated_bytes: usize,
+    pub sync_object_count: usize,
+    pub open_file_count: usize,
+    pub registry_key_count: usize,
+    pub registry_value_count: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -103,6 +120,13 @@ pub enum NtError {
     InvalidHandle(Handle),
     InvalidProcessHandle(Handle),
     InvalidThreadHandle(Handle),
+    InvalidSyncHandle(Handle),
+    InvalidFileHandle(Handle),
+    FileNotFound(String),
+    UnknownRegistryValue {
+        key_path: String,
+        value_name: String,
+    },
 }
 
 impl fmt::Display for NtError {
@@ -135,6 +159,19 @@ impl fmt::Display for NtError {
             Self::InvalidThreadHandle(handle) => {
                 write!(f, "invalid thread handle: 0x{handle:08X}")
             }
+            Self::InvalidSyncHandle(handle) => {
+                write!(f, "invalid sync handle: 0x{handle:08X}")
+            }
+            Self::InvalidFileHandle(handle) => {
+                write!(f, "invalid file handle: 0x{handle:08X}")
+            }
+            Self::FileNotFound(path) => write!(f, "file not found: {path}"),
+            Self::UnknownRegistryValue {
+                key_path,
+                value_name,
+            } => {
+                write!(f, "registry value not found: {key_path}::{value_name}")
+            }
         }
     }
 }
@@ -145,6 +182,8 @@ impl std::error::Error for NtError {}
 enum HandleTarget {
     Process(ProcessId),
     Thread(ThreadId),
+    Sync(SyncId),
+    File(FileId),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -153,16 +192,44 @@ struct MemoryRegionRecord {
     bytes: Vec<u8>,
 }
 
+type SyncId = u32;
+type FileId = u32;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum SyncObject {
+    Event {
+        manual_reset: bool,
+        signaled: bool,
+        name: Option<String>,
+    },
+    Mutex {
+        owner_tid: Option<ThreadId>,
+        name: Option<String>,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct FileHandleRecord {
+    path: String,
+    cursor: usize,
+}
+
 #[derive(Debug)]
 pub struct NtCore {
     next_pid: ProcessId,
     next_tid: ThreadId,
     next_handle: Handle,
     next_mem_base: VirtualAddress,
+    next_sync_id: SyncId,
+    next_file_id: FileId,
     processes: HashMap<ProcessId, ProcessRecord>,
     threads: HashMap<ThreadId, ThreadRecord>,
     handles: HashMap<Handle, HandleTarget>,
     memory_regions: HashMap<ProcessId, Vec<MemoryRegionRecord>>,
+    sync_objects: HashMap<SyncId, SyncObject>,
+    file_contents: HashMap<String, Vec<u8>>,
+    open_files: HashMap<FileId, FileHandleRecord>,
+    registry: HashMap<String, HashMap<String, Vec<u8>>>,
 }
 
 impl Default for NtCore {
@@ -172,10 +239,16 @@ impl Default for NtCore {
             next_tid: 10_000,
             next_handle: 0x100,
             next_mem_base: 0x0000_0000_1000_0000,
+            next_sync_id: 1,
+            next_file_id: 1,
             processes: HashMap::new(),
             threads: HashMap::new(),
             handles: HashMap::new(),
             memory_regions: HashMap::new(),
+            sync_objects: HashMap::new(),
+            file_contents: HashMap::new(),
+            open_files: HashMap::new(),
+            registry: HashMap::new(),
         }
     }
 }
@@ -226,6 +299,82 @@ impl NtCore {
                 None
             }
         })
+    }
+
+    fn resolve_sync_id(&self, handle: Handle) -> Result<SyncId, NtError> {
+        match self.handles.get(&handle) {
+            Some(HandleTarget::Sync(id)) => Ok(*id),
+            _ => Err(NtError::InvalidSyncHandle(handle)),
+        }
+    }
+
+    fn resolve_file_id(&self, handle: Handle) -> Result<FileId, NtError> {
+        match self.handles.get(&handle) {
+            Some(HandleTarget::File(id)) => Ok(*id),
+            _ => Err(NtError::InvalidFileHandle(handle)),
+        }
+    }
+
+    fn is_handle_signaled(
+        &self,
+        handle: Handle,
+        waiter_tid: Option<ThreadId>,
+    ) -> Result<bool, NtError> {
+        match self.handles.get(&handle).copied() {
+            Some(HandleTarget::Process(pid)) => Ok(self
+                .processes
+                .get(&pid)
+                .is_some_and(|p| matches!(p.state, ProcessState::Terminated { .. }))),
+            Some(HandleTarget::Thread(tid)) => Ok(self
+                .threads
+                .get(&tid)
+                .is_some_and(|t| matches!(t.state, ThreadState::Terminated { .. }))),
+            Some(HandleTarget::Sync(sync_id)) => match self.sync_objects.get(&sync_id) {
+                Some(SyncObject::Event { signaled, .. }) => Ok(*signaled),
+                Some(SyncObject::Mutex { owner_tid, .. }) => {
+                    Ok(owner_tid.is_none() || *owner_tid == waiter_tid)
+                }
+                None => Err(NtError::InvalidSyncHandle(handle)),
+            },
+            Some(HandleTarget::File(_)) => Ok(true),
+            None => Err(NtError::InvalidHandle(handle)),
+        }
+    }
+
+    fn consume_handle_signal(
+        &mut self,
+        handle: Handle,
+        waiter_tid: Option<ThreadId>,
+    ) -> Result<(), NtError> {
+        match self.handles.get(&handle).copied() {
+            Some(HandleTarget::Process(_))
+            | Some(HandleTarget::Thread(_))
+            | Some(HandleTarget::File(_)) => Ok(()),
+            Some(HandleTarget::Sync(sync_id)) => {
+                let sync = self
+                    .sync_objects
+                    .get_mut(&sync_id)
+                    .ok_or(NtError::InvalidSyncHandle(handle))?;
+                match sync {
+                    SyncObject::Event {
+                        manual_reset,
+                        signaled,
+                        ..
+                    } => {
+                        if *signaled && !*manual_reset {
+                            *signaled = false;
+                        }
+                    }
+                    SyncObject::Mutex { owner_tid, .. } => {
+                        if owner_tid.is_none() {
+                            *owner_tid = Some(waiter_tid.unwrap_or(0));
+                        }
+                    }
+                }
+                Ok(())
+            }
+            None => Err(NtError::InvalidHandle(handle)),
+        }
     }
 
     pub fn launch_process(&mut self, image_name: &str, entry_point_rva: u32) -> ProcessLaunch {
@@ -566,10 +715,262 @@ impl NtCore {
         Ok(out)
     }
 
-    pub fn close_handle(&mut self, handle: Handle) -> Result<(), NtError> {
-        if self.handles.remove(&handle).is_none() {
-            return Err(NtError::InvalidHandle(handle));
+    pub fn create_event(
+        &mut self,
+        manual_reset: bool,
+        initial_state: bool,
+        name: Option<&str>,
+    ) -> Handle {
+        let sync_id = self.next_sync_id;
+        self.next_sync_id = self.next_sync_id.saturating_add(1);
+        self.sync_objects.insert(
+            sync_id,
+            SyncObject::Event {
+                manual_reset,
+                signaled: initial_state,
+                name: name.map(|s| s.to_string()),
+            },
+        );
+        self.alloc_handle(HandleTarget::Sync(sync_id))
+    }
+
+    pub fn create_mutex(
+        &mut self,
+        initial_owner_tid: Option<ThreadId>,
+        name: Option<&str>,
+    ) -> Handle {
+        let sync_id = self.next_sync_id;
+        self.next_sync_id = self.next_sync_id.saturating_add(1);
+        self.sync_objects.insert(
+            sync_id,
+            SyncObject::Mutex {
+                owner_tid: initial_owner_tid,
+                name: name.map(|s| s.to_string()),
+            },
+        );
+        self.alloc_handle(HandleTarget::Sync(sync_id))
+    }
+
+    pub fn set_event(&mut self, event_handle: Handle) -> Result<(), NtError> {
+        let sync_id = self.resolve_sync_id(event_handle)?;
+        let sync = self
+            .sync_objects
+            .get_mut(&sync_id)
+            .ok_or(NtError::InvalidSyncHandle(event_handle))?;
+        match sync {
+            SyncObject::Event { signaled, .. } => {
+                *signaled = true;
+                Ok(())
+            }
+            _ => Err(NtError::InvalidSyncHandle(event_handle)),
         }
+    }
+
+    pub fn reset_event(&mut self, event_handle: Handle) -> Result<(), NtError> {
+        let sync_id = self.resolve_sync_id(event_handle)?;
+        let sync = self
+            .sync_objects
+            .get_mut(&sync_id)
+            .ok_or(NtError::InvalidSyncHandle(event_handle))?;
+        match sync {
+            SyncObject::Event { signaled, .. } => {
+                *signaled = false;
+                Ok(())
+            }
+            _ => Err(NtError::InvalidSyncHandle(event_handle)),
+        }
+    }
+
+    pub fn release_mutex(&mut self, mutex_handle: Handle) -> Result<(), NtError> {
+        let sync_id = self.resolve_sync_id(mutex_handle)?;
+        let sync = self
+            .sync_objects
+            .get_mut(&sync_id)
+            .ok_or(NtError::InvalidSyncHandle(mutex_handle))?;
+        match sync {
+            SyncObject::Mutex { owner_tid, .. } => {
+                *owner_tid = None;
+                Ok(())
+            }
+            _ => Err(NtError::InvalidSyncHandle(mutex_handle)),
+        }
+    }
+
+    pub fn wait_for_single_object(
+        &mut self,
+        handle: Handle,
+        _timeout_ms: u32,
+        waiter_tid: Option<ThreadId>,
+    ) -> Result<WaitStatus, NtError> {
+        if self.is_handle_signaled(handle, waiter_tid)? {
+            self.consume_handle_signal(handle, waiter_tid)?;
+            Ok(WaitStatus::Signaled)
+        } else {
+            Ok(WaitStatus::Timeout)
+        }
+    }
+
+    pub fn wait_for_multiple_objects(
+        &mut self,
+        handles: &[Handle],
+        wait_all: bool,
+        _timeout_ms: u32,
+        waiter_tid: Option<ThreadId>,
+    ) -> Result<WaitMultipleStatus, NtError> {
+        if handles.is_empty() {
+            return Ok(WaitMultipleStatus::Timeout);
+        }
+
+        if wait_all {
+            for handle in handles {
+                if !self.is_handle_signaled(*handle, waiter_tid)? {
+                    return Ok(WaitMultipleStatus::Timeout);
+                }
+            }
+            for handle in handles {
+                self.consume_handle_signal(*handle, waiter_tid)?;
+            }
+            Ok(WaitMultipleStatus::AllSignaled)
+        } else {
+            for (idx, handle) in handles.iter().enumerate() {
+                if self.is_handle_signaled(*handle, waiter_tid)? {
+                    self.consume_handle_signal(*handle, waiter_tid)?;
+                    return Ok(WaitMultipleStatus::SignaledIndex(idx));
+                }
+            }
+            Ok(WaitMultipleStatus::Timeout)
+        }
+    }
+
+    pub fn open_file(&mut self, path: &str, create_if_missing: bool) -> Result<Handle, NtError> {
+        if create_if_missing {
+            self.file_contents.entry(path.to_string()).or_default();
+        } else if !self.file_contents.contains_key(path) {
+            return Err(NtError::FileNotFound(path.to_string()));
+        }
+
+        let file_id = self.next_file_id;
+        self.next_file_id = self.next_file_id.saturating_add(1);
+        self.open_files.insert(
+            file_id,
+            FileHandleRecord {
+                path: path.to_string(),
+                cursor: 0,
+            },
+        );
+
+        Ok(self.alloc_handle(HandleTarget::File(file_id)))
+    }
+
+    pub fn write_file(&mut self, file_handle: Handle, data: &[u8]) -> Result<usize, NtError> {
+        let file_id = self.resolve_file_id(file_handle)?;
+        let file = self
+            .open_files
+            .get_mut(&file_id)
+            .ok_or(NtError::InvalidFileHandle(file_handle))?;
+
+        let content = self.file_contents.entry(file.path.clone()).or_default();
+
+        if file.cursor > content.len() {
+            content.resize(file.cursor, 0);
+        }
+
+        let end = file.cursor + data.len();
+        if end > content.len() {
+            content.resize(end, 0);
+        }
+
+        content[file.cursor..end].copy_from_slice(data);
+        file.cursor = end;
+        Ok(data.len())
+    }
+
+    pub fn read_file(&mut self, file_handle: Handle, size: usize) -> Result<Vec<u8>, NtError> {
+        let file_id = self.resolve_file_id(file_handle)?;
+        let file = self
+            .open_files
+            .get_mut(&file_id)
+            .ok_or(NtError::InvalidFileHandle(file_handle))?;
+
+        let content = self
+            .file_contents
+            .get(&file.path)
+            .ok_or_else(|| NtError::FileNotFound(file.path.clone()))?;
+
+        let start = file.cursor;
+        let end = start.saturating_add(size).min(content.len());
+        file.cursor = end;
+        Ok(content[start..end].to_vec())
+    }
+
+    pub fn set_file_pointer(
+        &mut self,
+        file_handle: Handle,
+        position: usize,
+    ) -> Result<u64, NtError> {
+        let file_id = self.resolve_file_id(file_handle)?;
+        let file = self
+            .open_files
+            .get_mut(&file_id)
+            .ok_or(NtError::InvalidFileHandle(file_handle))?;
+        file.cursor = position;
+        Ok(position as u64)
+    }
+
+    pub fn file_content(&self, path: &str) -> Option<Vec<u8>> {
+        self.file_contents.get(path).cloned()
+    }
+
+    pub fn registry_set_value(&mut self, key_path: &str, value_name: &str, data: &[u8]) {
+        self.registry
+            .entry(key_path.to_string())
+            .or_default()
+            .insert(value_name.to_string(), data.to_vec());
+    }
+
+    pub fn registry_get_value(&self, key_path: &str, value_name: &str) -> Result<Vec<u8>, NtError> {
+        self.registry
+            .get(key_path)
+            .and_then(|values| values.get(value_name))
+            .cloned()
+            .ok_or_else(|| NtError::UnknownRegistryValue {
+                key_path: key_path.to_string(),
+                value_name: value_name.to_string(),
+            })
+    }
+
+    pub fn registry_delete_value(
+        &mut self,
+        key_path: &str,
+        value_name: &str,
+    ) -> Result<(), NtError> {
+        let Some(values) = self.registry.get_mut(key_path) else {
+            return Err(NtError::UnknownRegistryValue {
+                key_path: key_path.to_string(),
+                value_name: value_name.to_string(),
+            });
+        };
+        if values.remove(value_name).is_none() {
+            return Err(NtError::UnknownRegistryValue {
+                key_path: key_path.to_string(),
+                value_name: value_name.to_string(),
+            });
+        }
+        if values.is_empty() {
+            self.registry.remove(key_path);
+        }
+        Ok(())
+    }
+
+    pub fn close_handle(&mut self, handle: Handle) -> Result<(), NtError> {
+        let Some(target) = self.handles.remove(&handle) else {
+            return Err(NtError::InvalidHandle(handle));
+        };
+
+        if let HandleTarget::File(file_id) = target {
+            self.open_files.remove(&file_id);
+        }
+
         Ok(())
     }
 
@@ -616,6 +1017,9 @@ impl NtCore {
             .map(|r| r.meta.size)
             .sum();
 
+        let registry_key_count = self.registry.len();
+        let registry_value_count = self.registry.values().map(HashMap::len).sum();
+
         NtSnapshot {
             process_count: self.processes.len(),
             thread_count: self.threads.len(),
@@ -625,13 +1029,20 @@ impl NtCore {
             handle_count: self.handles.len(),
             memory_region_count,
             allocated_bytes,
+            sync_object_count: self.sync_objects.len(),
+            open_file_count: self.open_files.len(),
+            registry_key_count,
+            registry_value_count,
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{MemoryProtection, NtCore, NtError, ProcessState, ThreadState};
+    use super::{
+        MemoryProtection, NtCore, NtError, ProcessState, ThreadState, WaitMultipleStatus,
+        WaitStatus,
+    };
 
     #[test]
     fn launch_process_creates_primary_thread_and_handles() {
@@ -808,5 +1219,86 @@ mod tests {
             .alloc_memory(launch.pid, 4096, MemoryProtection::ReadWrite, None)
             .expect_err("terminated process should reject new memory alloc");
         assert_eq!(err, NtError::ProcessTerminated(launch.pid));
+    }
+
+    #[test]
+    fn event_and_mutex_waits_are_deterministic() {
+        let mut nt = NtCore::new();
+        let launch = nt.launch_process("setup.exe", 0x1000);
+
+        let evt = nt.create_event(false, false, Some("bootstrap-ready"));
+        assert_eq!(
+            nt.wait_for_single_object(evt, 0, Some(launch.primary_thread_id))
+                .expect("wait should succeed"),
+            WaitStatus::Timeout
+        );
+
+        nt.set_event(evt).expect("set event should succeed");
+        assert_eq!(
+            nt.wait_for_single_object(evt, 0, Some(launch.primary_thread_id))
+                .expect("wait should succeed"),
+            WaitStatus::Signaled
+        );
+        assert_eq!(
+            nt.wait_for_single_object(evt, 0, Some(launch.primary_thread_id))
+                .expect("auto-reset event should no longer be signaled"),
+            WaitStatus::Timeout
+        );
+
+        let mtx = nt.create_mutex(None, Some("global-lock"));
+        assert_eq!(
+            nt.wait_for_single_object(mtx, 0, Some(launch.primary_thread_id))
+                .expect("mutex wait should acquire"),
+            WaitStatus::Signaled
+        );
+        assert_eq!(
+            nt.wait_for_single_object(mtx, 0, Some(99_999))
+                .expect("mutex wait should report timeout for other owner"),
+            WaitStatus::Timeout
+        );
+        nt.release_mutex(mtx).expect("release mutex should succeed");
+
+        let all = nt
+            .wait_for_multiple_objects(&[evt, mtx], true, 0, Some(launch.primary_thread_id))
+            .expect("wait multiple should succeed");
+        assert_eq!(all, WaitMultipleStatus::Timeout);
+        nt.set_event(evt).expect("set event should succeed");
+        let all = nt
+            .wait_for_multiple_objects(&[evt, mtx], true, 0, Some(launch.primary_thread_id))
+            .expect("wait multiple should succeed");
+        assert_eq!(all, WaitMultipleStatus::AllSignaled);
+    }
+
+    #[test]
+    fn file_and_registry_adapters_store_roundtrip_data() {
+        let mut nt = NtCore::new();
+
+        let file = nt
+            .open_file("C:/temp/setup.log", true)
+            .expect("open file should succeed");
+        nt.write_file(file, b"hello")
+            .expect("write file should succeed");
+        nt.set_file_pointer(file, 0)
+            .expect("seek file should succeed");
+        let data = nt.read_file(file, 5).expect("read file should succeed");
+        assert_eq!(data, b"hello".to_vec());
+        assert_eq!(
+            nt.file_content("C:/temp/setup.log")
+                .expect("content should exist"),
+            b"hello".to_vec()
+        );
+
+        nt.registry_set_value("HKCU\\Software\\AIWR", "InstallDir", b"C:\\Apps");
+        assert_eq!(
+            nt.registry_get_value("HKCU\\Software\\AIWR", "InstallDir")
+                .expect("registry value should exist"),
+            b"C:\\Apps".to_vec()
+        );
+        nt.registry_delete_value("HKCU\\Software\\AIWR", "InstallDir")
+            .expect("delete registry value should succeed");
+        let err = nt
+            .registry_get_value("HKCU\\Software\\AIWR", "InstallDir")
+            .expect_err("deleted registry value should be gone");
+        assert!(matches!(err, NtError::UnknownRegistryValue { .. }));
     }
 }

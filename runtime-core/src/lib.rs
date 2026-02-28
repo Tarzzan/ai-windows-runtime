@@ -8,6 +8,7 @@ pub use dispatcher::{ApiDispatcher, ApiStatus, DispatchDecision, DispatchError};
 pub use ntcore::{
     Handle, MemoryProtection, MemoryRegion, NtCore, NtError, NtSnapshot, ProcessId, ProcessLaunch,
     ProcessRecord, ProcessState, ThreadId, ThreadLaunch, ThreadRecord, ThreadState, VirtualAddress,
+    WaitMultipleStatus, WaitStatus,
 };
 pub use pe::{
     LoadedPeImage, PeError, PeExport, PeImport, PeImportFunction, PeImportSymbol, PeMetadata,
