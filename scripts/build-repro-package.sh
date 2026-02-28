@@ -19,6 +19,7 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/trace.json" \
     "${OUT_DIR}/gaps.json" \
     "${OUT_DIR}/patch-plan.json" \
+    "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \

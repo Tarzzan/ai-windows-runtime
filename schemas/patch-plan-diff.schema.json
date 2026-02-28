@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Patch Plan Diff Artifact",
+  "type": "object",
+  "required": [
+    "artifact_version",
+    "generated_at",
+    "sources",
+    "summary",
+    "added",
+    "removed",
+    "changed",
+    "reviewer_focus"
+  ],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "sources": {
+      "type": "object",
+      "required": ["baseline_label", "current_label"],
+      "properties": {
+        "baseline_label": {"type": "string"},
+        "current_label": {"type": "string"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "baseline_count",
+        "current_count",
+        "added",
+        "removed",
+        "changed",
+        "unchanged"
+      ],
+      "properties": {
+        "baseline_count": {"type": "integer"},
+        "current_count": {"type": "integer"},
+        "added": {"type": "integer"},
+        "removed": {"type": "integer"},
+        "changed": {"type": "integer"},
+        "unchanged": {"type": "integer"}
+      }
+    },
+    "added": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
+    "removed": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
+    "changed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["gap_id", "changed_fields", "before", "after"],
+        "properties": {
+          "gap_id": {"type": "string"},
+          "changed_fields": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "before": {"type": "object"},
+          "after": {"type": "object"}
+        }
+      }
+    },
+    "reviewer_focus": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}
+

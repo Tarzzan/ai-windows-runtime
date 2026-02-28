@@ -9,8 +9,24 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 OUT_DIR="${1:-out}"
 BUNDLE_DIR="${2:-out/release-bundle}"
 VALIDATION_DIR="${OUT_DIR}/validation"
+BASELINE_PATCH_PLAN="${BASELINE_PATCH_PLAN:-}"
 
 mkdir -p "${BUNDLE_DIR}" "${VALIDATION_DIR}"
+
+PATCH_PLAN_DIFF_ARGS=(
+  --current "${OUT_DIR}/patch-plan.json"
+  --current-label "current-base"
+  --output "${OUT_DIR}/patch-plan-diff.json"
+)
+if [[ -n "${BASELINE_PATCH_PLAN}" && -f "${BASELINE_PATCH_PLAN}" ]]; then
+  PATCH_PLAN_DIFF_ARGS+=(--baseline "${BASELINE_PATCH_PLAN}" --baseline-label "baseline-base")
+fi
+"${PYTHON_BIN}" -m compat_runtime.patch_plan_diff.cli "${PATCH_PLAN_DIFF_ARGS[@]}"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/patch-plan-diff.json" \
+  --schema schemas/patch-plan-diff.schema.json \
+  --report "${VALIDATION_DIR}/patch-plan-diff-validation.json"
 
 "${PYTHON_BIN}" -m compat_runtime.root_cause.cli \
   --gaps "${OUT_DIR}/gaps.json" "${OUT_DIR}/runtime-gaps.json" \
@@ -34,6 +50,7 @@ mkdir -p "${BUNDLE_DIR}" "${VALIDATION_DIR}"
     "${OUT_DIR}/trace.json" \
     "${OUT_DIR}/gaps.json" \
     "${OUT_DIR}/patch-plan.json" \
+    "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
@@ -76,6 +93,7 @@ mkdir -p "${BUNDLE_DIR}" "${VALIDATION_DIR}"
     "${OUT_DIR}/trace.json" \
     "${OUT_DIR}/gaps.json" \
     "${OUT_DIR}/patch-plan.json" \
+    "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
@@ -104,5 +122,6 @@ cp "${OUT_DIR}/release-bundle-manifest.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/productization-readiness.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/repro-package.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/root-cause-summary.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/patch-plan-diff.json" "${BUNDLE_DIR}/"
 
 echo "release bundle: ok"

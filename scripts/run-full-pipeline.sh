@@ -9,6 +9,7 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 OUT_DIR="${1:-out}"
 VALIDATION_DIR="${OUT_DIR}/validation"
 BASELINE_EXECUTION_REPORT="${BASELINE_EXECUTION_REPORT:-}"
+BASELINE_PATCH_PLAN="${BASELINE_PATCH_PLAN:-}"
 mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
 
 "${PYTHON_BIN}" -m compat_runtime.trace_collector.cli \
@@ -22,6 +23,16 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
 "${PYTHON_BIN}" -m compat_runtime.patch_orchestrator.cli \
   --gaps "${OUT_DIR}/gaps.json" \
   --output "${OUT_DIR}/patch-plan.json"
+
+PATCH_PLAN_DIFF_ARGS=(
+  --current "${OUT_DIR}/patch-plan.json"
+  --current-label "current-base"
+  --output "${OUT_DIR}/patch-plan-diff.json"
+)
+if [[ -n "${BASELINE_PATCH_PLAN}" && -f "${BASELINE_PATCH_PLAN}" ]]; then
+  PATCH_PLAN_DIFF_ARGS+=(--baseline "${BASELINE_PATCH_PLAN}" --baseline-label "baseline-base")
+fi
+"${PYTHON_BIN}" -m compat_runtime.patch_plan_diff.cli "${PATCH_PLAN_DIFF_ARGS[@]}"
 
 "${PYTHON_BIN}" -m compat_runtime.telemetry_adapter.cli \
   --telemetry examples/sample-runtime-telemetry.json \
@@ -111,6 +122,7 @@ fi
     "${OUT_DIR}/trace.json" \
     "${OUT_DIR}/gaps.json" \
     "${OUT_DIR}/patch-plan.json" \
+    "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
@@ -153,6 +165,7 @@ fi
     "${OUT_DIR}/trace.json" \
     "${OUT_DIR}/gaps.json" \
     "${OUT_DIR}/patch-plan.json" \
+    "${OUT_DIR}/patch-plan-diff.json" \
     "${OUT_DIR}/runtime-trace.json" \
     "${OUT_DIR}/runtime-gaps.json" \
     "${OUT_DIR}/runtime-patch-plan.json" \
