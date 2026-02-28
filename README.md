@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 16)
+## Current scope (Phase 17)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -60,6 +60,8 @@ Core runtime capabilities in this phase:
 33. Export dashboard timeseries artifacts for observability and milestone tracking.
 34. Generate compatibility matrix and alpha release checklist artifacts.
 35. Build release bundle manifest with checksum inventory for packaged deliverables.
+36. Publish contributor runbook, corpus contribution protocol, and security review checklist.
+37. Validate productization governance artifacts automatically in pipeline gates.
 
 ## Quick start
 ```bash
@@ -90,6 +92,8 @@ scripts/build-kpi-report.sh out/execution-report.json out/trend-report.json
 # out/kpi-report.json and out/dashboard-timeseries.json are generated and schema-validated
 scripts/build-release-bundle.sh out out/release-bundle
 # out/compatibility-matrix.json, out/alpha-release-checklist.json and out/release-bundle-manifest.json are generated and schema-validated
+scripts/check-productization-readiness.sh out
+# out/productization-readiness.json is generated and schema-validated
 pytest -q
 
 # Native runtime core checks

@@ -128,4 +128,13 @@ fi
   --schema schemas/release-bundle-manifest.schema.json \
   --report "${VALIDATION_DIR}/release-bundle-manifest-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.productization.cli \
+  --root "${ROOT_DIR}" \
+  --output "${OUT_DIR}/productization-readiness.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/productization-readiness.json" \
+  --schema schemas/productization-readiness.schema.json \
+  --report "${VALIDATION_DIR}/productization-readiness-validation.json"
+
 echo "full pipeline: ok"

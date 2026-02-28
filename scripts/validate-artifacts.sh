@@ -81,4 +81,11 @@ if [[ -f "${OUT_DIR}/release-bundle-manifest.json" ]]; then
     --report "${REPORT_DIR}/release-bundle-manifest-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/productization-readiness.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/productization-readiness.json" \
+    --schema schemas/productization-readiness.schema.json \
+    --report "${REPORT_DIR}/productization-readiness-validation.json"
+fi
+
 echo "artifact validation: ok"

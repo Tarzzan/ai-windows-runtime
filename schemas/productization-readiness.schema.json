@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Productization Readiness Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "ready", "summary", "checks"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "ready": {"type": "boolean"},
+    "summary": {
+      "type": "object",
+      "required": ["total_checks", "pass_checks", "fail_checks"],
+      "properties": {
+        "total_checks": {"type": "integer"},
+        "pass_checks": {"type": "integer"},
+        "fail_checks": {"type": "integer"}
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "exists", "headings_ok", "missing_headings", "status"],
+        "properties": {
+          "id": {"type": "string"},
+          "path": {"type": "string"},
+          "exists": {"type": "boolean"},
+          "headings_ok": {"type": "boolean"},
+          "missing_headings": {"type": "array", "items": {"type": "string"}},
+          "status": {"type": "string"}
+        }
+      }
+    }
+  }
+}

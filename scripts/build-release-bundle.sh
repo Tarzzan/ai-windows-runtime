@@ -46,6 +46,15 @@ mkdir -p "${BUNDLE_DIR}" "${VALIDATION_DIR}"
   --schema schemas/release-bundle-manifest.schema.json \
   --report "${VALIDATION_DIR}/release-bundle-manifest-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.productization.cli \
+  --root "${ROOT_DIR}" \
+  --output "${OUT_DIR}/productization-readiness.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/productization-readiness.json" \
+  --schema schemas/productization-readiness.schema.json \
+  --report "${VALIDATION_DIR}/productization-readiness-validation.json"
+
 cp "${OUT_DIR}/execution-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/trend-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/kpi-report.json" "${BUNDLE_DIR}/"
@@ -53,5 +62,6 @@ cp "${OUT_DIR}/dashboard-timeseries.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/compatibility-matrix.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/alpha-release-checklist.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-bundle-manifest.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/productization-readiness.json" "${BUNDLE_DIR}/"
 
 echo "release bundle: ok"
