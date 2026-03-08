@@ -34,6 +34,9 @@ function renderKPIs(data) {
     ['Cadence', s.cadence],
     ['Focus', s.focus_items],
     ['Owners', s.owners_in_scope],
+    ['Overload', s.overloaded_owners],
+    ['Throttle', s.throttle_mode],
+    ['Corridor', s.priority_corridor],
   ];
   el.innerHTML = items.map(([label, value]) => `<div class="kpi"><div class="label">${label}</div><div class="value">${value}</div></div>`).join('');
 }
@@ -77,7 +80,7 @@ function renderQuality(data) {
   const v = q.validation;
   document.getElementById('quality').innerHTML = `
     <p>Quality Gate: ${badge(data.status.quality_gate)} | Release Decision: ${badge(data.status.release_decision)} | Launch: ${badge(data.status.launch_readiness)}</p>
-    <p>Policy Compliance: ${badge(data.status.policy_compliance)} | Confidence: ${badge(data.status.execution_confidence_band)} | Mode: ${badge(data.status.execution_mode)} | Momentum: ${badge(data.status.momentum_posture)} (${data.status.momentum_index}) | Pressure: ${badge(data.status.pressure_level)} (${data.status.pressure_index}) | Temperature: ${badge(data.status.temperature)} (${data.status.temperature_index}) | Control: ${badge(data.status.control_mode)} | Efficiency: ${badge(data.status.efficiency_band)} (${data.status.efficiency_score}) | Intervention: ${badge(data.status.intervention_mode)} | Friction: ${badge(data.status.friction_band)} (${data.status.friction_score}) | Cadence: ${badge(data.status.cadence)} | Focus: <b>${data.status.focus_items}</b> | Owners: <b>${data.status.owners_in_scope}</b> | Validation rate: <b>${v.valid_rate}%</b></p>
+    <p>Policy Compliance: ${badge(data.status.policy_compliance)} | Confidence: ${badge(data.status.execution_confidence_band)} | Mode: ${badge(data.status.execution_mode)} | Momentum: ${badge(data.status.momentum_posture)} (${data.status.momentum_index}) | Pressure: ${badge(data.status.pressure_level)} (${data.status.pressure_index}) | Temperature: ${badge(data.status.temperature)} (${data.status.temperature_index}) | Control: ${badge(data.status.control_mode)} | Efficiency: ${badge(data.status.efficiency_band)} (${data.status.efficiency_score}) | Intervention: ${badge(data.status.intervention_mode)} | Friction: ${badge(data.status.friction_band)} (${data.status.friction_score}) | Cadence: ${badge(data.status.cadence)} | Focus: <b>${data.status.focus_items}</b> | Owners: <b>${data.status.owners_in_scope}</b> | Overload: <b>${data.status.overloaded_owners}</b> | Throttle: ${badge(data.status.throttle_mode)} | Corridor: ${badge(data.status.priority_corridor)} | Validation rate: <b>${v.valid_rate}%</b></p>
     <p>Invalid reports: ${v.invalid}</p>`;
 }
 

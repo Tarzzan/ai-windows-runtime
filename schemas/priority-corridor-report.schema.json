@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Priority Corridor Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["priority_corridor", "throttle_mode", "p0_focus_items", "p0_risks"],
+      "properties": {
+        "priority_corridor": {"type": "string", "enum": ["p0_only", "p0_p1", "full"]},
+        "throttle_mode": {"type": "string"},
+        "p0_focus_items": {"type": "integer", "minimum": 0},
+        "p0_risks": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

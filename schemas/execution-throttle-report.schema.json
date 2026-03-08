@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Execution Throttle Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["throttle_mode", "cadence", "friction_band", "overloaded_owners"],
+      "properties": {
+        "throttle_mode": {"type": "string", "enum": ["tight", "balanced", "open"]},
+        "cadence": {"type": "string"},
+        "friction_band": {"type": "string"},
+        "overloaded_owners": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

@@ -89,6 +89,12 @@ rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/cadence-recommendation-report-validation.json" \
   "${OUT_DIR}/execution-focus-report.json" \
   "${VALIDATION_DIR}/execution-focus-report-validation.json" \
+  "${OUT_DIR}/owner-load-report.json" \
+  "${VALIDATION_DIR}/owner-load-report-validation.json" \
+  "${OUT_DIR}/execution-throttle-report.json" \
+  "${VALIDATION_DIR}/execution-throttle-report-validation.json" \
+  "${OUT_DIR}/priority-corridor-report.json" \
+  "${VALIDATION_DIR}/priority-corridor-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -768,6 +774,37 @@ fi
   --schema schemas/execution-focus-report.schema.json \
   --report "${VALIDATION_DIR}/execution-focus-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.owner_load.cli \
+  --ownership-assignment-report "${OUT_DIR}/ownership-assignment-report.json" \
+  --output "${OUT_DIR}/owner-load-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/owner-load-report.json" \
+  --schema schemas/owner-load-report.schema.json \
+  --report "${VALIDATION_DIR}/owner-load-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.execution_throttle.cli \
+  --cadence-recommendation-report "${OUT_DIR}/cadence-recommendation-report.json" \
+  --governance-friction-report "${OUT_DIR}/governance-friction-report.json" \
+  --owner-load-report "${OUT_DIR}/owner-load-report.json" \
+  --output "${OUT_DIR}/execution-throttle-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/execution-throttle-report.json" \
+  --schema schemas/execution-throttle-report.schema.json \
+  --report "${VALIDATION_DIR}/execution-throttle-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.priority_corridor.cli \
+  --execution-throttle-report "${OUT_DIR}/execution-throttle-report.json" \
+  --execution-focus-report "${OUT_DIR}/execution-focus-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --output "${OUT_DIR}/priority-corridor-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/priority-corridor-report.json" \
+  --schema schemas/priority-corridor-report.schema.json \
+  --report "${VALIDATION_DIR}/priority-corridor-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.backlog_refresh.cli \
   --incident-feedback-report "${OUT_DIR}/incident-feedback-report.json" \
   --iteration-plan-report "${OUT_DIR}/iteration-plan-report.json" \
@@ -876,6 +913,10 @@ scripts/build-execution-pressure-report.sh "${OUT_DIR}"
 scripts/build-control-efficiency-report.sh "${OUT_DIR}"
 scripts/build-intervention-plan-report.sh "${OUT_DIR}"
 scripts/build-ownership-assignment-report.sh "${OUT_DIR}"
+scripts/build-execution-focus-report.sh "${OUT_DIR}"
+scripts/build-owner-load-report.sh "${OUT_DIR}"
+scripts/build-execution-throttle-report.sh "${OUT_DIR}"
+scripts/build-priority-corridor-report.sh "${OUT_DIR}"
 scripts/build-remediation-sprint-report.sh "${OUT_DIR}"
 scripts/build-release-brief-report.sh "${OUT_DIR}"
 scripts/build-delivery-cockpit-report.sh "${OUT_DIR}"
@@ -932,6 +973,9 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/governance-friction-report.json" \
     "${OUT_DIR}/cadence-recommendation-report.json" \
     "${OUT_DIR}/execution-focus-report.json" \
+    "${OUT_DIR}/owner-load-report.json" \
+    "${OUT_DIR}/execution-throttle-report.json" \
+    "${OUT_DIR}/priority-corridor-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \

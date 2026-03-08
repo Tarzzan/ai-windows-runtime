@@ -169,6 +169,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     governance_friction = read_json(out_dir / "governance-friction-report.json", {})
     cadence_recommendation = read_json(out_dir / "cadence-recommendation-report.json", {})
     execution_focus = read_json(out_dir / "execution-focus-report.json", {})
+    owner_load = read_json(out_dir / "owner-load-report.json", {})
+    execution_throttle = read_json(out_dir / "execution-throttle-report.json", {})
+    priority_corridor = read_json(out_dir / "priority-corridor-report.json", {})
     risk_watchlist = read_json(out_dir / "risk-watchlist-report.json", {})
     validation = gather_validation(out_dir / "validation")
 
@@ -196,6 +199,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         governance_friction.get("actions", []),
         cadence_recommendation.get("actions", []),
         execution_focus.get("actions", []),
+        owner_load.get("actions", []),
+        execution_throttle.get("actions", []),
+        priority_corridor.get("actions", []),
     ]:
         for item in source:
             text = str(item).strip()
@@ -261,6 +267,15 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "owners_in_scope": (execution_focus.get("summary", {}) or {}).get(
             "owners_in_scope", 0
         ),
+        "overloaded_owners": (owner_load.get("summary", {}) or {}).get(
+            "overloaded_owners", 0
+        ),
+        "throttle_mode": (execution_throttle.get("summary", {}) or {}).get(
+            "throttle_mode", "unknown"
+        ),
+        "priority_corridor": (priority_corridor.get("summary", {}) or {}).get(
+            "priority_corridor", "unknown"
+        ),
     }
 
     return {
@@ -296,6 +311,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "governance_friction": governance_friction,
             "cadence_recommendation": cadence_recommendation,
             "execution_focus": execution_focus,
+            "owner_load": owner_load,
+            "execution_throttle": execution_throttle,
+            "priority_corridor": priority_corridor,
         },
         "risks": {
             "summary": risk_watchlist.get("summary", {}),
