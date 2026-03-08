@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Capacity Buffer Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["capacity_buffer_score", "capacity_buffer_band", "execution_reserve", "overloaded_owners", "refreshed_items"],
+      "properties": {
+        "capacity_buffer_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "capacity_buffer_band": {"type": "string", "enum": ["low", "medium", "high"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

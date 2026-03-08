@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scope Rebalance Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["scope_rebalance", "intake_queue_policy", "risk_budget_mode", "scope_budget_mode"],
+      "properties": {
+        "scope_rebalance": {"type": "string", "enum": ["reduce", "hold", "expand"]},
+        "intake_queue_policy": {"type": "string", "enum": ["restrictive", "managed", "permissive"]},
+        "risk_budget_mode": {"type": "string", "enum": ["conservative", "balanced", "aggressive"]},
+        "scope_budget_mode": {"type": "string", "enum": ["tight", "balanced", "flexible"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

@@ -112,6 +112,12 @@ rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/delivery-intake-sync-report-validation.json" \
   "${OUT_DIR}/execution-reserve-report.json" \
   "${VALIDATION_DIR}/execution-reserve-report-validation.json" \
+  "${OUT_DIR}/capacity-buffer-report.json" \
+  "${VALIDATION_DIR}/capacity-buffer-report-validation.json" \
+  "${OUT_DIR}/intake-queue-policy-report.json" \
+  "${VALIDATION_DIR}/intake-queue-policy-report-validation.json" \
+  "${OUT_DIR}/scope-rebalance-report.json" \
+  "${VALIDATION_DIR}/scope-rebalance-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -950,6 +956,39 @@ scripts/check-release-policy.sh "${OUT_DIR}"
   --schema schemas/execution-reserve-report.schema.json \
   --report "${VALIDATION_DIR}/execution-reserve-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.capacity_buffer.cli \
+  --execution-reserve-report "${OUT_DIR}/execution-reserve-report.json" \
+  --owner-load-report "${OUT_DIR}/owner-load-report.json" \
+  --backlog-refresh-report "${OUT_DIR}/backlog-refresh-report.json" \
+  --output "${OUT_DIR}/capacity-buffer-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/capacity-buffer-report.json" \
+  --schema schemas/capacity-buffer-report.schema.json \
+  --report "${VALIDATION_DIR}/capacity-buffer-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.intake_queue_policy.cli \
+  --capacity-buffer-report "${OUT_DIR}/capacity-buffer-report.json" \
+  --delivery-intake-sync-report "${OUT_DIR}/delivery-intake-sync-report.json" \
+  --commitment-guard-report "${OUT_DIR}/commitment-guard-report.json" \
+  --output "${OUT_DIR}/intake-queue-policy-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/intake-queue-policy-report.json" \
+  --schema schemas/intake-queue-policy-report.schema.json \
+  --report "${VALIDATION_DIR}/intake-queue-policy-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.scope_rebalance.cli \
+  --intake-queue-policy-report "${OUT_DIR}/intake-queue-policy-report.json" \
+  --portfolio-risk-budget-report "${OUT_DIR}/portfolio-risk-budget-report.json" \
+  --scope-budget-report "${OUT_DIR}/scope-budget-report.json" \
+  --output "${OUT_DIR}/scope-rebalance-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/scope-rebalance-report.json" \
+  --schema schemas/scope-rebalance-report.schema.json \
+  --report "${VALIDATION_DIR}/scope-rebalance-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.release_retrospective.cli \
   --delivery-signoff-report "${OUT_DIR}/delivery-signoff-report.json" \
   --readiness-delta-report "${OUT_DIR}/readiness-delta-report.json" \
@@ -1078,6 +1117,9 @@ scripts/build-commitment-guard-report.sh "${OUT_DIR}"
 scripts/build-portfolio-risk-budget-report.sh "${OUT_DIR}"
 scripts/build-delivery-intake-sync-report.sh "${OUT_DIR}"
 scripts/build-execution-reserve-report.sh "${OUT_DIR}"
+scripts/build-capacity-buffer-report.sh "${OUT_DIR}"
+scripts/build-intake-queue-policy-report.sh "${OUT_DIR}"
+scripts/build-scope-rebalance-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
@@ -1136,6 +1178,9 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/portfolio-risk-budget-report.json" \
     "${OUT_DIR}/delivery-intake-sync-report.json" \
     "${OUT_DIR}/execution-reserve-report.json" \
+    "${OUT_DIR}/capacity-buffer-report.json" \
+    "${OUT_DIR}/intake-queue-policy-report.json" \
+    "${OUT_DIR}/scope-rebalance-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \
@@ -1247,6 +1292,9 @@ cp "${OUT_DIR}/commitment-guard-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/portfolio-risk-budget-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/delivery-intake-sync-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/execution-reserve-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/capacity-buffer-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/intake-queue-policy-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/scope-rebalance-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-gate-history-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/pilot-readiness-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/ownership-assignment-report.json" "${BUNDLE_DIR}/"

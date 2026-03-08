@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Intake Queue Policy Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["intake_queue_policy", "capacity_buffer_band", "delivery_intake_sync", "commitment_guard"],
+      "properties": {
+        "intake_queue_policy": {"type": "string", "enum": ["restrictive", "managed", "permissive"]},
+        "capacity_buffer_band": {"type": "string", "enum": ["low", "medium", "high"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

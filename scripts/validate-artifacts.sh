@@ -431,6 +431,27 @@ if [[ -f "${OUT_DIR}/execution-reserve-report.json" ]]; then
     --report "${REPORT_DIR}/execution-reserve-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/capacity-buffer-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/capacity-buffer-report.json" \
+    --schema schemas/capacity-buffer-report.schema.json \
+    --report "${REPORT_DIR}/capacity-buffer-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/intake-queue-policy-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/intake-queue-policy-report.json" \
+    --schema schemas/intake-queue-policy-report.schema.json \
+    --report "${REPORT_DIR}/intake-queue-policy-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/scope-rebalance-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/scope-rebalance-report.json" \
+    --schema schemas/scope-rebalance-report.schema.json \
+    --report "${REPORT_DIR}/scope-rebalance-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/release-retrospective-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/release-retrospective-report.json" \

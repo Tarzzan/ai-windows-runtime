@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 132)
+## Current scope (Phase 135)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -320,6 +320,15 @@ Core runtime capabilities in this phase:
 293. Surface portfolio risk budget, delivery-intake sync, and execution reserve in the local dashboard control panel.
 294. Refresh risk-budget/sync/reserve signals in policy-aware regeneration flow before release packet rebuild.
 295. Add dedicated CLIs and build scripts for portfolio risk budget, delivery-intake sync, and execution reserve automation.
+296. Add capacity buffer artifact (`capacity-buffer-report.json`) from execution reserve, owner overload, and backlog refresh pressure.
+297. Validate and package capacity buffer artifacts in full pipeline and release bundle workflows.
+298. Add intake queue policy artifact (`intake-queue-policy-report.json`) from capacity buffer, delivery-intake sync, and commitment guard.
+299. Validate and package intake queue policy artifacts in full pipeline and release bundle workflows.
+300. Add scope rebalance artifact (`scope-rebalance-report.json`) from intake queue policy, portfolio risk budget, and scope budget mode.
+301. Validate and package scope rebalance artifacts in full pipeline and release bundle workflows.
+302. Surface capacity buffer, intake queue policy, and scope rebalance in the local dashboard control panel.
+303. Refresh buffer/queue-policy/rebalance signals in policy-aware regeneration flow before release packet rebuild.
+304. Add dedicated CLIs and build scripts for capacity buffer, intake queue policy, and scope rebalance automation.
 194. Add explicit `policy_compliance_level` to `policy-health-report.json` and enforce it in release policy gate.
 195. Keep backward-compatible gate behavior by deriving compliance level when older policy health artifacts omit it.
 196. Harden pipeline determinism by cleaning stale policy artifacts before early schema validation stages.
