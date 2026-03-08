@@ -32,6 +32,12 @@ rm -f "${OUT_DIR}/release-packet-report.json" \
 rm -f "${OUT_DIR}/delivery-signoff-report.json" \
   "${VALIDATION_DIR}/delivery-signoff-report-validation.json"
 
+# Prevent stale post-release artifacts from failing early schema validation.
+rm -f "${OUT_DIR}/post-release-monitor-report.json" \
+  "${VALIDATION_DIR}/post-release-monitor-report-validation.json" \
+  "${OUT_DIR}/incident-feedback-report.json" \
+  "${VALIDATION_DIR}/incident-feedback-report-validation.json"
+
 # Prevent stale policy artifacts from failing early schema validation.
 rm -f "${OUT_DIR}/active-policy.json" \
   "${VALIDATION_DIR}/active-policy-validation.json" \

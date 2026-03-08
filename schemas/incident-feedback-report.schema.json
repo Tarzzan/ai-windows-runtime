@@ -8,12 +8,21 @@
     "generated_at": {"type": "string"},
     "summary": {
       "type": "object",
-      "required": ["feedback_priority", "monitor_status", "p0_risks", "high_urgency_hooks"],
+      "required": [
+        "feedback_priority",
+        "monitor_status",
+        "p0_risks",
+        "high_urgency_hooks",
+        "release_policy_status",
+        "release_policy_failures"
+      ],
       "properties": {
         "feedback_priority": {"type": "string"},
         "monitor_status": {"type": "string"},
         "p0_risks": {"type": "integer"},
-        "high_urgency_hooks": {"type": "integer"}
+        "high_urgency_hooks": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "feedback": {"type": "array", "items": {"type": "object"}},

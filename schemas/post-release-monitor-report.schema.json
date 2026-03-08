@@ -13,14 +13,18 @@
         "delivery_signoff_status",
         "missing_hooks",
         "high_priority_crash_signatures",
-        "runtime_events"
+        "runtime_events",
+        "release_policy_status",
+        "release_policy_failures"
       ],
       "properties": {
         "monitor_status": {"type": "string"},
         "delivery_signoff_status": {"type": "string"},
         "missing_hooks": {"type": "integer"},
         "high_priority_crash_signatures": {"type": "integer"},
-        "runtime_events": {"type": "integer"}
+        "runtime_events": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "actions": {"type": "array", "items": {"type": "string"}}

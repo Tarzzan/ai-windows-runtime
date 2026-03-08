@@ -10,14 +10,17 @@ def build_post_release_monitor_report(
     *, delivery_signoff_report: dict, runtime_signal_report: dict, crash_signature_report: dict
 ) -> dict:
     signoff_status = str(delivery_signoff_report.get("status", "blocked"))
+    signoff_summary = delivery_signoff_report.get("summary", {})
     runtime_summary = runtime_signal_report.get("summary", {})
     crash_summary = crash_signature_report.get("summary", {})
 
     high_crash = int(crash_summary.get("high_priority_signatures", 0))
     missing_hooks = int(runtime_summary.get("missing_hooks", 0))
+    release_policy_status = str(signoff_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(signoff_summary.get("release_policy_failures", 0))
 
     monitor_status = "stable"
-    if high_crash > 0 or signoff_status == "blocked":
+    if high_crash > 0 or signoff_status == "blocked" or release_policy_status == "fail":
         monitor_status = "critical"
     elif missing_hooks > 0 or signoff_status == "conditional":
         monitor_status = "watch"
@@ -31,6 +34,8 @@ def build_post_release_monitor_report(
             "missing_hooks": missing_hooks,
             "high_priority_crash_signatures": high_crash,
             "runtime_events": int(runtime_summary.get("total_events", 0)),
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "actions": ["Track post-release telemetry until monitor_status is stable."],
     }

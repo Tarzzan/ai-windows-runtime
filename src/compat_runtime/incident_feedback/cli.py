@@ -27,6 +27,8 @@ def build_incident_feedback_report(
             "monitor_status": str(monitor_summary.get("monitor_status", "stable")),
             "p0_risks": int(risk_summary.get("p0_entries", 0)),
             "high_urgency_hooks": int(backlog_summary.get("high_urgency", 0)),
+            "release_policy_status": str(monitor_summary.get("release_policy_status", "missing")),
+            "release_policy_failures": int(monitor_summary.get("release_policy_failures", 0)),
         },
         "feedback": [
             {
