@@ -735,6 +735,9 @@ scripts/check-release-policy.sh "${OUT_DIR}"
 scripts/build-release-brief-report.sh "${OUT_DIR}"
 scripts/build-delivery-cockpit-report.sh "${OUT_DIR}"
 scripts/build-stakeholder-update-report.sh "${OUT_DIR}"
+# Refresh prelaunch chain so launch/packet reflect latest policy-aware stakeholder state.
+scripts/build-handoff-checklist-report.sh "${OUT_DIR}"
+scripts/build-launch-readiness-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
