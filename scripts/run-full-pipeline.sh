@@ -28,6 +28,10 @@ rm -f "${OUT_DIR}/release-packet-report.json" \
   "${OUT_DIR}/governance-checkpoint-report.json" \
   "${VALIDATION_DIR}/governance-checkpoint-report-validation.json"
 
+# Prevent stale delivery signoff artifacts from failing early schema validation.
+rm -f "${OUT_DIR}/delivery-signoff-report.json" \
+  "${VALIDATION_DIR}/delivery-signoff-report-validation.json"
+
 # Prevent stale policy artifacts from failing early schema validation.
 rm -f "${OUT_DIR}/active-policy.json" \
   "${VALIDATION_DIR}/active-policy-validation.json" \

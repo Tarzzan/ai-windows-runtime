@@ -7,16 +7,26 @@ from compat_runtime.common.io import read_json, write_json
 
 
 def _signoff_status(
-    *, launch_status: str, packet_ready: bool, runbook_readiness: str, dependency_blockers: int
+    *,
+    launch_status: str,
+    packet_ready: bool,
+    runbook_readiness: str,
+    dependency_blockers: int,
+    release_policy_status: str,
 ) -> str:
     if (
         launch_status == "ready"
         and packet_ready
         and runbook_readiness == "operational"
         and dependency_blockers == 0
+        and release_policy_status == "pass"
     ):
         return "approved"
-    if launch_status in {"ready", "limited"} and dependency_blockers == 0:
+    if (
+        launch_status in {"ready", "limited"}
+        and dependency_blockers == 0
+        and release_policy_status in {"pass", "missing"}
+    ):
         return "conditional"
     return "blocked"
 
@@ -38,12 +48,15 @@ def build_delivery_signoff_report(
     packet_ready = bool(packet_summary.get("packet_ready", False))
     runbook_readiness = str(runbook_summary.get("runbook_readiness", "needs_attention"))
     dependency_blockers = int(dependency_summary.get("dependencies_blocking", 0))
+    release_policy_status = str(packet_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(packet_summary.get("release_policy_failures", 0))
 
     status = _signoff_status(
         launch_status=launch_status,
         packet_ready=packet_ready,
         runbook_readiness=runbook_readiness,
         dependency_blockers=dependency_blockers,
+        release_policy_status=release_policy_status,
     )
 
     return {
@@ -56,6 +69,8 @@ def build_delivery_signoff_report(
             "runbook_readiness": runbook_readiness,
             "dependency_blockers": dependency_blockers,
             "readiness_score_delta": int(delta_summary.get("readiness_score_delta", 0)),
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "actions": ["Grant final signoff only when status is approved."],
     }

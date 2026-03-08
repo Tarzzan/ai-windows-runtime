@@ -14,14 +14,18 @@
         "packet_ready",
         "runbook_readiness",
         "dependency_blockers",
-        "readiness_score_delta"
+        "readiness_score_delta",
+        "release_policy_status",
+        "release_policy_failures"
       ],
       "properties": {
         "launch_status": {"type": "string"},
         "packet_ready": {"type": "boolean"},
         "runbook_readiness": {"type": "string"},
         "dependency_blockers": {"type": "integer"},
-        "readiness_score_delta": {"type": "integer"}
+        "readiness_score_delta": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "actions": {"type": "array", "items": {"type": "string"}}
