@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 138)
+## Current scope (Phase 141)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -338,6 +338,15 @@ Core runtime capabilities in this phase:
 311. Surface flow control budget, intake release window, and execution stability guard in the local dashboard control panel.
 312. Refresh flow/release-window/stability-guard signals in policy-aware regeneration flow before release packet rebuild.
 313. Add dedicated CLIs and build scripts for flow control budget, intake release window, and execution stability guard automation.
+314. Add delivery safety margin artifact (`delivery-safety-margin-report.json`) from execution stability guard, flow control budget, and capacity buffer.
+315. Validate and package delivery safety margin artifacts in full pipeline and release bundle workflows.
+316. Add intake commitment window artifact (`intake-commitment-window-report.json`) from safety margin, intake release window, and stability guard.
+317. Validate and package intake commitment window artifacts in full pipeline and release bundle workflows.
+318. Add scope lock state artifact (`scope-lock-state-report.json`) from intake commitment window, scope rebalance, and P0 risk pressure.
+319. Validate and package scope lock state artifacts in full pipeline and release bundle workflows.
+320. Surface delivery safety margin, intake commitment window, and scope lock state in the local dashboard control panel.
+321. Refresh safety/commitment-window/scope-lock signals in policy-aware regeneration flow before release packet rebuild.
+322. Add dedicated CLIs and build scripts for delivery safety margin, intake commitment window, and scope lock state automation.
 194. Add explicit `policy_compliance_level` to `policy-health-report.json` and enforce it in release policy gate.
 195. Keep backward-compatible gate behavior by deriving compliance level when older policy health artifacts omit it.
 196. Harden pipeline determinism by cleaning stale policy artifacts before early schema validation stages.

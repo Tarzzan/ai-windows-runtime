@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Delivery Safety Margin Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["safety_margin_score", "safety_margin_band", "execution_stability_guard", "flow_control_score", "capacity_buffer_score"],
+      "properties": {
+        "safety_margin_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "safety_margin_band": {"type": "string", "enum": ["narrow", "guarded", "comfortable"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

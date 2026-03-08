@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Intake Commitment Window Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["intake_commitment_window", "safety_margin_band", "intake_release_window", "execution_stability_guard"],
+      "properties": {
+        "intake_commitment_window": {"type": "string", "enum": ["locked", "managed", "open"]},
+        "safety_margin_band": {"type": "string", "enum": ["narrow", "guarded", "comfortable"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

@@ -124,6 +124,12 @@ rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/intake-release-window-report-validation.json" \
   "${OUT_DIR}/execution-stability-guard-report.json" \
   "${VALIDATION_DIR}/execution-stability-guard-report-validation.json" \
+  "${OUT_DIR}/delivery-safety-margin-report.json" \
+  "${VALIDATION_DIR}/delivery-safety-margin-report-validation.json" \
+  "${OUT_DIR}/intake-commitment-window-report.json" \
+  "${VALIDATION_DIR}/intake-commitment-window-report-validation.json" \
+  "${OUT_DIR}/scope-lock-state-report.json" \
+  "${VALIDATION_DIR}/scope-lock-state-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -1028,6 +1034,39 @@ scripts/check-release-policy.sh "${OUT_DIR}"
   --schema schemas/execution-stability-guard-report.schema.json \
   --report "${VALIDATION_DIR}/execution-stability-guard-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.delivery_safety_margin.cli \
+  --execution-stability-guard-report "${OUT_DIR}/execution-stability-guard-report.json" \
+  --flow-control-budget-report "${OUT_DIR}/flow-control-budget-report.json" \
+  --capacity-buffer-report "${OUT_DIR}/capacity-buffer-report.json" \
+  --output "${OUT_DIR}/delivery-safety-margin-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/delivery-safety-margin-report.json" \
+  --schema schemas/delivery-safety-margin-report.schema.json \
+  --report "${VALIDATION_DIR}/delivery-safety-margin-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.intake_commitment_window.cli \
+  --delivery-safety-margin-report "${OUT_DIR}/delivery-safety-margin-report.json" \
+  --intake-release-window-report "${OUT_DIR}/intake-release-window-report.json" \
+  --execution-stability-guard-report "${OUT_DIR}/execution-stability-guard-report.json" \
+  --output "${OUT_DIR}/intake-commitment-window-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/intake-commitment-window-report.json" \
+  --schema schemas/intake-commitment-window-report.schema.json \
+  --report "${VALIDATION_DIR}/intake-commitment-window-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.scope_lock_state.cli \
+  --intake-commitment-window-report "${OUT_DIR}/intake-commitment-window-report.json" \
+  --scope-rebalance-report "${OUT_DIR}/scope-rebalance-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --output "${OUT_DIR}/scope-lock-state-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/scope-lock-state-report.json" \
+  --schema schemas/scope-lock-state-report.schema.json \
+  --report "${VALIDATION_DIR}/scope-lock-state-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.release_retrospective.cli \
   --delivery-signoff-report "${OUT_DIR}/delivery-signoff-report.json" \
   --readiness-delta-report "${OUT_DIR}/readiness-delta-report.json" \
@@ -1162,6 +1201,9 @@ scripts/build-scope-rebalance-report.sh "${OUT_DIR}"
 scripts/build-flow-control-budget-report.sh "${OUT_DIR}"
 scripts/build-intake-release-window-report.sh "${OUT_DIR}"
 scripts/build-execution-stability-guard-report.sh "${OUT_DIR}"
+scripts/build-delivery-safety-margin-report.sh "${OUT_DIR}"
+scripts/build-intake-commitment-window-report.sh "${OUT_DIR}"
+scripts/build-scope-lock-state-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
@@ -1226,6 +1268,9 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/flow-control-budget-report.json" \
     "${OUT_DIR}/intake-release-window-report.json" \
     "${OUT_DIR}/execution-stability-guard-report.json" \
+    "${OUT_DIR}/delivery-safety-margin-report.json" \
+    "${OUT_DIR}/intake-commitment-window-report.json" \
+    "${OUT_DIR}/scope-lock-state-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \
@@ -1343,6 +1388,9 @@ cp "${OUT_DIR}/scope-rebalance-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/flow-control-budget-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/intake-release-window-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/execution-stability-guard-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/delivery-safety-margin-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/intake-commitment-window-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/scope-lock-state-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-gate-history-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/pilot-readiness-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/ownership-assignment-report.json" "${BUNDLE_DIR}/"

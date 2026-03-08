@@ -473,6 +473,27 @@ if [[ -f "${OUT_DIR}/execution-stability-guard-report.json" ]]; then
     --report "${REPORT_DIR}/execution-stability-guard-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/delivery-safety-margin-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/delivery-safety-margin-report.json" \
+    --schema schemas/delivery-safety-margin-report.schema.json \
+    --report "${REPORT_DIR}/delivery-safety-margin-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/intake-commitment-window-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/intake-commitment-window-report.json" \
+    --schema schemas/intake-commitment-window-report.schema.json \
+    --report "${REPORT_DIR}/intake-commitment-window-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/scope-lock-state-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/scope-lock-state-report.json" \
+    --schema schemas/scope-lock-state-report.schema.json \
+    --report "${REPORT_DIR}/scope-lock-state-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/release-retrospective-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/release-retrospective-report.json" \

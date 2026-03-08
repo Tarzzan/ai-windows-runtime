@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scope Lock State Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["scope_lock_state", "intake_commitment_window", "scope_rebalance", "p0_entries"],
+      "properties": {
+        "scope_lock_state": {"type": "string", "enum": ["locked", "controlled", "flexible"]},
+        "intake_commitment_window": {"type": "string", "enum": ["locked", "managed", "open"]},
+        "scope_rebalance": {"type": "string", "enum": ["reduce", "hold", "expand"]},
+        "p0_entries": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}
