@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 101)
+## Current scope (Phase 102)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -227,6 +227,9 @@ Core runtime capabilities in this phase:
 200. Add execution momentum artifact (`execution-momentum-report.json`) correlating confidence, burndown pressure, gate trajectory, and incident feedback.
 201. Validate and package execution momentum artifacts in full pipeline and release bundle workflows.
 202. Surface execution momentum posture and momentum index in the local dashboard control panel.
+203. Add execution pressure artifact (`execution-pressure-report.json`) correlating momentum, dependency blockers, P0 risk pressure, and validation coverage gaps.
+204. Validate and package execution pressure artifacts in full pipeline and release bundle workflows.
+205. Surface execution pressure level and pressure index in the local dashboard control panel.
 194. Add explicit `policy_compliance_level` to `policy-health-report.json` and enforce it in release policy gate.
 195. Keep backward-compatible gate behavior by deriving compliance level when older policy health artifacts omit it.
 196. Harden pipeline determinism by cleaning stale policy artifacts before early schema validation stages.

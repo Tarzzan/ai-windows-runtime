@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Execution Pressure Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "scoring", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "pressure_index",
+        "pressure_level",
+        "momentum_index",
+        "dependency_blockers",
+        "p0_risks",
+        "missing_validation_reports"
+      ],
+      "properties": {
+        "pressure_index": {"type": "integer", "minimum": 0, "maximum": 100},
+        "pressure_level": {"type": "string", "enum": ["low", "medium", "high", "critical"]},
+        "momentum_index": {"type": "integer", "minimum": 0, "maximum": 100},
+        "dependency_blockers": {"type": "integer", "minimum": 0},
+        "p0_risks": {"type": "integer", "minimum": 0},
+        "missing_validation_reports": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "scoring": {
+      "type": "object",
+      "required": ["base_pressure", "dependency_penalty", "risk_penalty", "validation_penalty"],
+      "properties": {
+        "base_pressure": {"type": "integer", "minimum": 0},
+        "dependency_penalty": {"type": "integer", "minimum": 0},
+        "risk_penalty": {"type": "integer", "minimum": 0},
+        "validation_penalty": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

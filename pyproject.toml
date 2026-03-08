@@ -71,6 +71,7 @@ compat-governance-checkpoint = "compat_runtime.governance_checkpoint.cli:main"
 compat-office-readiness = "compat_runtime.office_readiness.cli:main"
 compat-execution-confidence = "compat_runtime.execution_confidence.cli:main"
 compat-execution-momentum = "compat_runtime.execution_momentum.cli:main"
+compat-execution-pressure = "compat_runtime.execution_pressure.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
