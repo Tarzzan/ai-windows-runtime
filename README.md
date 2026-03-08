@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 65)
+## Current scope (Phase 79)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -206,6 +206,20 @@ Core runtime capabilities in this phase:
 179. Generate governance checkpoint artifact (`governance-checkpoint-report.json`) from stability, hotfix, snapshot, and evidence signals.
 180. Classify governance verdict as `pass/conditional/block` using explicit checkpoint rules.
 181. Validate governance checkpoint artifacts automatically in pipeline, release bundle, and reproducible package flows.
+182. Add Office readiness artifact and schema (`office-readiness-report.json`) to quantify Office-specific launch posture.
+183. Add configurable policy system with profile support (`alpha/beta/prod`) via `COMPAT_POLICY_PATH` and `COMPAT_POLICY_PROFILE`.
+184. Export effective merged policy into `active-policy.json` for runtime observability and governance evidence.
+185. Add policy lockfile (`config/active-policy.lock.json`) and drift detection gate (`check-policy-drift.sh`).
+186. Add policy lockfile sync check (`check-policy-lockfile-sync.sh`) with local auto-fix mode (`--fix`).
+187. Add strict policy config validation gate (`check-policy-config.sh`) with schema + semantic checks.
+188. Add policy health artifact (`policy-health-report.json`) with config validity, lockfile sync, and policy hash.
+189. Enforce policy health in release gate (`check-release-policy.sh`) before `go`.
+190. Propagate policy health signals into release packet summary.
+191. Propagate policy health signals into evidence catalog summary.
+192. Propagate policy health signals into governance checkpoint summary and verdicting.
+193. Add CI gates for policy config check and policy lockfile sync before lint/tests/pipeline.
+194. Include policy artifacts in reproducible package and release bundle outputs.
+195. Harden full pipeline against stale packet/catalog/governance artifacts to keep schema validation deterministic.
 
 ## Quick start
 ```bash
