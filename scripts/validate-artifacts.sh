@@ -536,6 +536,27 @@ if [[ -f "${OUT_DIR}/scope-transition-gate-report.json" ]]; then
     --report "${REPORT_DIR}/scope-transition-gate-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/transition-readiness-index-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/transition-readiness-index-report.json" \
+    --schema schemas/transition-readiness-index-report.schema.json \
+    --report "${REPORT_DIR}/transition-readiness-index-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/intake-transition-policy-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/intake-transition-policy-report.json" \
+    --schema schemas/intake-transition-policy-report.schema.json \
+    --report "${REPORT_DIR}/intake-transition-policy-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/scope-admission-gate-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/scope-admission-gate-report.json" \
+    --schema schemas/scope-admission-gate-report.schema.json \
+    --report "${REPORT_DIR}/scope-admission-gate-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/release-retrospective-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/release-retrospective-report.json" \

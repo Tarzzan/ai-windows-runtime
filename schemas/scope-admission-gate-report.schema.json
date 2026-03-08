@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scope Admission Gate Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["scope_admission_gate", "intake_transition_policy", "scope_freeze_guard", "release_policy_status"],
+      "properties": {
+        "scope_admission_gate": {"type": "string", "enum": ["closed", "guarded", "open"]},
+        "intake_transition_policy": {"type": "string", "enum": ["hold", "stage", "advance"]},
+        "scope_freeze_guard": {"type": "string", "enum": ["freeze", "guarded", "open"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

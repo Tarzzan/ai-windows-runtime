@@ -199,6 +199,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     delivery_stress_index = read_json(out_dir / "delivery-stress-index-report.json", {})
     intake_pacing_window = read_json(out_dir / "intake-pacing-window-report.json", {})
     scope_transition_gate = read_json(out_dir / "scope-transition-gate-report.json", {})
+    transition_readiness_index = read_json(out_dir / "transition-readiness-index-report.json", {})
+    intake_transition_policy = read_json(out_dir / "intake-transition-policy-report.json", {})
+    scope_admission_gate = read_json(out_dir / "scope-admission-gate-report.json", {})
     risk_watchlist = read_json(out_dir / "risk-watchlist-report.json", {})
     validation = gather_validation(out_dir / "validation")
 
@@ -256,6 +259,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         delivery_stress_index.get("actions", []),
         intake_pacing_window.get("actions", []),
         scope_transition_gate.get("actions", []),
+        transition_readiness_index.get("actions", []),
+        intake_transition_policy.get("actions", []),
+        scope_admission_gate.get("actions", []),
     ]:
         for item in source:
             text = str(item).strip()
@@ -441,6 +447,18 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "scope_transition_gate": (scope_transition_gate.get("summary", {}) or {}).get(
             "scope_transition_gate", "unknown"
         ),
+        "transition_readiness_band": (transition_readiness_index.get("summary", {}) or {}).get(
+            "transition_readiness_band", "unknown"
+        ),
+        "transition_readiness_score": (transition_readiness_index.get("summary", {}) or {}).get(
+            "transition_readiness_score", 0
+        ),
+        "intake_transition_policy": (intake_transition_policy.get("summary", {}) or {}).get(
+            "intake_transition_policy", "unknown"
+        ),
+        "scope_admission_gate": (scope_admission_gate.get("summary", {}) or {}).get(
+            "scope_admission_gate", "unknown"
+        ),
     }
 
     return {
@@ -506,6 +524,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "delivery_stress_index": delivery_stress_index,
             "intake_pacing_window": intake_pacing_window,
             "scope_transition_gate": scope_transition_gate,
+            "transition_readiness_index": transition_readiness_index,
+            "intake_transition_policy": intake_transition_policy,
+            "scope_admission_gate": scope_admission_gate,
         },
         "risks": {
             "summary": risk_watchlist.get("summary", {}),

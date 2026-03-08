@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Intake Transition Policy Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["intake_transition_policy", "transition_readiness_band", "intake_pacing_window", "intake_slot_policy"],
+      "properties": {
+        "intake_transition_policy": {"type": "string", "enum": ["hold", "stage", "advance"]},
+        "transition_readiness_band": {"type": "string", "enum": ["blocked", "watch", "ready"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}
