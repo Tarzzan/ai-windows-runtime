@@ -28,6 +28,17 @@ RELEASE_DECISION="$(jq -r '.decision // "missing"' "$RELEASE_DECISION_FILE")"
 LAUNCH_STATUS="$(jq -r '.status // "missing"' "$LAUNCH_READINESS_FILE")"
 POLICY_CONFIG_VALID="$(jq -r '.config_valid // false' "$POLICY_HEALTH_FILE")"
 LOCKFILE_SYNC="$(jq -r '.lockfile_sync // false' "$POLICY_HEALTH_FILE")"
+POLICY_COMPLIANCE_LEVEL="$(jq -r '.policy_compliance_level // "missing"' "$POLICY_HEALTH_FILE")"
+
+if [[ "$POLICY_COMPLIANCE_LEVEL" == "missing" ]]; then
+  if [[ "$POLICY_CONFIG_VALID" == "true" && "$LOCKFILE_SYNC" == "true" ]]; then
+    POLICY_COMPLIANCE_LEVEL="compliant"
+  elif [[ "$POLICY_CONFIG_VALID" == "true" || "$LOCKFILE_SYNC" == "true" ]]; then
+    POLICY_COMPLIANCE_LEVEL="degraded"
+  else
+    POLICY_COMPLIANCE_LEVEL="non_compliant"
+  fi
+fi
 
 if [[ "$QUALITY_GATE" != "pass" ]]; then
   echo "release policy check: expected quality gate 'pass', got '$QUALITY_GATE'" >&2
@@ -41,12 +52,8 @@ if [[ "$LAUNCH_STATUS" != "ready" ]]; then
   echo "release policy check: expected launch readiness 'ready', got '$LAUNCH_STATUS'" >&2
   exit 1
 fi
-if [[ "$POLICY_CONFIG_VALID" != "true" ]]; then
-  echo "release policy check: expected policy config_valid=true, got '$POLICY_CONFIG_VALID'" >&2
-  exit 1
-fi
-if [[ "$LOCKFILE_SYNC" != "true" ]]; then
-  echo "release policy check: expected policy lockfile_sync=true, got '$LOCKFILE_SYNC'" >&2
+if [[ "$POLICY_COMPLIANCE_LEVEL" != "compliant" ]]; then
+  echo "release policy check: expected policy_compliance_level='compliant', got '$POLICY_COMPLIANCE_LEVEL'" >&2
   exit 1
 fi
 

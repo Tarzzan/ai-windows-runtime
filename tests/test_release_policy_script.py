@@ -75,7 +75,32 @@ def test_release_policy_script_fails_when_policy_health_is_not_synced(tmp_path):
     )
 
     assert result.returncode != 0
-    assert "expected policy lockfile_sync=true" in result.stderr
+    assert "expected policy_compliance_level='compliant'" in result.stderr
+
+
+def test_release_policy_script_fails_when_policy_compliance_level_is_degraded(tmp_path):
+    if shutil.which("jq") is None:
+        return
+
+    _write_green_release_artifacts(tmp_path, launch_status="ready")
+    _write_json(
+        tmp_path / "policy-health-report.json",
+        {
+            "config_valid": True,
+            "lockfile_sync": True,
+            "policy_compliance_level": "degraded",
+        },
+    )
+
+    result = subprocess.run(
+        [str(SCRIPT), str(tmp_path)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "expected policy_compliance_level='compliant'" in result.stderr
 
 
 def test_release_policy_script_fails_when_jq_is_missing(tmp_path):

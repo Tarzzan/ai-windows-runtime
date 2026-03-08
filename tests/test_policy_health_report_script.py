@@ -43,6 +43,7 @@ def test_policy_health_report_script_marks_synced_lockfile(tmp_path):
     assert payload["lockfile_exists"] is True
     assert payload["lockfile_sync"] is True
     assert payload["config_valid"] is True
+    assert payload["policy_compliance_level"] == "compliant"
 
 
 def test_policy_health_report_script_marks_drift_and_missing_validation(tmp_path):
@@ -82,4 +83,5 @@ def test_policy_health_report_script_marks_drift_and_missing_validation(tmp_path
     assert payload["lockfile_exists"] is True
     assert payload["lockfile_sync"] is False
     assert payload["config_valid"] is False
+    assert payload["policy_compliance_level"] == "non_compliant"
     assert any("differs from lockfile" in note for note in payload["notes"])

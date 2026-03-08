@@ -28,6 +28,12 @@ rm -f "${OUT_DIR}/release-packet-report.json" \
   "${OUT_DIR}/governance-checkpoint-report.json" \
   "${VALIDATION_DIR}/governance-checkpoint-report-validation.json"
 
+# Prevent stale policy artifacts from failing early schema validation.
+rm -f "${OUT_DIR}/active-policy.json" \
+  "${VALIDATION_DIR}/active-policy-validation.json" \
+  "${OUT_DIR}/policy-health-report.json" \
+  "${VALIDATION_DIR}/policy-health-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.trace_collector.cli \
   --input examples/sample-trace.log \
   --output "${OUT_DIR}/trace.json"

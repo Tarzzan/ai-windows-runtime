@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 79)
+## Current scope (Phase 82)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -218,6 +218,9 @@ Core runtime capabilities in this phase:
 191. Propagate policy health signals into evidence catalog summary.
 192. Propagate policy health signals into governance checkpoint summary and verdicting.
 193. Add CI gates for policy config check and policy lockfile sync before lint/tests/pipeline.
+194. Add explicit `policy_compliance_level` to `policy-health-report.json` and enforce it in release policy gate.
+195. Keep backward-compatible gate behavior by deriving compliance level when older policy health artifacts omit it.
+196. Harden pipeline determinism by cleaning stale policy artifacts before early schema validation stages.
 194. Include policy artifacts in reproducible package and release bundle outputs.
 195. Harden full pipeline against stale packet/catalog/governance artifacts to keep schema validation deterministic.
 

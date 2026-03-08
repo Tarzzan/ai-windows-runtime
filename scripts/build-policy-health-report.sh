@@ -66,6 +66,13 @@ if config_validation.exists():
 if not config_valid:
     notes.append("policy config validation missing or invalid")
 
+if config_valid and lockfile_sync:
+    compliance_level = "compliant"
+elif config_valid or lockfile_sync:
+    compliance_level = "degraded"
+else:
+    compliance_level = "non_compliant"
+
 artifact = {
     "artifact_version": "1.0",
     "policy_path": os.environ["POLICY_PATH"],
@@ -75,6 +82,7 @@ artifact = {
     "lockfile_exists": lockfile_exists,
     "lockfile_sync": lockfile_sync,
     "config_valid": config_valid,
+    "policy_compliance_level": compliance_level,
     "notes": notes,
 }
 write_json(str(active_policy.parent / "policy-health-report.json"), artifact)

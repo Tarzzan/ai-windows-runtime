@@ -10,7 +10,8 @@
     "lockfile_path",
     "lockfile_exists",
     "lockfile_sync",
-    "config_valid"
+    "config_valid",
+    "policy_compliance_level"
   ],
   "properties": {
     "artifact_version": { "type": "string" },
@@ -21,6 +22,10 @@
     "lockfile_exists": { "type": "boolean" },
     "lockfile_sync": { "type": "boolean" },
     "config_valid": { "type": "boolean" },
+    "policy_compliance_level": {
+      "type": "string",
+      "enum": ["compliant", "degraded", "non_compliant"]
+    },
     "notes": {
       "type": "array",
       "items": { "type": "string" }

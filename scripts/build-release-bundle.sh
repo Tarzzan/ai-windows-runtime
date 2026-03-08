@@ -21,6 +21,12 @@ rm -f "${OUT_DIR}/office-readiness-report.json" \
 rm -f "${OUT_DIR}/release-decision-report.json" \
   "${VALIDATION_DIR}/release-decision-report-validation.json"
 
+# Prevent stale policy artifacts from failing early schema validation.
+rm -f "${OUT_DIR}/active-policy.json" \
+  "${VALIDATION_DIR}/active-policy-validation.json" \
+  "${OUT_DIR}/policy-health-report.json" \
+  "${VALIDATION_DIR}/policy-health-report-validation.json"
+
 PATCH_PLAN_DIFF_ARGS=(
   --current "${OUT_DIR}/patch-plan.json"
   --current-label "current-base"
