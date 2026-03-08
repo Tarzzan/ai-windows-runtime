@@ -55,6 +55,10 @@ rm -f "${OUT_DIR}/handoff-checklist-report.json" \
   "${OUT_DIR}/launch-readiness-report.json" \
   "${VALIDATION_DIR}/launch-readiness-report-validation.json"
 
+# Prevent stale ops artifacts from failing early schema validation.
+rm -f "${OUT_DIR}/ops-runbook-report.json" \
+  "${VALIDATION_DIR}/ops-runbook-report-validation.json"
+
 # Prevent stale policy artifacts from failing early schema validation.
 rm -f "${OUT_DIR}/active-policy.json" \
   "${VALIDATION_DIR}/active-policy-validation.json" \

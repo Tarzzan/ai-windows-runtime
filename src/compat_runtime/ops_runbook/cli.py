@@ -12,9 +12,16 @@ def build_ops_runbook_report(
     stop_conditions = rollout_guardrails_report.get("stop_conditions", [])
     safeguards = rollout_guardrails_report.get("safeguards", [])
     commands = validation_command_pack.get("commands", [])
-    failed_checks = int(handoff_checklist_report.get("summary", {}).get("checks_fail", 0))
+    handoff_summary = handoff_checklist_report.get("summary", {})
+    failed_checks = int(handoff_summary.get("checks_fail", 0))
+    release_policy_status = str(handoff_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(handoff_summary.get("release_policy_failures", 0))
 
-    readiness = "operational" if len(commands) > 0 and failed_checks == 0 else "needs_attention"
+    readiness = (
+        "operational"
+        if len(commands) > 0 and failed_checks == 0 and release_policy_status in {"pass", "missing"}
+        else "needs_attention"
+    )
 
     curated_commands = []
     for entry in commands[:6]:
@@ -35,6 +42,8 @@ def build_ops_runbook_report(
             "safeguards": len(safeguards),
             "commands": len(curated_commands),
             "handoff_failed_checks": failed_checks,
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "runbook": {
             "stop_conditions": stop_conditions,

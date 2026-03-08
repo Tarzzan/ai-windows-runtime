@@ -13,14 +13,18 @@
         "stop_conditions",
         "safeguards",
         "commands",
-        "handoff_failed_checks"
+        "handoff_failed_checks",
+        "release_policy_status",
+        "release_policy_failures"
       ],
       "properties": {
         "runbook_readiness": {"type": "string"},
         "stop_conditions": {"type": "integer"},
         "safeguards": {"type": "integer"},
         "commands": {"type": "integer"},
-        "handoff_failed_checks": {"type": "integer"}
+        "handoff_failed_checks": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "runbook": {"type": "object"},
