@@ -69,6 +69,7 @@ compat-verification-snapshot = "compat_runtime.verification_snapshot.cli:main"
 compat-evidence-catalog = "compat_runtime.evidence_catalog.cli:main"
 compat-governance-checkpoint = "compat_runtime.governance_checkpoint.cli:main"
 compat-office-readiness = "compat_runtime.office_readiness.cli:main"
+compat-execution-confidence = "compat_runtime.execution_confidence.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

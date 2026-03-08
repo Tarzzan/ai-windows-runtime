@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 99)
+## Current scope (Phase 100)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -221,6 +221,9 @@ Core runtime capabilities in this phase:
 194. Add a local static dashboard template for project-wide control panel views (progress, timeline, quality, risks, actions).
 195. Add automated dashboard data builder from README/docs/out artifacts (`build_dashboard_data.py`) with deterministic JSON output.
 196. Add refresh/open scripts that publish the dashboard in the user desktop directory (`xdg-user-dir DESKTOP`) with offline-safe data preload.
+197. Add execution confidence artifact (`execution-confidence-report.json`) from readiness, forecast, watchlist, and policy health signals.
+198. Validate execution confidence artifacts automatically in pipeline and release bundle flows.
+199. Surface execution confidence status and execution mode in the local dashboard control panel.
 194. Add explicit `policy_compliance_level` to `policy-health-report.json` and enforce it in release policy gate.
 195. Keep backward-compatible gate behavior by deriving compliance level when older policy health artifacts omit it.
 196. Harden pipeline determinism by cleaning stale policy artifacts before early schema validation stages.

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Execution Confidence Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "penalties", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "readiness_score",
+        "confidence_score",
+        "confidence_band",
+        "execution_mode",
+        "estimated_iterations_to_go",
+        "p0_entries",
+        "p1_entries",
+        "policy_compliance_level"
+      ],
+      "properties": {
+        "readiness_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "confidence_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "confidence_band": {"type": "string", "enum": ["high", "medium", "low"]},
+        "execution_mode": {"type": "string", "enum": ["accelerate", "controlled", "stabilize"]},
+        "estimated_iterations_to_go": {"type": "integer", "minimum": 0},
+        "p0_entries": {"type": "integer", "minimum": 0},
+        "p1_entries": {"type": "integer", "minimum": 0},
+        "policy_compliance_level": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "penalties": {
+      "type": "object",
+      "required": ["forecast_penalty", "p0_penalty", "p1_penalty", "policy_penalty"],
+      "properties": {
+        "forecast_penalty": {"type": "integer", "minimum": 0},
+        "p0_penalty": {"type": "integer", "minimum": 0},
+        "p1_penalty": {"type": "integer", "minimum": 0},
+        "policy_penalty": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "actions": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "additionalProperties": true
+}

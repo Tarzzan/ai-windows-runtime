@@ -69,6 +69,8 @@ rm -f "${OUT_DIR}/ops-runbook-report.json" \
 # Prevent stale planning artifacts from failing early schema validation.
 rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/risk-watchlist-report-validation.json" \
+  "${OUT_DIR}/execution-confidence-report.json" \
+  "${VALIDATION_DIR}/execution-confidence-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -423,6 +425,17 @@ fi
   --schema schemas/risk-watchlist-report.schema.json \
   --report "${VALIDATION_DIR}/risk-watchlist-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.execution_confidence.cli \
+  --readiness-scorecard-report "${OUT_DIR}/readiness-scorecard-report.json" \
+  --release-forecast-report "${OUT_DIR}/release-forecast-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --output "${OUT_DIR}/execution-confidence-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/execution-confidence-report.json" \
+  --schema schemas/execution-confidence-report.schema.json \
+  --report "${VALIDATION_DIR}/execution-confidence-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.release_gate_history.cli \
   --dashboard-timeseries "${OUT_DIR}/dashboard-timeseries.json" \
   --trend-report "${OUT_DIR}/trend-report.json" \
@@ -750,6 +763,7 @@ scripts/build-release-forecast-report.sh "${OUT_DIR}"
 scripts/build-readiness-scorecard-report.sh "${OUT_DIR}"
 scripts/build-execution-burndown-report.sh "${OUT_DIR}"
 scripts/build-risk-watchlist-report.sh "${OUT_DIR}"
+scripts/build-execution-confidence-report.sh "${OUT_DIR}"
 scripts/build-ownership-assignment-report.sh "${OUT_DIR}"
 scripts/build-remediation-sprint-report.sh "${OUT_DIR}"
 scripts/build-release-brief-report.sh "${OUT_DIR}"
@@ -792,6 +806,7 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/execution-burndown-report.json" \
     "${OUT_DIR}/validation-command-pack.json" \
     "${OUT_DIR}/risk-watchlist-report.json" \
+    "${OUT_DIR}/execution-confidence-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \
