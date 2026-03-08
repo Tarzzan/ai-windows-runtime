@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scope Expansion Readiness Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["scope_expansion_readiness_score", "scope_expansion_readiness_band", "scope_unlock_gate", "scope_reentry_readiness_score", "p0_entries"],
+      "properties": {
+        "scope_expansion_readiness_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "scope_expansion_readiness_band": {"type": "string", "enum": ["blocked", "watch", "ready"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

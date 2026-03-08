@@ -59,6 +59,9 @@ function renderKPIs(data) {
     ['Reentree', `${s.scope_reentry_readiness_band} (${s.scope_reentry_readiness_score})`],
     ['Reprise intake', s.intake_resumption_policy],
     ['Deblocage', s.scope_unlock_gate],
+    ['Expansion', `${s.scope_expansion_readiness_band} (${s.scope_expansion_readiness_score})`],
+    ['Politique exp.', s.intake_expansion_policy],
+    ['Gate exp.', s.scope_expansion_gate],
   ];
   el.innerHTML = items
     .map(
@@ -131,7 +134,7 @@ function renderQuality(data) {
   document.getElementById('quality').innerHTML = `
     <p>Decision release: ${badge(s.release_decision)} | Lancement: ${badge(s.launch_readiness)} | Policy: ${badge(s.policy_status)} (${badge(s.policy_compliance)})</p>
     <p>Confiance: ${badge(s.execution_confidence_band)} | Temperature: ${badge(s.temperature)} | Controle: ${badge(s.control_mode)} | Intervention: ${badge(s.intervention_mode)}</p>
-    <p>Transition scope: ${badge(s.scope_transition_gate)} | Readiness transition: ${badge(s.transition_readiness_band)} (${s.transition_readiness_score}) | Politique intake: ${badge(s.intake_transition_policy)} | Admission scope: ${badge(s.scope_admission_gate)} | Reentree scope: ${badge(s.scope_reentry_readiness_band)} (${s.scope_reentry_readiness_score}) | Politique reprise: ${badge(s.intake_resumption_policy)} | Gate deblocage: ${badge(s.scope_unlock_gate)}</p>
+    <p>Transition scope: ${badge(s.scope_transition_gate)} | Readiness transition: ${badge(s.transition_readiness_band)} (${s.transition_readiness_score}) | Politique intake: ${badge(s.intake_transition_policy)} | Admission scope: ${badge(s.scope_admission_gate)} | Reentree scope: ${badge(s.scope_reentry_readiness_band)} (${s.scope_reentry_readiness_score}) | Politique reprise: ${badge(s.intake_resumption_policy)} | Gate deblocage: ${badge(s.scope_unlock_gate)} | Readiness expansion: ${badge(s.scope_expansion_readiness_band)} (${s.scope_expansion_readiness_score}) | Politique expansion: ${badge(s.intake_expansion_policy)} | Gate expansion: ${badge(s.scope_expansion_gate)}</p>
     <p>Taux de validation: <b>${v.valid_rate || 0}%</b> | Rapports invalides: <b>${v.invalid || 0}</b></p>`;
 }
 

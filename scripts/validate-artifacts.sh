@@ -578,6 +578,27 @@ if [[ -f "${OUT_DIR}/scope-unlock-gate-report.json" ]]; then
     --report "${REPORT_DIR}/scope-unlock-gate-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/scope-expansion-readiness-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/scope-expansion-readiness-report.json" \
+    --schema schemas/scope-expansion-readiness-report.schema.json \
+    --report "${REPORT_DIR}/scope-expansion-readiness-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/intake-expansion-policy-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/intake-expansion-policy-report.json" \
+    --schema schemas/intake-expansion-policy-report.schema.json \
+    --report "${REPORT_DIR}/intake-expansion-policy-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/scope-expansion-gate-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/scope-expansion-gate-report.json" \
+    --schema schemas/scope-expansion-gate-report.schema.json \
+    --report "${REPORT_DIR}/scope-expansion-gate-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/release-retrospective-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/release-retrospective-report.json" \
