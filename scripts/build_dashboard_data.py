@@ -149,6 +149,139 @@ def gather_commits(repo: Path, limit: int = 15) -> list[dict[str, str]]:
     return commits
 
 
+def _action_priority_score(action: str, status: dict[str, Any], risk_summary: dict[str, Any]) -> int:
+    text = action.lower()
+    score = 10
+
+    for token in ["p0", "urgent", "critical", "blocker", "bloquer", "blocked", "escalate"]:
+        if token in text:
+            score += 18
+
+    if any(token in text for token in ["triage", "watchlist", "risk", "risque"]):
+        score += 12
+
+    if any(token in text for token in ["stabilize", "stabilisation", "cooling", "reduce scope"]):
+        score += 10
+
+    if any(token in text for token in ["pipeline", "validation", "re-run", "re-run full"]):
+        score += 8
+
+    if any(token in text for token in ["packaging", "pilot", "launch"]):
+        score += 4
+
+    if status.get("transition_readiness_band") == "blocked" and any(
+        token in text for token in ["transition", "scope", "admission"]
+    ):
+        score += 16
+
+    if status.get("scope_admission_gate") == "closed" and any(
+        token in text for token in ["scope", "admission", "gate"]
+    ):
+        score += 16
+
+    if status.get("temperature") == "hot":
+        if any(token in text for token in ["stabilize", "cooling", "scope", "risk"]):
+            score += 12
+
+    if status.get("intervention_mode") == "urgent":
+        if any(token in text for token in ["urgent", "triage", "stabilize", "risk"]):
+            score += 12
+
+    p0_entries = int(risk_summary.get("p0_entries", 0))
+    if p0_entries > 0 and any(token in text for token in ["p0", "triage", "watchlist", "risk"]):
+        score += min(20, p0_entries * 4)
+
+    return score
+
+
+def prioritize_actions(
+    actions: list[str], status: dict[str, Any], risk_summary: dict[str, Any], limit: int = 20
+) -> list[str]:
+    ranked = sorted(
+        ((action, _action_priority_score(action, status, risk_summary)) for action in actions),
+        key=lambda item: (-item[1], item[0].lower()),
+    )
+    return [action for action, _ in ranked[:limit]]
+
+
+def build_aligned_backlog(
+    *,
+    current_phase: int,
+    status: dict[str, Any],
+    risk_summary: dict[str, Any],
+    legacy_backlog: list[str],
+) -> list[str]:
+    items: list[str] = []
+    next_phase = current_phase + 1
+
+    items.append(
+        f"Phase {next_phase}: lot de stabilisation prioritaire (P0, transition, admission) avant extension de perimetre."
+    )
+
+    if int(risk_summary.get("p0_entries", 0)) > 0:
+        items.append("Assigner proprietaires + echeances sur chaque entree P0 de la watchlist.")
+        items.append("Executer un triage quotidien P0 jusqu'a reduction du risque critique.")
+
+    if status.get("transition_readiness_band") == "blocked":
+        items.append("Lever le blocage de readiness de transition avec preuves de validation.")
+    if status.get("scope_admission_gate") == "closed":
+        items.append("Passer le gate d'admission scope de closed a guarded/open avant nouveau lot.")
+    if status.get("intake_transition_policy") == "hold":
+        items.append("Sortir la politique intake du mode hold avec criteres explicites.")
+    if status.get("temperature") == "hot":
+        items.append("Appliquer un plan de refroidissement delivery (reduction scope + boucles courtes).")
+    if status.get("intervention_mode") == "urgent":
+        items.append("Executer un sprint de remediations urgentes ciblees sur les chemins bloquants.")
+
+    items.append("Relancer pipeline complet et bundle release apres chaque remediations critiques.")
+    items.append("Verifier coherence dashboard: release go/ready doit rester coherent avec les signaux de risque.")
+    items.append(
+        f"Definir et documenter les phases {next_phase}-{next_phase + 2} sur base des ecarts restants."
+    )
+
+    # Keep a small tail of legacy backlog for context, without making it the primary roadmap.
+    for legacy in legacy_backlog[:5]:
+        items.append(f"[Contexte historique] {legacy}")
+
+    deduped: list[str] = []
+    for item in items:
+        if item not in deduped:
+            deduped.append(item)
+    return deduped[:30]
+
+
+def localize_action(action: str) -> str:
+    text = action.strip()
+    replacements = [
+        ("Execute urgent intervention sprint on blockers and P0 risk items.", "Executer un sprint d'intervention urgent sur les bloqueurs et les risques P0."),
+        ("Stabilize commitments and avoid net-new scope until P0 backlog shrinks.", "Stabiliser les engagements et eviter tout nouveau scope tant que le backlog P0 ne baisse pas."),
+        ("Maintain locked scope while P0 pressure and commitment lock remain active.", "Maintenir le scope verrouille tant que la pression P0 et le verrou d'engagement restent actifs."),
+        ("Keep conservative portfolio budget until P0 risk pressure decreases.", "Maintenir un budget portefeuille conservateur tant que la pression de risque P0 ne baisse pas."),
+        ("Enforce strict commitment guard until policy and P0 risk posture improve.", "Renforcer strictement le garde d'engagement tant que la policy et la posture de risque P0 ne s'ameliorent pas."),
+        ("Focus on blocker burn-down before adding new implementation scope.", "Concentrer l'effort sur la reduction des bloqueurs avant d'ajouter du nouveau scope d'implementation."),
+        ("Escalate P0 watchlist entries in next triage meeting.", "Escalader les entrees P0 de la watchlist a la prochaine reunion de triage."),
+        ("Track P1 watchlist entries with explicit owners and due dates.", "Suivre les entrees P1 de la watchlist avec proprietaires et dates d'echeance explicites."),
+        ("Authorize launch only when status is ready and guardrails stay active.", "Autoriser le lancement uniquement si le statut est pret et que les garde-fous restent actifs."),
+        ("Re-run full pipeline after any critical remediation change.", "Relancer le pipeline complet apres chaque remediation critique."),
+        ("Apply delivery cooling plan: reduce scope and shorten feedback loops.", "Appliquer un plan de refroidissement delivery: reduire le scope et raccourcir les boucles de feedback."),
+        ("Prioritize stabilization controls on blockers and high-risk execution paths.", "Prioriser les controles de stabilisation sur les bloqueurs et les chemins d'execution a haut risque."),
+        ("Quality gate is green. Proceed with release packaging and pilot validation.", "Le quality gate est au vert. Poursuivre le packaging release et la validation pilote."),
+    ]
+    for src, dst in replacements:
+        if text == src:
+            return dst
+    generic = text
+    generic = generic.replace("Control efficiency is low", "L'efficience du controle est faible")
+    generic = generic.replace("Apply strict execution stability guard while risk pressure remains elevated.", "Appliquer strictement le garde de stabilite d'execution tant que la pression de risque reste elevee.")
+    generic = generic.replace("until", "tant que")
+    generic = generic.replace(" and ", " et ")
+    generic = generic.replace("shorten feedback loops", "raccourcir les boucles de feedback")
+    generic = generic.replace("reduce scope", "reduire le scope")
+    generic = generic.replace("increase validation discipline", "renforcer la discipline de validation")
+    generic = generic.replace("policy", "politique")
+    return generic
+
+
 def build_dashboard_data(repo: Path) -> dict[str, Any]:
     readme = parse_readme(repo / "README.md")
     phases = parse_phase_docs(repo / "docs", readme["current_phase"])
@@ -216,57 +349,7 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     if not in_progress and phases:
         in_progress = [phases[-1]]
 
-    next_actions: list[str] = []
-    for source in [
-        quality_gate.get("actions", []),
-        release_policy.get("failures", []),
-        risk_watchlist.get("actions", []),
-        launch_readiness.get("actions", []),
-        delivery_temperature.get("actions", []),
-        control_recommendation.get("actions", []),
-        control_efficiency.get("actions", []),
-        intervention_plan.get("actions", []),
-        governance_friction.get("actions", []),
-        cadence_recommendation.get("actions", []),
-        execution_focus.get("actions", []),
-        owner_load.get("actions", []),
-        execution_throttle.get("actions", []),
-        priority_corridor.get("actions", []),
-        queue_pressure.get("actions", []),
-        delivery_bandwidth.get("actions", []),
-        intake_guard.get("actions", []),
-        intake_capacity.get("actions", []),
-        admission_control.get("actions", []),
-        commitment_pacing.get("actions", []),
-        scope_budget.get("actions", []),
-        admission_window.get("actions", []),
-        commitment_guard.get("actions", []),
-        portfolio_risk_budget.get("actions", []),
-        delivery_intake_sync.get("actions", []),
-        execution_reserve.get("actions", []),
-        capacity_buffer.get("actions", []),
-        intake_queue_policy.get("actions", []),
-        scope_rebalance.get("actions", []),
-        flow_control_budget.get("actions", []),
-        intake_release_window.get("actions", []),
-        execution_stability_guard.get("actions", []),
-        delivery_safety_margin.get("actions", []),
-        intake_commitment_window.get("actions", []),
-        scope_lock_state.get("actions", []),
-        throughput_guard_band.get("actions", []),
-        intake_slot_policy.get("actions", []),
-        scope_freeze_guard.get("actions", []),
-        delivery_stress_index.get("actions", []),
-        intake_pacing_window.get("actions", []),
-        scope_transition_gate.get("actions", []),
-        transition_readiness_index.get("actions", []),
-        intake_transition_policy.get("actions", []),
-        scope_admission_gate.get("actions", []),
-    ]:
-        for item in source:
-            text = str(item).strip()
-            if text and text not in next_actions:
-                next_actions.append(text)
+    risk_summary = risk_watchlist.get("summary", {})
 
     status = {
         "quality_gate": quality_gate.get("gate", "unknown"),
@@ -461,6 +544,66 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         ),
     }
 
+    raw_actions: list[str] = []
+    for source in [
+        quality_gate.get("actions", []),
+        release_policy.get("failures", []),
+        risk_watchlist.get("actions", []),
+        launch_readiness.get("actions", []),
+        delivery_temperature.get("actions", []),
+        control_recommendation.get("actions", []),
+        control_efficiency.get("actions", []),
+        intervention_plan.get("actions", []),
+        governance_friction.get("actions", []),
+        cadence_recommendation.get("actions", []),
+        execution_focus.get("actions", []),
+        owner_load.get("actions", []),
+        execution_throttle.get("actions", []),
+        priority_corridor.get("actions", []),
+        queue_pressure.get("actions", []),
+        delivery_bandwidth.get("actions", []),
+        intake_guard.get("actions", []),
+        intake_capacity.get("actions", []),
+        admission_control.get("actions", []),
+        commitment_pacing.get("actions", []),
+        scope_budget.get("actions", []),
+        admission_window.get("actions", []),
+        commitment_guard.get("actions", []),
+        portfolio_risk_budget.get("actions", []),
+        delivery_intake_sync.get("actions", []),
+        execution_reserve.get("actions", []),
+        capacity_buffer.get("actions", []),
+        intake_queue_policy.get("actions", []),
+        scope_rebalance.get("actions", []),
+        flow_control_budget.get("actions", []),
+        intake_release_window.get("actions", []),
+        execution_stability_guard.get("actions", []),
+        delivery_safety_margin.get("actions", []),
+        intake_commitment_window.get("actions", []),
+        scope_lock_state.get("actions", []),
+        throughput_guard_band.get("actions", []),
+        intake_slot_policy.get("actions", []),
+        scope_freeze_guard.get("actions", []),
+        delivery_stress_index.get("actions", []),
+        intake_pacing_window.get("actions", []),
+        scope_transition_gate.get("actions", []),
+        transition_readiness_index.get("actions", []),
+        intake_transition_policy.get("actions", []),
+        scope_admission_gate.get("actions", []),
+    ]:
+        for item in source:
+            text = localize_action(str(item).strip())
+            if text and text not in raw_actions:
+                raw_actions.append(text)
+
+    next_actions = prioritize_actions(raw_actions, status, risk_summary, limit=20)
+    aligned_backlog = build_aligned_backlog(
+        current_phase=current_phase,
+        status=status,
+        risk_summary=risk_summary,
+        legacy_backlog=backlog,
+    )
+
     return {
         "meta": {
             "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -478,7 +621,7 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "status": status,
         "timeline": phases,
         "in_progress": in_progress,
-        "remaining_backlog": backlog,
+        "remaining_backlog": aligned_backlog,
         "quality": {
             "validation": validation,
             "quality_gate": quality_gate,
@@ -529,7 +672,7 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "scope_admission_gate": scope_admission_gate,
         },
         "risks": {
-            "summary": risk_watchlist.get("summary", {}),
+            "summary": risk_summary,
             "entries": risk_watchlist.get("entries", [])[:50],
         },
         "next_actions": next_actions[:20],

@@ -35,8 +35,10 @@ body {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 14px;
+  box-shadow: 0 2px 10px rgba(16, 40, 56, 0.04);
 }
 .card h2 { margin: 0 0 10px; font-size: 16px; }
+.card p { margin: 0 0 8px; line-height: 1.45; }
 .span-2 { grid-column: span 2; }
 .kpis { display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)); gap: 10px; }
 .kpi {
@@ -80,6 +82,30 @@ th, td { text-align: left; border-bottom: 1px solid var(--line); padding: 7px 4p
 .badge.bad { color: var(--bad); border-color: #edc0ba; background: #fdeeed; }
 .risk-summary { margin-bottom: 10px; font-size: 13px; }
 ul, ol { margin: 0; padding-left: 18px; }
+.actions-priority {
+  list-style: none;
+  padding-left: 0;
+}
+.actions-priority li {
+  border: 1px solid var(--line);
+  border-left: 5px solid #8da0aa;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: #fbfcfd;
+}
+.actions-priority li.priority-high {
+  border-left-color: var(--bad);
+  background: #fff3f2;
+}
+.actions-priority li.priority-mid {
+  border-left-color: var(--warn);
+  background: #fff9ee;
+}
+.actions-priority li.priority-low {
+  border-left-color: var(--accent);
+  background: #eefaf5;
+}
 @media (max-width: 960px) {
   .grid { grid-template-columns: 1fr; }
   .span-2 { grid-column: span 1; }
