@@ -11,6 +11,8 @@ def test_evidence_catalog_lists_artifacts():
                 "policy_config_valid": True,
                 "policy_lockfile_sync": True,
                 "policy_compliance_level": "compliant",
+                "release_policy_status": "pass",
+                "release_policy_failures": 0,
             }
         },
         repro_package={"artifacts": [{"path": "a", "exists": True, "sha256": "x"}]},
@@ -19,3 +21,5 @@ def test_evidence_catalog_lists_artifacts():
     assert report["summary"]["policy_config_valid"] is True
     assert report["summary"]["policy_lockfile_sync"] is True
     assert report["summary"]["policy_compliance_level"] == "compliant"
+    assert report["summary"]["release_policy_status"] == "pass"
+    assert report["summary"]["release_policy_failures"] == 0

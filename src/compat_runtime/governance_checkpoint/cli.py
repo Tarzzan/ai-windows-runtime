@@ -12,7 +12,10 @@ def _checkpoint_status(
     missing_reports: int,
     policy_config_valid: bool,
     policy_lockfile_sync: bool,
+    release_policy_status: str,
 ) -> str:
+    if release_policy_status != "pass":
+        return "block"
     if not policy_config_valid or not policy_lockfile_sync:
         return "block"
     if window_status == "stable" and plan_mode == "routine" and missing_reports == 0:
@@ -36,6 +39,8 @@ def build_governance_checkpoint_report(
     policy_config_valid = bool(catalog_summary.get("policy_config_valid", False))
     policy_lockfile_sync = bool(catalog_summary.get("policy_lockfile_sync", False))
     policy_compliance_level = str(catalog_summary.get("policy_compliance_level", "non_compliant"))
+    release_policy_status = str(catalog_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(catalog_summary.get("release_policy_failures", 0))
 
     status = _checkpoint_status(
         str(window_summary.get("window_status", "unstable")),
@@ -43,6 +48,7 @@ def build_governance_checkpoint_report(
         int(snapshot_summary.get("missing_reports", 1)),
         policy_config_valid,
         policy_lockfile_sync,
+        release_policy_status,
     )
 
     return {
@@ -57,6 +63,8 @@ def build_governance_checkpoint_report(
             "policy_config_valid": policy_config_valid,
             "policy_lockfile_sync": policy_lockfile_sync,
             "policy_compliance_level": policy_compliance_level,
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "actions": ["Proceed only when governance checkpoint status is pass or conditional."],
     }

@@ -20,6 +20,7 @@ def build_release_packet_report(
     release_bundle_manifest: dict,
     stakeholder_update_report: dict,
     policy_health_report: dict | None = None,
+    release_policy_report: dict | None = None,
 ) -> dict:
     launch_status = str(launch_readiness_report.get("status", "blocked"))
     launch_summary = launch_readiness_report.get("summary", {})
@@ -27,8 +28,11 @@ def build_release_packet_report(
     missing = release_bundle_manifest.get("missing", [])
     stakeholder_summary = stakeholder_update_report.get("summary", {})
     policy_health_summary = policy_health_report or {}
+    release_policy_summary = release_policy_report or {}
     policy_config_valid = bool(policy_health_summary.get("config_valid", False))
     policy_lockfile_sync = bool(policy_health_summary.get("lockfile_sync", False))
+    release_policy_status = str(release_policy_summary.get("status", "missing"))
+    release_policy_failures = len(release_policy_summary.get("failures", []))
 
     packet_ready = launch_status in {"ready", "limited"} and len(missing) == 0
 
@@ -48,6 +52,8 @@ def build_release_packet_report(
                 policy_config_valid=policy_config_valid,
                 policy_lockfile_sync=policy_lockfile_sync,
             ),
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "missing": missing,
         "actions": [
@@ -63,18 +69,23 @@ def main() -> None:
     parser.add_argument("--release-bundle-manifest", required=True, help="Release bundle manifest path")
     parser.add_argument("--stakeholder-update-report", required=True, help="Stakeholder update report path")
     parser.add_argument("--policy-health-report", required=False, help="Optional policy health report")
+    parser.add_argument("--release-policy-report", required=False, help="Optional release policy report")
     parser.add_argument("--output", required=True, help="Output path")
     args = parser.parse_args()
 
     policy_health_report: dict | None = None
     if args.policy_health_report:
         policy_health_report = read_json(args.policy_health_report)
+    release_policy_report: dict | None = None
+    if args.release_policy_report:
+        release_policy_report = read_json(args.release_policy_report)
 
     artifact = build_release_packet_report(
         launch_readiness_report=read_json(args.launch_readiness_report),
         release_bundle_manifest=read_json(args.release_bundle_manifest),
         stakeholder_update_report=read_json(args.stakeholder_update_report),
         policy_health_report=policy_health_report,
+        release_policy_report=release_policy_report,
     )
     write_json(args.output, artifact)
 

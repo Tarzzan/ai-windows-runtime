@@ -15,11 +15,17 @@ if [[ -f "${OUT_DIR}/policy-health-report.json" ]]; then
   POLICY_HEALTH_ARGS=(--policy-health-report "${OUT_DIR}/policy-health-report.json")
 fi
 
+RELEASE_POLICY_ARGS=()
+if [[ -f "${OUT_DIR}/release-policy-report.json" ]]; then
+  RELEASE_POLICY_ARGS=(--release-policy-report "${OUT_DIR}/release-policy-report.json")
+fi
+
 "${PYTHON_BIN}" -m compat_runtime.release_packet.cli \
   --launch-readiness-report "${OUT_DIR}/launch-readiness-report.json" \
   --release-bundle-manifest "${OUT_DIR}/release-bundle-manifest.json" \
   --stakeholder-update-report "${OUT_DIR}/stakeholder-update-report.json" \
   "${POLICY_HEALTH_ARGS[@]}" \
+  "${RELEASE_POLICY_ARGS[@]}" \
   --output "${OUT_DIR}/release-packet-report.json"
 
 "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \

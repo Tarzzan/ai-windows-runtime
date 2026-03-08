@@ -26,6 +26,8 @@ def build_evidence_catalog_report(
             "policy_compliance_level": str(
                 packet_summary.get("policy_compliance_level", "non_compliant")
             ),
+            "release_policy_status": str(packet_summary.get("release_policy_status", "missing")),
+            "release_policy_failures": int(packet_summary.get("release_policy_failures", 0)),
         },
         "catalog": [
             {

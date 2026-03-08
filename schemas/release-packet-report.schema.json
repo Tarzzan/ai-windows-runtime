@@ -17,7 +17,9 @@
         "stakeholder_delivery_status",
         "policy_config_valid",
         "policy_lockfile_sync",
-        "policy_compliance_level"
+        "policy_compliance_level",
+        "release_policy_status",
+        "release_policy_failures"
       ],
       "properties": {
         "packet_ready": {"type": "boolean"},
@@ -31,7 +33,9 @@
         "policy_compliance_level": {
           "type": "string",
           "enum": ["compliant", "degraded", "non_compliant"]
-        }
+        },
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "missing": {"type": "array", "items": {}},
