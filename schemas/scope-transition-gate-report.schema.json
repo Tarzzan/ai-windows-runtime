@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scope Transition Gate Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["scope_transition_gate", "intake_pacing_window", "scope_freeze_guard", "policy_status"],
+      "properties": {
+        "scope_transition_gate": {"type": "string", "enum": ["blocked", "conditional", "open"]},
+        "intake_pacing_window": {"type": "string", "enum": ["slow", "moderate", "fast"]},
+        "scope_freeze_guard": {"type": "string", "enum": ["freeze", "guarded", "open"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

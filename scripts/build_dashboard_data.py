@@ -196,6 +196,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     throughput_guard_band = read_json(out_dir / "throughput-guard-band-report.json", {})
     intake_slot_policy = read_json(out_dir / "intake-slot-policy-report.json", {})
     scope_freeze_guard = read_json(out_dir / "scope-freeze-guard-report.json", {})
+    delivery_stress_index = read_json(out_dir / "delivery-stress-index-report.json", {})
+    intake_pacing_window = read_json(out_dir / "intake-pacing-window-report.json", {})
+    scope_transition_gate = read_json(out_dir / "scope-transition-gate-report.json", {})
     risk_watchlist = read_json(out_dir / "risk-watchlist-report.json", {})
     validation = gather_validation(out_dir / "validation")
 
@@ -250,6 +253,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         throughput_guard_band.get("actions", []),
         intake_slot_policy.get("actions", []),
         scope_freeze_guard.get("actions", []),
+        delivery_stress_index.get("actions", []),
+        intake_pacing_window.get("actions", []),
+        scope_transition_gate.get("actions", []),
     ]:
         for item in source:
             text = str(item).strip()
@@ -423,6 +429,18 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "scope_freeze_guard": (scope_freeze_guard.get("summary", {}) or {}).get(
             "scope_freeze_guard", "unknown"
         ),
+        "delivery_stress_band": (delivery_stress_index.get("summary", {}) or {}).get(
+            "delivery_stress_band", "unknown"
+        ),
+        "delivery_stress_score": (delivery_stress_index.get("summary", {}) or {}).get(
+            "delivery_stress_score", 0
+        ),
+        "intake_pacing_window": (intake_pacing_window.get("summary", {}) or {}).get(
+            "intake_pacing_window", "unknown"
+        ),
+        "scope_transition_gate": (scope_transition_gate.get("summary", {}) or {}).get(
+            "scope_transition_gate", "unknown"
+        ),
     }
 
     return {
@@ -485,6 +503,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "throughput_guard_band": throughput_guard_band,
             "intake_slot_policy": intake_slot_policy,
             "scope_freeze_guard": scope_freeze_guard,
+            "delivery_stress_index": delivery_stress_index,
+            "intake_pacing_window": intake_pacing_window,
+            "scope_transition_gate": scope_transition_gate,
         },
         "risks": {
             "summary": risk_watchlist.get("summary", {}),

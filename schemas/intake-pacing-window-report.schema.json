@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Intake Pacing Window Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["intake_pacing_window", "delivery_stress_band", "intake_slot_policy", "intake_release_window"],
+      "properties": {
+        "intake_pacing_window": {"type": "string", "enum": ["slow", "moderate", "fast"]},
+        "delivery_stress_band": {"type": "string", "enum": ["low", "medium", "high"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

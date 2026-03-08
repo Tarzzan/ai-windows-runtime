@@ -515,6 +515,27 @@ if [[ -f "${OUT_DIR}/scope-freeze-guard-report.json" ]]; then
     --report "${REPORT_DIR}/scope-freeze-guard-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/delivery-stress-index-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/delivery-stress-index-report.json" \
+    --schema schemas/delivery-stress-index-report.schema.json \
+    --report "${REPORT_DIR}/delivery-stress-index-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/intake-pacing-window-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/intake-pacing-window-report.json" \
+    --schema schemas/intake-pacing-window-report.schema.json \
+    --report "${REPORT_DIR}/intake-pacing-window-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/scope-transition-gate-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/scope-transition-gate-report.json" \
+    --schema schemas/scope-transition-gate-report.schema.json \
+    --report "${REPORT_DIR}/scope-transition-gate-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/release-retrospective-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/release-retrospective-report.json" \

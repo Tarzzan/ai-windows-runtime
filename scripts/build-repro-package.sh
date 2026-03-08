@@ -83,6 +83,9 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/throughput-guard-band-report.json" \
     "${OUT_DIR}/intake-slot-policy-report.json" \
     "${OUT_DIR}/scope-freeze-guard-report.json" \
+    "${OUT_DIR}/delivery-stress-index-report.json" \
+    "${OUT_DIR}/intake-pacing-window-report.json" \
+    "${OUT_DIR}/scope-transition-gate-report.json" \
     "${OUT_DIR}/release-retrospective-report.json" \
     "${OUT_DIR}/next-cycle-bootstrap-report.json" \
     "${OUT_DIR}/stability-window-report.json" \

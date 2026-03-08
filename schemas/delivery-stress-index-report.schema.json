@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Delivery Stress Index Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["delivery_stress_score", "delivery_stress_band", "scope_freeze_guard", "throughput_guard_score", "p0_entries"],
+      "properties": {
+        "delivery_stress_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "delivery_stress_band": {"type": "string", "enum": ["low", "medium", "high"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}
