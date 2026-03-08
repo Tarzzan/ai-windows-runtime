@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Project Control Panel</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>Project Control Panel</h1>
+      <div class="meta" id="meta"></div>
+    </header>
+
+    <main class="grid">
+      <section class="card kpis" id="kpis"></section>
+
+      <section class="card">
+        <h2>Filtres</h2>
+        <div class="filters">
+          <input id="search" type="search" placeholder="Rechercher phase, risque, action..." />
+          <select id="phaseFilter">
+            <option value="all">Toutes les phases</option>
+            <option value="completed">Completed</option>
+            <option value="in_progress">In Progress</option>
+            <option value="planned">Planned</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="card span-2">
+        <h2>Timeline Des Phases</h2>
+        <div id="timeline" class="timeline"></div>
+      </section>
+
+      <section class="card">
+        <h2>Ce Qui Est En Cours</h2>
+        <ul id="inProgress"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Ce Qu'il Reste A Faire</h2>
+        <ul id="remaining"></ul>
+      </section>
+
+      <section class="card span-2">
+        <h2>Qualite Et Pipeline</h2>
+        <div id="quality"></div>
+      </section>
+
+      <section class="card span-2">
+        <h2>Risques</h2>
+        <div id="riskSummary" class="risk-summary"></div>
+        <table id="riskTable">
+          <thead>
+            <tr><th>ID</th><th>Priorite</th><th>Type</th><th>Detail</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>Prochaines Actions</h2>
+        <ol id="actions"></ol>
+      </section>
+
+      <section class="card">
+        <h2>Commits Recents</h2>
+        <ul id="commits"></ul>
+      </section>
+    </main>
+
+    <script src="data/dashboard-data.js"></script>
+    <script src="assets/app.js"></script>
+  </body>
+</html>

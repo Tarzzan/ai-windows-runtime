@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 98)
+## Current scope (Phase 99)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -218,6 +218,9 @@ Core runtime capabilities in this phase:
 191. Propagate policy health signals into evidence catalog summary.
 192. Propagate policy health signals into governance checkpoint summary and verdicting.
 193. Add CI gates for policy config check and policy lockfile sync before lint/tests/pipeline.
+194. Add a local static dashboard template for project-wide control panel views (progress, timeline, quality, risks, actions).
+195. Add automated dashboard data builder from README/docs/out artifacts (`build_dashboard_data.py`) with deterministic JSON output.
+196. Add refresh/open scripts that publish the dashboard in the user desktop directory (`xdg-user-dir DESKTOP`) with offline-safe data preload.
 194. Add explicit `policy_compliance_level` to `policy-health-report.json` and enforce it in release policy gate.
 195. Keep backward-compatible gate behavior by deriving compliance level when older policy health artifacts omit it.
 196. Harden pipeline determinism by cleaning stale policy artifacts before early schema validation stages.
