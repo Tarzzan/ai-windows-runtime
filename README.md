@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 120)
+## Current scope (Phase 123)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -284,6 +284,15 @@ Core runtime capabilities in this phase:
 257. Surface owner overload, throttle mode, and priority corridor in the local dashboard control panel.
 258. Refresh owner load/throttle/priority corridor signals in policy-aware regeneration flow before release packet rebuild.
 259. Add dedicated CLIs and build scripts for owner load, execution throttle, and priority corridor automation.
+260. Add queue pressure artifact (`queue-pressure-report.json`) combining owner overload, throttle mode, and active priority corridor.
+261. Validate and package queue pressure artifacts in full pipeline and release bundle workflows.
+262. Add delivery bandwidth artifact (`delivery-bandwidth-report.json`) from queue pressure, cadence recommendation, and owner load posture.
+263. Validate and package delivery bandwidth artifacts in full pipeline and release bundle workflows.
+264. Add intake guard artifact (`intake-guard-report.json`) from bandwidth mode, release policy status, and priority corridor.
+265. Validate and package intake guard artifacts in full pipeline and release bundle workflows.
+266. Surface queue pressure, delivery bandwidth, and intake guard in the local dashboard control panel.
+267. Refresh queue pressure/bandwidth/intake guard signals in policy-aware regeneration flow before release packet rebuild.
+268. Add dedicated CLIs and build scripts for queue pressure, delivery bandwidth, and intake guard automation.
 194. Add explicit `policy_compliance_level` to `policy-health-report.json` and enforce it in release policy gate.
 195. Keep backward-compatible gate behavior by deriving compliance level when older policy health artifacts omit it.
 196. Harden pipeline determinism by cleaning stale policy artifacts before early schema validation stages.

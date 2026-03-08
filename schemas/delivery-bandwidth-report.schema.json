@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Delivery Bandwidth Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["bandwidth_score", "bandwidth_mode", "queue_pressure_score", "cadence", "overloaded_owners"],
+      "properties": {
+        "bandwidth_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "bandwidth_mode": {"type": "string", "enum": ["narrow", "controlled", "wide"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

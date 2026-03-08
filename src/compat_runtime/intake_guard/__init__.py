@@ -1,0 +1,1 @@
+"""Intake guard report builder."""
