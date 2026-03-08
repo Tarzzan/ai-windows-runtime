@@ -494,6 +494,27 @@ if [[ -f "${OUT_DIR}/scope-lock-state-report.json" ]]; then
     --report "${REPORT_DIR}/scope-lock-state-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/throughput-guard-band-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/throughput-guard-band-report.json" \
+    --schema schemas/throughput-guard-band-report.schema.json \
+    --report "${REPORT_DIR}/throughput-guard-band-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/intake-slot-policy-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/intake-slot-policy-report.json" \
+    --schema schemas/intake-slot-policy-report.schema.json \
+    --report "${REPORT_DIR}/intake-slot-policy-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/scope-freeze-guard-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/scope-freeze-guard-report.json" \
+    --schema schemas/scope-freeze-guard-report.schema.json \
+    --report "${REPORT_DIR}/scope-freeze-guard-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/release-retrospective-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/release-retrospective-report.json" \

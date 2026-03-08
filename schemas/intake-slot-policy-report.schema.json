@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Intake Slot Policy Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["intake_slot_policy", "throughput_guard_band", "intake_commitment_window", "intake_queue_policy"],
+      "properties": {
+        "intake_slot_policy": {"type": "string", "enum": ["minimal", "moderate", "expanded"]},
+        "throughput_guard_band": {"type": "string", "enum": ["tight", "balanced", "wide"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

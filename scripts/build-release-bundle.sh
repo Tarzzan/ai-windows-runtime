@@ -130,6 +130,12 @@ rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/intake-commitment-window-report-validation.json" \
   "${OUT_DIR}/scope-lock-state-report.json" \
   "${VALIDATION_DIR}/scope-lock-state-report-validation.json" \
+  "${OUT_DIR}/throughput-guard-band-report.json" \
+  "${VALIDATION_DIR}/throughput-guard-band-report-validation.json" \
+  "${OUT_DIR}/intake-slot-policy-report.json" \
+  "${VALIDATION_DIR}/intake-slot-policy-report-validation.json" \
+  "${OUT_DIR}/scope-freeze-guard-report.json" \
+  "${VALIDATION_DIR}/scope-freeze-guard-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -1067,6 +1073,39 @@ scripts/check-release-policy.sh "${OUT_DIR}"
   --schema schemas/scope-lock-state-report.schema.json \
   --report "${VALIDATION_DIR}/scope-lock-state-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.throughput_guard_band.cli \
+  --scope-lock-state-report "${OUT_DIR}/scope-lock-state-report.json" \
+  --delivery-safety-margin-report "${OUT_DIR}/delivery-safety-margin-report.json" \
+  --execution-reserve-report "${OUT_DIR}/execution-reserve-report.json" \
+  --output "${OUT_DIR}/throughput-guard-band-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/throughput-guard-band-report.json" \
+  --schema schemas/throughput-guard-band-report.schema.json \
+  --report "${VALIDATION_DIR}/throughput-guard-band-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.intake_slot_policy.cli \
+  --throughput-guard-band-report "${OUT_DIR}/throughput-guard-band-report.json" \
+  --intake-commitment-window-report "${OUT_DIR}/intake-commitment-window-report.json" \
+  --intake-queue-policy-report "${OUT_DIR}/intake-queue-policy-report.json" \
+  --output "${OUT_DIR}/intake-slot-policy-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/intake-slot-policy-report.json" \
+  --schema schemas/intake-slot-policy-report.schema.json \
+  --report "${VALIDATION_DIR}/intake-slot-policy-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.scope_freeze_guard.cli \
+  --intake-slot-policy-report "${OUT_DIR}/intake-slot-policy-report.json" \
+  --scope-lock-state-report "${OUT_DIR}/scope-lock-state-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --output "${OUT_DIR}/scope-freeze-guard-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/scope-freeze-guard-report.json" \
+  --schema schemas/scope-freeze-guard-report.schema.json \
+  --report "${VALIDATION_DIR}/scope-freeze-guard-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.release_retrospective.cli \
   --delivery-signoff-report "${OUT_DIR}/delivery-signoff-report.json" \
   --readiness-delta-report "${OUT_DIR}/readiness-delta-report.json" \
@@ -1204,6 +1243,9 @@ scripts/build-execution-stability-guard-report.sh "${OUT_DIR}"
 scripts/build-delivery-safety-margin-report.sh "${OUT_DIR}"
 scripts/build-intake-commitment-window-report.sh "${OUT_DIR}"
 scripts/build-scope-lock-state-report.sh "${OUT_DIR}"
+scripts/build-throughput-guard-band-report.sh "${OUT_DIR}"
+scripts/build-intake-slot-policy-report.sh "${OUT_DIR}"
+scripts/build-scope-freeze-guard-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
@@ -1271,6 +1313,9 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/delivery-safety-margin-report.json" \
     "${OUT_DIR}/intake-commitment-window-report.json" \
     "${OUT_DIR}/scope-lock-state-report.json" \
+    "${OUT_DIR}/throughput-guard-band-report.json" \
+    "${OUT_DIR}/intake-slot-policy-report.json" \
+    "${OUT_DIR}/scope-freeze-guard-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \
@@ -1391,6 +1436,9 @@ cp "${OUT_DIR}/execution-stability-guard-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/delivery-safety-margin-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/intake-commitment-window-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/scope-lock-state-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/throughput-guard-band-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/intake-slot-policy-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/scope-freeze-guard-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-gate-history-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/pilot-readiness-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/ownership-assignment-report.json" "${BUNDLE_DIR}/"

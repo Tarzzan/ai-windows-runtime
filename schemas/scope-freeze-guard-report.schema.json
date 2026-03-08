@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scope Freeze Guard Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["scope_freeze_guard", "intake_slot_policy", "scope_lock_state", "p0_entries"],
+      "properties": {
+        "scope_freeze_guard": {"type": "string", "enum": ["freeze", "guarded", "open"]},
+        "intake_slot_policy": {"type": "string", "enum": ["minimal", "moderate", "expanded"]},
+        "scope_lock_state": {"type": "string", "enum": ["locked", "controlled", "flexible"]},
+        "p0_entries": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

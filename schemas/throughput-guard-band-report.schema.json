@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Throughput Guard Band Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["throughput_guard_score", "throughput_guard_band", "scope_lock_state", "safety_margin_score", "execution_reserve"],
+      "properties": {
+        "throughput_guard_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "throughput_guard_band": {"type": "string", "enum": ["tight", "balanced", "wide"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

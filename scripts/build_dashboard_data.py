@@ -193,6 +193,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     delivery_safety_margin = read_json(out_dir / "delivery-safety-margin-report.json", {})
     intake_commitment_window = read_json(out_dir / "intake-commitment-window-report.json", {})
     scope_lock_state = read_json(out_dir / "scope-lock-state-report.json", {})
+    throughput_guard_band = read_json(out_dir / "throughput-guard-band-report.json", {})
+    intake_slot_policy = read_json(out_dir / "intake-slot-policy-report.json", {})
+    scope_freeze_guard = read_json(out_dir / "scope-freeze-guard-report.json", {})
     risk_watchlist = read_json(out_dir / "risk-watchlist-report.json", {})
     validation = gather_validation(out_dir / "validation")
 
@@ -244,6 +247,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         delivery_safety_margin.get("actions", []),
         intake_commitment_window.get("actions", []),
         scope_lock_state.get("actions", []),
+        throughput_guard_band.get("actions", []),
+        intake_slot_policy.get("actions", []),
+        scope_freeze_guard.get("actions", []),
     ]:
         for item in source:
             text = str(item).strip()
@@ -405,6 +411,18 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "scope_lock_state": (scope_lock_state.get("summary", {}) or {}).get(
             "scope_lock_state", "unknown"
         ),
+        "throughput_guard_band": (throughput_guard_band.get("summary", {}) or {}).get(
+            "throughput_guard_band", "unknown"
+        ),
+        "throughput_guard_score": (throughput_guard_band.get("summary", {}) or {}).get(
+            "throughput_guard_score", 0
+        ),
+        "intake_slot_policy": (intake_slot_policy.get("summary", {}) or {}).get(
+            "intake_slot_policy", "unknown"
+        ),
+        "scope_freeze_guard": (scope_freeze_guard.get("summary", {}) or {}).get(
+            "scope_freeze_guard", "unknown"
+        ),
     }
 
     return {
@@ -464,6 +482,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "delivery_safety_margin": delivery_safety_margin,
             "intake_commitment_window": intake_commitment_window,
             "scope_lock_state": scope_lock_state,
+            "throughput_guard_band": throughput_guard_band,
+            "intake_slot_policy": intake_slot_policy,
+            "scope_freeze_guard": scope_freeze_guard,
         },
         "risks": {
             "summary": risk_watchlist.get("summary", {}),
