@@ -389,6 +389,27 @@ if [[ -f "${OUT_DIR}/commitment-pacing-report.json" ]]; then
     --report "${REPORT_DIR}/commitment-pacing-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/scope-budget-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/scope-budget-report.json" \
+    --schema schemas/scope-budget-report.schema.json \
+    --report "${REPORT_DIR}/scope-budget-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/admission-window-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/admission-window-report.json" \
+    --schema schemas/admission-window-report.schema.json \
+    --report "${REPORT_DIR}/admission-window-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/commitment-guard-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/commitment-guard-report.json" \
+    --schema schemas/commitment-guard-report.schema.json \
+    --report "${REPORT_DIR}/commitment-guard-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/release-retrospective-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/release-retrospective-report.json" \

@@ -100,6 +100,12 @@ rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/admission-control-report-validation.json" \
   "${OUT_DIR}/commitment-pacing-report.json" \
   "${VALIDATION_DIR}/commitment-pacing-report-validation.json" \
+  "${OUT_DIR}/scope-budget-report.json" \
+  "${VALIDATION_DIR}/scope-budget-report-validation.json" \
+  "${OUT_DIR}/admission-window-report.json" \
+  "${VALIDATION_DIR}/admission-window-report-validation.json" \
+  "${OUT_DIR}/commitment-guard-report.json" \
+  "${VALIDATION_DIR}/commitment-guard-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -702,6 +708,24 @@ fi
   --schema schemas/delivery-temperature-report.schema.json \
   --report "${VALIDATION_DIR}/delivery-temperature-report-validation.json"
 
+# Ensure release-policy diagnostics exist before control recommendation generation.
+scripts/check-policy-config.sh "${OUT_DIR}"
+scripts/export-active-policy.sh "${OUT_DIR}"
+scripts/build-policy-health-report.sh "${OUT_DIR}"
+scripts/check-release-policy.sh "${OUT_DIR}"
+
+"${PYTHON_BIN}" -m compat_runtime.control_recommendation.cli \
+  --delivery-temperature-report "${OUT_DIR}/delivery-temperature-report.json" \
+  --execution-confidence-report "${OUT_DIR}/execution-confidence-report.json" \
+  --execution-pressure-report "${OUT_DIR}/execution-pressure-report.json" \
+  --release-policy-report "${OUT_DIR}/release-policy-report.json" \
+  --output "${OUT_DIR}/control-recommendation-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/control-recommendation-report.json" \
+  --schema schemas/control-recommendation-report.schema.json \
+  --report "${VALIDATION_DIR}/control-recommendation-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.intervention_plan.cli \
   --control-efficiency-report "${OUT_DIR}/control-efficiency-report.json" \
   --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
@@ -854,6 +878,39 @@ fi
   --schema schemas/commitment-pacing-report.schema.json \
   --report "${VALIDATION_DIR}/commitment-pacing-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.scope_budget.cli \
+  --commitment-pacing-report "${OUT_DIR}/commitment-pacing-report.json" \
+  --readiness-scorecard-report "${OUT_DIR}/readiness-scorecard-report.json" \
+  --release-forecast-report "${OUT_DIR}/release-forecast-report.json" \
+  --output "${OUT_DIR}/scope-budget-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/scope-budget-report.json" \
+  --schema schemas/scope-budget-report.schema.json \
+  --report "${VALIDATION_DIR}/scope-budget-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.admission_window.cli \
+  --scope-budget-report "${OUT_DIR}/scope-budget-report.json" \
+  --admission-control-report "${OUT_DIR}/admission-control-report.json" \
+  --execution-focus-report "${OUT_DIR}/execution-focus-report.json" \
+  --output "${OUT_DIR}/admission-window-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/admission-window-report.json" \
+  --schema schemas/admission-window-report.schema.json \
+  --report "${VALIDATION_DIR}/admission-window-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.commitment_guard.cli \
+  --admission-window-report "${OUT_DIR}/admission-window-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --release-policy-report "${OUT_DIR}/release-policy-report.json" \
+  --output "${OUT_DIR}/commitment-guard-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/commitment-guard-report.json" \
+  --schema schemas/commitment-guard-report.schema.json \
+  --report "${VALIDATION_DIR}/commitment-guard-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.release_retrospective.cli \
   --delivery-signoff-report "${OUT_DIR}/delivery-signoff-report.json" \
   --readiness-delta-report "${OUT_DIR}/readiness-delta-report.json" \
@@ -976,6 +1033,9 @@ scripts/build-intake-guard-report.sh "${OUT_DIR}"
 scripts/build-intake-capacity-report.sh "${OUT_DIR}"
 scripts/build-admission-control-report.sh "${OUT_DIR}"
 scripts/build-commitment-pacing-report.sh "${OUT_DIR}"
+scripts/build-scope-budget-report.sh "${OUT_DIR}"
+scripts/build-admission-window-report.sh "${OUT_DIR}"
+scripts/build-commitment-guard-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
@@ -1028,6 +1088,9 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/intake-capacity-report.json" \
     "${OUT_DIR}/admission-control-report.json" \
     "${OUT_DIR}/commitment-pacing-report.json" \
+    "${OUT_DIR}/scope-budget-report.json" \
+    "${OUT_DIR}/admission-window-report.json" \
+    "${OUT_DIR}/commitment-guard-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \
@@ -1133,6 +1196,9 @@ cp "${OUT_DIR}/intake-guard-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/intake-capacity-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/admission-control-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/commitment-pacing-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/scope-budget-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/admission-window-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/commitment-guard-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-gate-history-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/pilot-readiness-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/ownership-assignment-report.json" "${BUNDLE_DIR}/"

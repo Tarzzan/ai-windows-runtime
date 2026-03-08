@@ -1,0 +1,1 @@
+"""Commitment guard artifact module."""

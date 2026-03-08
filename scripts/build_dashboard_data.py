@@ -178,6 +178,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     intake_capacity = read_json(out_dir / "intake-capacity-report.json", {})
     admission_control = read_json(out_dir / "admission-control-report.json", {})
     commitment_pacing = read_json(out_dir / "commitment-pacing-report.json", {})
+    scope_budget = read_json(out_dir / "scope-budget-report.json", {})
+    admission_window = read_json(out_dir / "admission-window-report.json", {})
+    commitment_guard = read_json(out_dir / "commitment-guard-report.json", {})
     risk_watchlist = read_json(out_dir / "risk-watchlist-report.json", {})
     validation = gather_validation(out_dir / "validation")
 
@@ -214,6 +217,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         intake_capacity.get("actions", []),
         admission_control.get("actions", []),
         commitment_pacing.get("actions", []),
+        scope_budget.get("actions", []),
+        admission_window.get("actions", []),
+        commitment_guard.get("actions", []),
     ]:
         for item in source:
             text = str(item).strip()
@@ -315,6 +321,18 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "commitment_mode": (commitment_pacing.get("summary", {}) or {}).get(
             "commitment_mode", "unknown"
         ),
+        "scope_budget_mode": (scope_budget.get("summary", {}) or {}).get(
+            "scope_budget_mode", "unknown"
+        ),
+        "scope_budget_score": (scope_budget.get("summary", {}) or {}).get(
+            "scope_budget_score", 0
+        ),
+        "admission_window": (admission_window.get("summary", {}) or {}).get(
+            "admission_window", "unknown"
+        ),
+        "commitment_guard": (commitment_guard.get("summary", {}) or {}).get(
+            "commitment_guard", "unknown"
+        ),
     }
 
     return {
@@ -359,6 +377,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "intake_capacity": intake_capacity,
             "admission_control": admission_control,
             "commitment_pacing": commitment_pacing,
+            "scope_budget": scope_budget,
+            "admission_window": admission_window,
+            "commitment_guard": commitment_guard,
         },
         "risks": {
             "summary": risk_watchlist.get("summary", {}),

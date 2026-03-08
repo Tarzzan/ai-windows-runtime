@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scope Budget Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["scope_budget_score", "scope_budget_mode", "commitment_mode", "readiness_score", "estimated_iterations_to_go"],
+      "properties": {
+        "scope_budget_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "scope_budget_mode": {"type": "string", "enum": ["tight", "balanced", "flexible"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

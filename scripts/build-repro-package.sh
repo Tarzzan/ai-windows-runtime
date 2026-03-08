@@ -65,6 +65,9 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/intake-capacity-report.json" \
     "${OUT_DIR}/admission-control-report.json" \
     "${OUT_DIR}/commitment-pacing-report.json" \
+    "${OUT_DIR}/scope-budget-report.json" \
+    "${OUT_DIR}/admission-window-report.json" \
+    "${OUT_DIR}/commitment-guard-report.json" \
     "${OUT_DIR}/release-retrospective-report.json" \
     "${OUT_DIR}/next-cycle-bootstrap-report.json" \
     "${OUT_DIR}/stability-window-report.json" \
