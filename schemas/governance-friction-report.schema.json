@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Governance Friction Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["friction_score", "friction_band", "efficiency_score", "intervention_mode", "missing_validation_reports"],
+      "properties": {
+        "friction_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "friction_band": {"type": "string", "enum": ["high", "medium", "low"]},
+        "efficiency_score": {"type": "integer"},
+        "intervention_mode": {"type": "string"},
+        "missing_validation_reports": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

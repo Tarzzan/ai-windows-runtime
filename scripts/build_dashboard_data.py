@@ -166,6 +166,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     control_recommendation = read_json(out_dir / "control-recommendation-report.json", {})
     control_efficiency = read_json(out_dir / "control-efficiency-report.json", {})
     intervention_plan = read_json(out_dir / "intervention-plan-report.json", {})
+    governance_friction = read_json(out_dir / "governance-friction-report.json", {})
+    cadence_recommendation = read_json(out_dir / "cadence-recommendation-report.json", {})
+    execution_focus = read_json(out_dir / "execution-focus-report.json", {})
     risk_watchlist = read_json(out_dir / "risk-watchlist-report.json", {})
     validation = gather_validation(out_dir / "validation")
 
@@ -190,6 +193,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         control_recommendation.get("actions", []),
         control_efficiency.get("actions", []),
         intervention_plan.get("actions", []),
+        governance_friction.get("actions", []),
+        cadence_recommendation.get("actions", []),
+        execution_focus.get("actions", []),
     ]:
         for item in source:
             text = str(item).strip()
@@ -240,6 +246,18 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "intervention_mode": (intervention_plan.get("summary", {}) or {}).get(
             "intervention_mode", "unknown"
         ),
+        "friction_band": (governance_friction.get("summary", {}) or {}).get(
+            "friction_band", "unknown"
+        ),
+        "friction_score": (governance_friction.get("summary", {}) or {}).get(
+            "friction_score", 0
+        ),
+        "cadence": (cadence_recommendation.get("summary", {}) or {}).get(
+            "cadence", "unknown"
+        ),
+        "focus_items": (execution_focus.get("summary", {}) or {}).get(
+            "p0_focus_items", 0
+        ),
     }
 
     return {
@@ -272,6 +290,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "control_recommendation": control_recommendation,
             "control_efficiency": control_efficiency,
             "intervention_plan": intervention_plan,
+            "governance_friction": governance_friction,
+            "cadence_recommendation": cadence_recommendation,
+            "execution_focus": execution_focus,
         },
         "risks": {
             "summary": risk_watchlist.get("summary", {}),

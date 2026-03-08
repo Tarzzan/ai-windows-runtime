@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cadence Recommendation Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["cadence", "friction_band", "friction_score", "temperature", "control_mode"],
+      "properties": {
+        "cadence": {"type": "string", "enum": ["slow", "moderate", "fast"]},
+        "friction_band": {"type": "string"},
+        "friction_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "temperature": {"type": "string"},
+        "control_mode": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

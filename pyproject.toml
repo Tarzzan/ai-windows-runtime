@@ -76,6 +76,9 @@ compat-delivery-temperature = "compat_runtime.delivery_temperature.cli:main"
 compat-control-recommendation = "compat_runtime.control_recommendation.cli:main"
 compat-control-efficiency = "compat_runtime.control_efficiency.cli:main"
 compat-intervention-plan = "compat_runtime.intervention_plan.cli:main"
+compat-governance-friction = "compat_runtime.governance_friction.cli:main"
+compat-cadence-recommendation = "compat_runtime.cadence_recommendation.cli:main"
+compat-execution-focus = "compat_runtime.execution_focus.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

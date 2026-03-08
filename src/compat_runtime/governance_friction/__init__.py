@@ -1,0 +1,1 @@
+"""Governance friction report builder."""

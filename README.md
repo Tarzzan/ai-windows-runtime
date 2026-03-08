@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 111)
+## Current scope (Phase 114)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -257,6 +257,15 @@ Core runtime capabilities in this phase:
 230. Add dedicated CLIs and build scripts for control efficiency and intervention plan for reusable automation entry points.
 231. Add targeted unit tests for control efficiency and intervention plan logic.
 232. Propagate control efficiency and intervention artifacts into repro package and release bundle inventories.
+233. Add governance friction artifact (`governance-friction-report.json`) combining control efficiency, intervention mode, and validation coverage pressure.
+234. Validate and package governance friction artifacts in full pipeline and release bundle workflows.
+235. Add cadence recommendation artifact (`cadence-recommendation-report.json`) from governance friction, delivery temperature, and control mode.
+236. Validate and package cadence recommendation artifacts in full pipeline and release bundle workflows.
+237. Add execution focus artifact (`execution-focus-report.json`) to capture P0 focus list aligned with cadence and ownership.
+238. Validate and package execution focus artifacts in full pipeline and release bundle workflows.
+239. Surface friction/cadence/focus signals in the local dashboard control panel.
+240. Refresh friction/cadence/focus signals in policy-aware regeneration flow before release packet rebuild.
+241. Add dedicated CLIs and build scripts for governance friction, cadence recommendation, and execution focus.
 194. Add explicit `policy_compliance_level` to `policy-health-report.json` and enforce it in release policy gate.
 195. Keep backward-compatible gate behavior by deriving compliance level when older policy health artifacts omit it.
 196. Harden pipeline determinism by cleaning stale policy artifacts before early schema validation stages.

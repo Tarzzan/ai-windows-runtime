@@ -83,6 +83,12 @@ rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/control-efficiency-report-validation.json" \
   "${OUT_DIR}/intervention-plan-report.json" \
   "${VALIDATION_DIR}/intervention-plan-report-validation.json" \
+  "${OUT_DIR}/governance-friction-report.json" \
+  "${VALIDATION_DIR}/governance-friction-report-validation.json" \
+  "${OUT_DIR}/cadence-recommendation-report.json" \
+  "${VALIDATION_DIR}/cadence-recommendation-report-validation.json" \
+  "${OUT_DIR}/execution-focus-report.json" \
+  "${VALIDATION_DIR}/execution-focus-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -729,6 +735,39 @@ fi
   --schema schemas/intervention-plan-report.schema.json \
   --report "${VALIDATION_DIR}/intervention-plan-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.governance_friction.cli \
+  --control-efficiency-report "${OUT_DIR}/control-efficiency-report.json" \
+  --intervention-plan-report "${OUT_DIR}/intervention-plan-report.json" \
+  --validation-coverage-report "${OUT_DIR}/validation-coverage-report.json" \
+  --output "${OUT_DIR}/governance-friction-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/governance-friction-report.json" \
+  --schema schemas/governance-friction-report.schema.json \
+  --report "${VALIDATION_DIR}/governance-friction-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.cadence_recommendation.cli \
+  --governance-friction-report "${OUT_DIR}/governance-friction-report.json" \
+  --delivery-temperature-report "${OUT_DIR}/delivery-temperature-report.json" \
+  --control-recommendation-report "${OUT_DIR}/control-recommendation-report.json" \
+  --output "${OUT_DIR}/cadence-recommendation-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/cadence-recommendation-report.json" \
+  --schema schemas/cadence-recommendation-report.schema.json \
+  --report "${VALIDATION_DIR}/cadence-recommendation-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.execution_focus.cli \
+  --cadence-recommendation-report "${OUT_DIR}/cadence-recommendation-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --ownership-assignment-report "${OUT_DIR}/ownership-assignment-report.json" \
+  --output "${OUT_DIR}/execution-focus-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/execution-focus-report.json" \
+  --schema schemas/execution-focus-report.schema.json \
+  --report "${VALIDATION_DIR}/execution-focus-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.backlog_refresh.cli \
   --incident-feedback-report "${OUT_DIR}/incident-feedback-report.json" \
   --iteration-plan-report "${OUT_DIR}/iteration-plan-report.json" \
@@ -846,6 +885,9 @@ scripts/build-handoff-checklist-report.sh "${OUT_DIR}"
 scripts/build-launch-readiness-report.sh "${OUT_DIR}"
 scripts/build-delivery-temperature-report.sh "${OUT_DIR}"
 scripts/build-control-recommendation-report.sh "${OUT_DIR}"
+scripts/build-governance-friction-report.sh "${OUT_DIR}"
+scripts/build-cadence-recommendation-report.sh "${OUT_DIR}"
+scripts/build-execution-focus-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
@@ -887,6 +929,9 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/control-recommendation-report.json" \
     "${OUT_DIR}/control-efficiency-report.json" \
     "${OUT_DIR}/intervention-plan-report.json" \
+    "${OUT_DIR}/governance-friction-report.json" \
+    "${OUT_DIR}/cadence-recommendation-report.json" \
+    "${OUT_DIR}/execution-focus-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \

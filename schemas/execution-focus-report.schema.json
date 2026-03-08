@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Execution Focus Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "focus_items", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["cadence", "p0_focus_items", "owners_in_scope"],
+      "properties": {
+        "cadence": {"type": "string"},
+        "p0_focus_items": {"type": "integer", "minimum": 0},
+        "owners_in_scope": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "focus_items": {"type": "array", "items": {"type": "object"}},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}
