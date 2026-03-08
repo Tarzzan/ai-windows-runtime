@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Execution Momentum Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "scoring", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "momentum_index",
+        "posture",
+        "confidence_band",
+        "execution_mode",
+        "trajectory",
+        "blocking_tasks",
+        "p0_entries",
+        "incident_p0_feedback"
+      ],
+      "properties": {
+        "momentum_index": {"type": "integer", "minimum": 0, "maximum": 100},
+        "posture": {"type": "string", "enum": ["advancing", "holding", "fragile"]},
+        "confidence_band": {"type": "string"},
+        "execution_mode": {"type": "string"},
+        "trajectory": {"type": "string"},
+        "blocking_tasks": {"type": "integer", "minimum": 0},
+        "p0_entries": {"type": "integer", "minimum": 0},
+        "incident_p0_feedback": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "scoring": {
+      "type": "object",
+      "required": [
+        "base_confidence_score",
+        "trajectory_delta",
+        "blocker_penalty",
+        "incident_penalty",
+        "p0_penalty"
+      ],
+      "properties": {
+        "base_confidence_score": {"type": "integer"},
+        "trajectory_delta": {"type": "integer"},
+        "blocker_penalty": {"type": "integer", "minimum": 0},
+        "incident_penalty": {"type": "integer", "minimum": 0},
+        "p0_penalty": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

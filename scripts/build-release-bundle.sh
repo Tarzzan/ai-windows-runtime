@@ -64,6 +64,8 @@ rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/risk-watchlist-report-validation.json" \
   "${OUT_DIR}/execution-confidence-report.json" \
   "${VALIDATION_DIR}/execution-confidence-report-validation.json" \
+  "${OUT_DIR}/execution-momentum-report.json" \
+  "${VALIDATION_DIR}/execution-momentum-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -621,6 +623,18 @@ fi
   --schema schemas/incident-feedback-report.schema.json \
   --report "${VALIDATION_DIR}/incident-feedback-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.execution_momentum.cli \
+  --execution-confidence-report "${OUT_DIR}/execution-confidence-report.json" \
+  --execution-burndown-report "${OUT_DIR}/execution-burndown-report.json" \
+  --release-gate-history-report "${OUT_DIR}/release-gate-history-report.json" \
+  --incident-feedback-report "${OUT_DIR}/incident-feedback-report.json" \
+  --output "${OUT_DIR}/execution-momentum-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/execution-momentum-report.json" \
+  --schema schemas/execution-momentum-report.schema.json \
+  --report "${VALIDATION_DIR}/execution-momentum-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.backlog_refresh.cli \
   --incident-feedback-report "${OUT_DIR}/incident-feedback-report.json" \
   --iteration-plan-report "${OUT_DIR}/iteration-plan-report.json" \
@@ -724,6 +738,7 @@ scripts/build-readiness-scorecard-report.sh "${OUT_DIR}"
 scripts/build-execution-burndown-report.sh "${OUT_DIR}"
 scripts/build-risk-watchlist-report.sh "${OUT_DIR}"
 scripts/build-execution-confidence-report.sh "${OUT_DIR}"
+scripts/build-execution-momentum-report.sh "${OUT_DIR}"
 scripts/build-ownership-assignment-report.sh "${OUT_DIR}"
 scripts/build-remediation-sprint-report.sh "${OUT_DIR}"
 scripts/build-release-brief-report.sh "${OUT_DIR}"
@@ -766,6 +781,7 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/validation-command-pack.json" \
     "${OUT_DIR}/risk-watchlist-report.json" \
     "${OUT_DIR}/execution-confidence-report.json" \
+    "${OUT_DIR}/execution-momentum-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \
@@ -853,6 +869,7 @@ cp "${OUT_DIR}/execution-burndown-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/validation-command-pack.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/risk-watchlist-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/execution-confidence-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/execution-momentum-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-gate-history-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/pilot-readiness-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/ownership-assignment-report.json" "${BUNDLE_DIR}/"

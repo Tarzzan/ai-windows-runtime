@@ -160,6 +160,7 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     launch_readiness = read_json(out_dir / "launch-readiness-report.json", {})
     release_policy = read_json(out_dir / "release-policy-report.json", {})
     execution_confidence = read_json(out_dir / "execution-confidence-report.json", {})
+    execution_momentum = read_json(out_dir / "execution-momentum-report.json", {})
     risk_watchlist = read_json(out_dir / "risk-watchlist-report.json", {})
     validation = gather_validation(out_dir / "validation")
 
@@ -200,6 +201,12 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "execution_mode": (execution_confidence.get("summary", {}) or {}).get(
             "execution_mode", "unknown"
         ),
+        "momentum_posture": (execution_momentum.get("summary", {}) or {}).get(
+            "posture", "unknown"
+        ),
+        "momentum_index": (execution_momentum.get("summary", {}) or {}).get(
+            "momentum_index", 0
+        ),
     }
 
     return {
@@ -226,6 +233,7 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "release_decision": release_decision,
             "launch_readiness": launch_readiness,
             "execution_confidence": execution_confidence,
+            "execution_momentum": execution_momentum,
         },
         "risks": {
             "summary": risk_watchlist.get("summary", {}),

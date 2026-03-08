@@ -24,6 +24,7 @@ function renderKPIs(data) {
     ['Validation', `${q.valid}/${q.total}`],
     ['Policy', s.policy_status],
     ['Confidence', s.execution_confidence_band],
+    ['Momentum', `${s.momentum_posture} (${s.momentum_index})`],
   ];
   el.innerHTML = items.map(([label, value]) => `<div class="kpi"><div class="label">${label}</div><div class="value">${value}</div></div>`).join('');
 }
@@ -67,7 +68,7 @@ function renderQuality(data) {
   const v = q.validation;
   document.getElementById('quality').innerHTML = `
     <p>Quality Gate: ${badge(data.status.quality_gate)} | Release Decision: ${badge(data.status.release_decision)} | Launch: ${badge(data.status.launch_readiness)}</p>
-    <p>Policy Compliance: ${badge(data.status.policy_compliance)} | Confidence: ${badge(data.status.execution_confidence_band)} | Mode: ${badge(data.status.execution_mode)} | Validation rate: <b>${v.valid_rate}%</b></p>
+    <p>Policy Compliance: ${badge(data.status.policy_compliance)} | Confidence: ${badge(data.status.execution_confidence_band)} | Mode: ${badge(data.status.execution_mode)} | Momentum: ${badge(data.status.momentum_posture)} (${data.status.momentum_index}) | Validation rate: <b>${v.valid_rate}%</b></p>
     <p>Invalid reports: ${v.invalid}</p>`;
 }
 
