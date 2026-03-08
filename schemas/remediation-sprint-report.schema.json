@@ -14,7 +14,9 @@
         "sprint_next_tasks",
         "backlog_tasks",
         "iterations_to_clear_blockers",
-        "estimated_iterations_to_go"
+        "estimated_iterations_to_go",
+        "release_policy_status",
+        "release_policy_failures"
       ],
       "properties": {
         "tasks_total": {"type": "integer"},
@@ -22,7 +24,9 @@
         "sprint_next_tasks": {"type": "integer"},
         "backlog_tasks": {"type": "integer"},
         "iterations_to_clear_blockers": {"type": "integer"},
-        "estimated_iterations_to_go": {"type": "integer"}
+        "estimated_iterations_to_go": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "tasks": {"type": "array", "items": {"type": "object"}},

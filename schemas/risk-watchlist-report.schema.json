@@ -8,12 +8,21 @@
     "generated_at": {"type": "string"},
     "summary": {
       "type": "object",
-      "required": ["entries_total", "p0_entries", "p1_entries", "p2_entries"],
+      "required": [
+        "entries_total",
+        "p0_entries",
+        "p1_entries",
+        "p2_entries",
+        "release_policy_status",
+        "release_policy_failures"
+      ],
       "properties": {
         "entries_total": {"type": "integer"},
         "p0_entries": {"type": "integer"},
         "p1_entries": {"type": "integer"},
-        "p2_entries": {"type": "integer"}
+        "p2_entries": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "entries": {

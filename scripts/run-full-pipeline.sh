@@ -66,6 +66,14 @@ rm -f "${OUT_DIR}/handoff-checklist-report.json" \
 rm -f "${OUT_DIR}/ops-runbook-report.json" \
   "${VALIDATION_DIR}/ops-runbook-report-validation.json"
 
+# Prevent stale planning artifacts from failing early schema validation.
+rm -f "${OUT_DIR}/risk-watchlist-report.json" \
+  "${VALIDATION_DIR}/risk-watchlist-report-validation.json" \
+  "${OUT_DIR}/ownership-assignment-report.json" \
+  "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
+  "${OUT_DIR}/remediation-sprint-report.json" \
+  "${VALIDATION_DIR}/remediation-sprint-report-validation.json"
+
 # Prevent stale policy artifacts from failing early schema validation.
 rm -f "${OUT_DIR}/active-policy.json" \
   "${VALIDATION_DIR}/active-policy-validation.json" \
@@ -731,7 +739,10 @@ scripts/build-policy-health-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 # Produce machine-readable policy gate diagnostics before repro packaging.
 scripts/check-release-policy.sh "${OUT_DIR}"
-# Refresh communication chain to propagate release policy diagnostics.
+# Refresh planning + communication chain to propagate release policy diagnostics.
+scripts/build-risk-watchlist-report.sh "${OUT_DIR}"
+scripts/build-ownership-assignment-report.sh "${OUT_DIR}"
+scripts/build-remediation-sprint-report.sh "${OUT_DIR}"
 scripts/build-release-brief-report.sh "${OUT_DIR}"
 scripts/build-delivery-cockpit-report.sh "${OUT_DIR}"
 scripts/build-stakeholder-update-report.sh "${OUT_DIR}"

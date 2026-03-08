@@ -4,6 +4,7 @@ from compat_runtime.remediation_sprint.cli import build_remediation_sprint_repor
 def test_remediation_sprint_groups_tasks_by_priority():
     report = build_remediation_sprint_report(
         ownership_assignment_report={
+            "summary": {"release_policy_status": "pass", "release_policy_failures": 0},
             "tasks": [
                 {"id": "a", "priority": "P0", "blocking": True, "owner": "o1", "objective": "A"},
                 {"id": "b", "priority": "P1", "blocking": False, "owner": "o2", "objective": "B"},
@@ -17,4 +18,6 @@ def test_remediation_sprint_groups_tasks_by_priority():
     assert report["summary"]["sprint_now_tasks"] == 1
     assert report["summary"]["sprint_next_tasks"] == 1
     assert report["summary"]["backlog_tasks"] == 1
+    assert report["summary"]["release_policy_status"] == "pass"
+    assert report["summary"]["release_policy_failures"] == 0
     assert report["actions"]

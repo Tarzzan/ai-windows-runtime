@@ -80,6 +80,9 @@ def build_ownership_assignment_report(
     unassigned = sum(1 for row in task_rows if not row["owner"]) + sum(
         1 for row in watchlist_rows if not row["owner"]
     )
+    watchlist_summary = risk_watchlist_report.get("summary", {})
+    release_policy_status = str(watchlist_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(watchlist_summary.get("release_policy_failures", 0))
 
     return {
         "artifact_version": "1.0",
@@ -90,6 +93,8 @@ def build_ownership_assignment_report(
             "watchlist_assigned": len(watchlist_rows),
             "p0_items": p0,
             "unassigned_items": unassigned,
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "owners": owners,
         "tasks": task_rows,

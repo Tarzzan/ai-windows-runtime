@@ -8,13 +8,23 @@
     "generated_at": {"type": "string"},
     "summary": {
       "type": "object",
-      "required": ["owners", "tasks_assigned", "watchlist_assigned", "p0_items", "unassigned_items"],
+      "required": [
+        "owners",
+        "tasks_assigned",
+        "watchlist_assigned",
+        "p0_items",
+        "unassigned_items",
+        "release_policy_status",
+        "release_policy_failures"
+      ],
       "properties": {
         "owners": {"type": "integer"},
         "tasks_assigned": {"type": "integer"},
         "watchlist_assigned": {"type": "integer"},
         "p0_items": {"type": "integer"},
-        "unassigned_items": {"type": "integer"}
+        "unassigned_items": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "owners": {"type": "array", "items": {"type": "string"}},

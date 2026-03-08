@@ -21,6 +21,7 @@ def build_risk_watchlist_report(
     proposal_risk_report: dict,
     hook_backlog_report: dict,
     runtime_signal_report: dict,
+    release_policy_report: dict | None = None,
 ) -> dict:
     entries = []
 
@@ -89,6 +90,9 @@ def build_risk_watchlist_report(
     p0 = sum(1 for row in entries if row["priority"] == "P0")
     p1 = sum(1 for row in entries if row["priority"] == "P1")
     p2 = sum(1 for row in entries if row["priority"] == "P2")
+    policy = release_policy_report or {}
+    release_policy_status = str(policy.get("status", "missing"))
+    release_policy_failures = len(policy.get("failures", []))
 
     actions = []
     if p0 > 0:
@@ -106,6 +110,8 @@ def build_risk_watchlist_report(
             "p0_entries": p0,
             "p1_entries": p1,
             "p2_entries": p2,
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "entries": entries,
         "actions": actions,
@@ -117,6 +123,7 @@ def main() -> None:
     parser.add_argument("--proposal-risk-report", required=True, help="Proposal risk report path")
     parser.add_argument("--hook-backlog-report", required=True, help="Hook backlog report path")
     parser.add_argument("--runtime-signal-report", required=True, help="Runtime signal report path")
+    parser.add_argument("--release-policy-report", required=False, help="Optional release policy report")
     parser.add_argument("--output", required=True, help="Output path")
     args = parser.parse_args()
 
@@ -124,6 +131,7 @@ def main() -> None:
         proposal_risk_report=read_json(args.proposal_risk_report),
         hook_backlog_report=read_json(args.hook_backlog_report),
         runtime_signal_report=read_json(args.runtime_signal_report),
+        release_policy_report=read_json(args.release_policy_report) if args.release_policy_report else None,
     )
     write_json(args.output, artifact)
 

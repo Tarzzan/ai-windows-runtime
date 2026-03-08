@@ -16,6 +16,7 @@ def test_ownership_assignment_maps_tasks_and_watchlist():
             ]
         },
         risk_watchlist_report={
+            "summary": {"release_policy_status": "fail", "release_policy_failures": 2},
             "entries": [{"id": "w1", "priority": "P0", "kind": "proposal_risk", "detail": "high"}]
         },
         validation_command_pack={"commands": [{"task_id": "t1", "command": "pytest -q"}]},
@@ -23,5 +24,7 @@ def test_ownership_assignment_maps_tasks_and_watchlist():
 
     assert report["summary"]["tasks_assigned"] == 1
     assert report["summary"]["watchlist_assigned"] == 1
+    assert report["summary"]["release_policy_status"] == "fail"
+    assert report["summary"]["release_policy_failures"] == 2
     assert report["tasks"][0]["owner"]
     assert report["actions"]

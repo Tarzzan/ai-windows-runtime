@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 92)
+## Current scope (Phase 95)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -250,6 +250,11 @@ Core runtime capabilities in this phase:
 223. Harden pipeline/bundle against stale ops-runbook artifacts after schema evolution.
 224. Rebuild prelaunch artifacts (`handoff`, `launch`) after release-policy diagnostics refresh.
 225. Ensure release packet regeneration consumes refreshed prelaunch + communication policy context.
+226. Propagate release policy diagnostics into risk watchlist summary.
+227. Propagate release policy diagnostics into ownership assignment summary.
+228. Propagate release policy diagnostics into remediation sprint summary.
+229. Refresh planning chain (`risk-watchlist`, `ownership`, `remediation`) after release-policy diagnostics.
+230. Recompute communication and prelaunch artifacts from refreshed planning context before final packet.
 194. Include policy artifacts in reproducible package and release bundle outputs.
 195. Harden full pipeline against stale packet/catalog/governance artifacts to keep schema validation deterministic.
 

@@ -64,6 +64,9 @@ def build_remediation_sprint_report(
 
     burndown_summary = execution_burndown_report.get("summary", {})
     forecast_summary = release_forecast_report.get("summary", {})
+    ownership_summary = ownership_assignment_report.get("summary", {})
+    release_policy_status = str(ownership_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(ownership_summary.get("release_policy_failures", 0))
 
     return {
         "artifact_version": "1.0",
@@ -79,6 +82,8 @@ def build_remediation_sprint_report(
             "estimated_iterations_to_go": int(
                 forecast_summary.get("estimated_iterations_to_go", 1)
             ),
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "tasks": rows,
         "buckets": {"sprint_now": sprint_now, "sprint_next": sprint_next, "backlog": backlog},

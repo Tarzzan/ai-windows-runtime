@@ -17,10 +17,13 @@ def test_risk_watchlist_collects_priority_entries():
         runtime_signal_report={
             "issues": [{"id": "i1", "severity": "high", "domain": "com", "message": "CoCreate failed"}]
         },
+        release_policy_report={"status": "fail", "failures": ["x"]},
     )
 
     assert report["summary"]["entries_total"] >= 3
     assert report["summary"]["p0_entries"] >= 1
+    assert report["summary"]["release_policy_status"] == "fail"
+    assert report["summary"]["release_policy_failures"] == 1
     assert report["actions"]
 
 
@@ -32,3 +35,4 @@ def test_risk_watchlist_handles_no_signals():
     )
     assert report["summary"]["entries_total"] == 0
     assert report["summary"]["p0_entries"] == 0
+    assert report["summary"]["release_policy_status"] == "missing"
