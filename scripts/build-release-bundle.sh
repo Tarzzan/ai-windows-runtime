@@ -148,6 +148,12 @@ rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/intake-transition-policy-report-validation.json" \
   "${OUT_DIR}/scope-admission-gate-report.json" \
   "${VALIDATION_DIR}/scope-admission-gate-report-validation.json" \
+  "${OUT_DIR}/scope-reentry-readiness-report.json" \
+  "${VALIDATION_DIR}/scope-reentry-readiness-report-validation.json" \
+  "${OUT_DIR}/intake-resumption-policy-report.json" \
+  "${VALIDATION_DIR}/intake-resumption-policy-report-validation.json" \
+  "${OUT_DIR}/scope-unlock-gate-report.json" \
+  "${VALIDATION_DIR}/scope-unlock-gate-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -1184,6 +1190,39 @@ scripts/check-release-policy.sh "${OUT_DIR}"
   --schema schemas/scope-admission-gate-report.schema.json \
   --report "${VALIDATION_DIR}/scope-admission-gate-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.scope_reentry_readiness.cli \
+  --scope-admission-gate-report "${OUT_DIR}/scope-admission-gate-report.json" \
+  --transition-readiness-index-report "${OUT_DIR}/transition-readiness-index-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --output "${OUT_DIR}/scope-reentry-readiness-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/scope-reentry-readiness-report.json" \
+  --schema schemas/scope-reentry-readiness-report.schema.json \
+  --report "${VALIDATION_DIR}/scope-reentry-readiness-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.intake_resumption_policy.cli \
+  --scope-reentry-readiness-report "${OUT_DIR}/scope-reentry-readiness-report.json" \
+  --intake-transition-policy-report "${OUT_DIR}/intake-transition-policy-report.json" \
+  --delivery-temperature-report "${OUT_DIR}/delivery-temperature-report.json" \
+  --output "${OUT_DIR}/intake-resumption-policy-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/intake-resumption-policy-report.json" \
+  --schema schemas/intake-resumption-policy-report.schema.json \
+  --report "${VALIDATION_DIR}/intake-resumption-policy-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.scope_unlock_gate.cli \
+  --intake-resumption-policy-report "${OUT_DIR}/intake-resumption-policy-report.json" \
+  --scope-admission-gate-report "${OUT_DIR}/scope-admission-gate-report.json" \
+  --release-policy-report "${OUT_DIR}/release-policy-report.json" \
+  --output "${OUT_DIR}/scope-unlock-gate-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/scope-unlock-gate-report.json" \
+  --schema schemas/scope-unlock-gate-report.schema.json \
+  --report "${VALIDATION_DIR}/scope-unlock-gate-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.release_retrospective.cli \
   --delivery-signoff-report "${OUT_DIR}/delivery-signoff-report.json" \
   --readiness-delta-report "${OUT_DIR}/readiness-delta-report.json" \
@@ -1330,6 +1369,9 @@ scripts/build-scope-transition-gate-report.sh "${OUT_DIR}"
 scripts/build-transition-readiness-index-report.sh "${OUT_DIR}"
 scripts/build-intake-transition-policy-report.sh "${OUT_DIR}"
 scripts/build-scope-admission-gate-report.sh "${OUT_DIR}"
+scripts/build-scope-reentry-readiness-report.sh "${OUT_DIR}"
+scripts/build-intake-resumption-policy-report.sh "${OUT_DIR}"
+scripts/build-scope-unlock-gate-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
@@ -1406,6 +1448,9 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/transition-readiness-index-report.json" \
     "${OUT_DIR}/intake-transition-policy-report.json" \
     "${OUT_DIR}/scope-admission-gate-report.json" \
+    "${OUT_DIR}/scope-reentry-readiness-report.json" \
+    "${OUT_DIR}/intake-resumption-policy-report.json" \
+    "${OUT_DIR}/scope-unlock-gate-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \
@@ -1535,6 +1580,9 @@ cp "${OUT_DIR}/scope-transition-gate-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/transition-readiness-index-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/intake-transition-policy-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/scope-admission-gate-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/scope-reentry-readiness-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/intake-resumption-policy-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/scope-unlock-gate-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-gate-history-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/pilot-readiness-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/ownership-assignment-report.json" "${BUNDLE_DIR}/"

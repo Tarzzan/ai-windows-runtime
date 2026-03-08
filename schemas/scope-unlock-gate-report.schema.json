@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scope Unlock Gate Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["scope_unlock_gate", "intake_resumption_policy", "scope_admission_gate", "release_policy_status"],
+      "properties": {
+        "scope_unlock_gate": {"type": "string", "enum": ["locked", "guarded", "unlocked"]},
+        "intake_resumption_policy": {"type": "string", "enum": ["hold", "stage", "resume"]},
+        "scope_admission_gate": {"type": "string", "enum": ["closed", "guarded", "open"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 150)
+## Current scope (Phase 153)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -374,6 +374,15 @@ Core runtime capabilities in this phase:
 347. Surface transition readiness, intake transition policy, and scope admission gate in the local dashboard control panel.
 348. Refresh readiness/transition/admission signals in policy-aware regeneration flow before release packet rebuild.
 349. Add dedicated CLIs and build scripts for transition readiness index, intake transition policy, and scope admission gate automation.
+350. Add scope reentry readiness artifact (`scope-reentry-readiness-report.json`) from scope admission gate, transition readiness, and P0 watchlist pressure.
+351. Validate and package scope reentry readiness artifacts in full pipeline and release bundle workflows.
+352. Add intake resumption policy artifact (`intake-resumption-policy-report.json`) from reentry readiness, intake transition policy, and delivery temperature.
+353. Validate and package intake resumption policy artifacts in full pipeline and release bundle workflows.
+354. Add scope unlock gate artifact (`scope-unlock-gate-report.json`) from intake resumption policy, scope admission gate, and release policy status.
+355. Validate and package scope unlock gate artifacts in full pipeline and release bundle workflows.
+356. Surface scope reentry readiness, intake resumption policy, and scope unlock gate in the local dashboard control panel.
+357. Refresh reentry/resumption/unlock signals in policy-aware regeneration flow before release packet rebuild.
+358. Add dedicated CLIs and build scripts for scope reentry readiness, intake resumption policy, and scope unlock gate automation.
 194. Add explicit `policy_compliance_level` to `policy-health-report.json` and enforce it in release policy gate.
 195. Keep backward-compatible gate behavior by deriving compliance level when older policy health artifacts omit it.
 196. Harden pipeline determinism by cleaning stale policy artifacts before early schema validation stages.

@@ -89,6 +89,9 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/transition-readiness-index-report.json" \
     "${OUT_DIR}/intake-transition-policy-report.json" \
     "${OUT_DIR}/scope-admission-gate-report.json" \
+    "${OUT_DIR}/scope-reentry-readiness-report.json" \
+    "${OUT_DIR}/intake-resumption-policy-report.json" \
+    "${OUT_DIR}/scope-unlock-gate-report.json" \
     "${OUT_DIR}/release-retrospective-report.json" \
     "${OUT_DIR}/next-cycle-bootstrap-report.json" \
     "${OUT_DIR}/stability-window-report.json" \
