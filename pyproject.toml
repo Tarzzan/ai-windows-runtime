@@ -74,6 +74,8 @@ compat-execution-momentum = "compat_runtime.execution_momentum.cli:main"
 compat-execution-pressure = "compat_runtime.execution_pressure.cli:main"
 compat-delivery-temperature = "compat_runtime.delivery_temperature.cli:main"
 compat-control-recommendation = "compat_runtime.control_recommendation.cli:main"
+compat-control-efficiency = "compat_runtime.control_efficiency.cli:main"
+compat-intervention-plan = "compat_runtime.intervention_plan.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

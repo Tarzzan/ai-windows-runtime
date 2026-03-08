@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Control Efficiency Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "factors", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["efficiency_score", "efficiency_band", "confidence_score", "momentum_index", "commands_total", "blocking_commands"],
+      "properties": {
+        "efficiency_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "efficiency_band": {"type": "string", "enum": ["high", "medium", "low"]},
+        "confidence_score": {"type": "integer"},
+        "momentum_index": {"type": "integer"},
+        "commands_total": {"type": "integer", "minimum": 0},
+        "blocking_commands": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "factors": {"type": "object"},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

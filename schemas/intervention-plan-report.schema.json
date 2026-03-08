@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Intervention Plan Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["intervention_mode", "efficiency_band", "efficiency_score", "p0_risks", "dependency_blockers"],
+      "properties": {
+        "intervention_mode": {"type": "string", "enum": ["routine", "targeted", "urgent"]},
+        "efficiency_band": {"type": "string"},
+        "efficiency_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "p0_risks": {"type": "integer", "minimum": 0},
+        "dependency_blockers": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

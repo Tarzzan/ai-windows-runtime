@@ -1,0 +1,1 @@
+"""Control efficiency report builder."""

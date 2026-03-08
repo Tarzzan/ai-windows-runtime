@@ -72,6 +72,10 @@ rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/delivery-temperature-report-validation.json" \
   "${OUT_DIR}/control-recommendation-report.json" \
   "${VALIDATION_DIR}/control-recommendation-report-validation.json" \
+  "${OUT_DIR}/control-efficiency-report.json" \
+  "${VALIDATION_DIR}/control-efficiency-report-validation.json" \
+  "${OUT_DIR}/intervention-plan-report.json" \
+  "${VALIDATION_DIR}/intervention-plan-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -652,6 +656,17 @@ fi
   --schema schemas/execution-pressure-report.schema.json \
   --report "${VALIDATION_DIR}/execution-pressure-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.control_efficiency.cli \
+  --execution-confidence-report "${OUT_DIR}/execution-confidence-report.json" \
+  --execution-momentum-report "${OUT_DIR}/execution-momentum-report.json" \
+  --validation-command-pack "${OUT_DIR}/validation-command-pack.json" \
+  --output "${OUT_DIR}/control-efficiency-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/control-efficiency-report.json" \
+  --schema schemas/control-efficiency-report.schema.json \
+  --report "${VALIDATION_DIR}/control-efficiency-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.delivery_temperature.cli \
   --execution-pressure-report "${OUT_DIR}/execution-pressure-report.json" \
   --launch-readiness-report "${OUT_DIR}/launch-readiness-report.json" \
@@ -662,6 +677,17 @@ fi
   --input "${OUT_DIR}/delivery-temperature-report.json" \
   --schema schemas/delivery-temperature-report.schema.json \
   --report "${VALIDATION_DIR}/delivery-temperature-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.intervention_plan.cli \
+  --control-efficiency-report "${OUT_DIR}/control-efficiency-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --dependency-watch-report "${OUT_DIR}/dependency-watch-report.json" \
+  --output "${OUT_DIR}/intervention-plan-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/intervention-plan-report.json" \
+  --schema schemas/intervention-plan-report.schema.json \
+  --report "${VALIDATION_DIR}/intervention-plan-report-validation.json"
 
 "${PYTHON_BIN}" -m compat_runtime.backlog_refresh.cli \
   --incident-feedback-report "${OUT_DIR}/incident-feedback-report.json" \
@@ -768,6 +794,8 @@ scripts/build-risk-watchlist-report.sh "${OUT_DIR}"
 scripts/build-execution-confidence-report.sh "${OUT_DIR}"
 scripts/build-execution-momentum-report.sh "${OUT_DIR}"
 scripts/build-execution-pressure-report.sh "${OUT_DIR}"
+scripts/build-control-efficiency-report.sh "${OUT_DIR}"
+scripts/build-intervention-plan-report.sh "${OUT_DIR}"
 scripts/build-ownership-assignment-report.sh "${OUT_DIR}"
 scripts/build-remediation-sprint-report.sh "${OUT_DIR}"
 scripts/build-release-brief-report.sh "${OUT_DIR}"
@@ -778,6 +806,8 @@ scripts/build-handoff-checklist-report.sh "${OUT_DIR}"
 scripts/build-launch-readiness-report.sh "${OUT_DIR}"
 scripts/build-delivery-temperature-report.sh "${OUT_DIR}"
 scripts/build-control-recommendation-report.sh "${OUT_DIR}"
+scripts/build-control-efficiency-report.sh "${OUT_DIR}"
+scripts/build-intervention-plan-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
@@ -816,6 +846,8 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/execution-pressure-report.json" \
     "${OUT_DIR}/delivery-temperature-report.json" \
     "${OUT_DIR}/control-recommendation-report.json" \
+    "${OUT_DIR}/control-efficiency-report.json" \
+    "${OUT_DIR}/intervention-plan-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \
@@ -907,6 +939,8 @@ cp "${OUT_DIR}/execution-momentum-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/execution-pressure-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/delivery-temperature-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/control-recommendation-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/control-efficiency-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/intervention-plan-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-gate-history-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/pilot-readiness-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/ownership-assignment-report.json" "${BUNDLE_DIR}/"

@@ -164,6 +164,8 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     execution_pressure = read_json(out_dir / "execution-pressure-report.json", {})
     delivery_temperature = read_json(out_dir / "delivery-temperature-report.json", {})
     control_recommendation = read_json(out_dir / "control-recommendation-report.json", {})
+    control_efficiency = read_json(out_dir / "control-efficiency-report.json", {})
+    intervention_plan = read_json(out_dir / "intervention-plan-report.json", {})
     risk_watchlist = read_json(out_dir / "risk-watchlist-report.json", {})
     validation = gather_validation(out_dir / "validation")
 
@@ -225,6 +227,15 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "control_mode": (control_recommendation.get("summary", {}) or {}).get(
             "control_mode", "unknown"
         ),
+        "efficiency_band": (control_efficiency.get("summary", {}) or {}).get(
+            "efficiency_band", "unknown"
+        ),
+        "efficiency_score": (control_efficiency.get("summary", {}) or {}).get(
+            "efficiency_score", 0
+        ),
+        "intervention_mode": (intervention_plan.get("summary", {}) or {}).get(
+            "intervention_mode", "unknown"
+        ),
     }
 
     return {
@@ -255,6 +266,8 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "execution_pressure": execution_pressure,
             "delivery_temperature": delivery_temperature,
             "control_recommendation": control_recommendation,
+            "control_efficiency": control_efficiency,
+            "intervention_plan": intervention_plan,
         },
         "risks": {
             "summary": risk_watchlist.get("summary", {}),
