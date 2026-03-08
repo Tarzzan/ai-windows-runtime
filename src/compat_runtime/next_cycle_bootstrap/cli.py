@@ -6,7 +6,11 @@ from datetime import datetime, timezone
 from compat_runtime.common.io import read_json, write_json
 
 
-def _bootstrap_status(signoff_status: str, feedback_priority: str, lessons: int) -> str:
+def _bootstrap_status(
+    signoff_status: str, feedback_priority: str, lessons: int, release_policy_status: str
+) -> str:
+    if release_policy_status == "fail":
+        return "blocked"
     if signoff_status == "approved" and feedback_priority in {"P1", "P2"}:
         return "ready"
     if lessons > 0:
@@ -27,7 +31,9 @@ def build_next_cycle_bootstrap_report(
 
     signoff_status = str(delivery_signoff_report.get("status", "blocked"))
     feedback_priority = str(backlog_summary.get("feedback_priority", "P2"))
-    status = _bootstrap_status(signoff_status, feedback_priority, len(lessons))
+    release_policy_status = str(backlog_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(backlog_summary.get("release_policy_failures", 0))
+    status = _bootstrap_status(signoff_status, feedback_priority, len(lessons), release_policy_status)
 
     commands = validation_command_pack.get("commands", [])
 
@@ -41,6 +47,8 @@ def build_next_cycle_bootstrap_report(
             "retrospective_trajectory": str(retro_summary.get("trajectory", "stable")),
             "refreshed_items": int(backlog_summary.get("refreshed_items", 0)),
             "bootstrap_commands": min(len(commands), 10),
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "commands": [str(row.get("command", "")) for row in commands[:10]],
         "actions": ["Initialize next iteration plan using refreshed backlog and retrospective lessons."],

@@ -14,14 +14,18 @@
         "feedback_priority",
         "retrospective_trajectory",
         "refreshed_items",
-        "bootstrap_commands"
+        "bootstrap_commands",
+        "release_policy_status",
+        "release_policy_failures"
       ],
       "properties": {
         "signoff_status": {"type": "string"},
         "feedback_priority": {"type": "string"},
         "retrospective_trajectory": {"type": "string"},
         "refreshed_items": {"type": "integer"},
-        "bootstrap_commands": {"type": "integer"}
+        "bootstrap_commands": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "commands": {"type": "array", "items": {"type": "string"}},

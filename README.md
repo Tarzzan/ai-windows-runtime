@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 86)
+## Current scope (Phase 87)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -233,6 +233,9 @@ Core runtime capabilities in this phase:
 206. Propagate release policy diagnostics from delivery signoff into post-release monitor summary.
 207. Escalate post-release monitor status to `critical` when release policy status is `fail`.
 208. Propagate release policy diagnostics into incident feedback summary for triage continuity.
+209. Propagate release policy diagnostics into backlog refresh summary for next-cycle prioritization.
+210. Propagate release policy diagnostics into next-cycle bootstrap summary and status evaluation.
+211. Block next-cycle bootstrap when release policy status is `fail`.
 194. Include policy artifacts in reproducible package and release bundle outputs.
 195. Harden full pipeline against stale packet/catalog/governance artifacts to keep schema validation deterministic.
 

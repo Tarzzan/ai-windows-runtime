@@ -14,6 +14,8 @@ def build_backlog_refresh_report(
     sprint_summary = remediation_sprint_report.get("summary", {})
 
     priority = str(feedback_summary.get("feedback_priority", "P2"))
+    release_policy_status = str(feedback_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(feedback_summary.get("release_policy_failures", 0))
     refreshed = []
     for task in tasks[:8]:
         refreshed.append(
@@ -32,6 +34,8 @@ def build_backlog_refresh_report(
             "feedback_priority": priority,
             "sprint_now_tasks": int(sprint_summary.get("sprint_now_tasks", 0)),
             "sprint_next_tasks": int(sprint_summary.get("sprint_next_tasks", 0)),
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "items": refreshed,
         "actions": ["Apply refreshed priorities when drafting next iteration plan."],

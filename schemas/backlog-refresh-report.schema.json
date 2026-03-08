@@ -8,12 +8,21 @@
     "generated_at": {"type": "string"},
     "summary": {
       "type": "object",
-      "required": ["refreshed_items", "feedback_priority", "sprint_now_tasks", "sprint_next_tasks"],
+      "required": [
+        "refreshed_items",
+        "feedback_priority",
+        "sprint_now_tasks",
+        "sprint_next_tasks",
+        "release_policy_status",
+        "release_policy_failures"
+      ],
       "properties": {
         "refreshed_items": {"type": "integer"},
         "feedback_priority": {"type": "string"},
         "sprint_now_tasks": {"type": "integer"},
-        "sprint_next_tasks": {"type": "integer"}
+        "sprint_next_tasks": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "items": {"type": "array", "items": {"type": "object"}},
