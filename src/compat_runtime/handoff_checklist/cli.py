@@ -16,6 +16,8 @@ def build_handoff_checklist_report(
     stakeholder_summary = stakeholder_update_report.get("summary", {})
     assignment_summary = ownership_assignment_report.get("summary", {})
     guardrails_summary = rollout_guardrails_report.get("summary", {})
+    release_policy_status = str(stakeholder_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(stakeholder_summary.get("release_policy_failures", 0))
 
     checks = [
         {
@@ -40,6 +42,11 @@ def build_handoff_checklist_report(
             else "warn",
             "detail": "Stakeholder-facing delivery status is available.",
         },
+        {
+            "id": "release_policy_alignment",
+            "status": "pass" if release_policy_status in {"pass", "missing"} else "fail",
+            "detail": "Release policy diagnostics are compatible with handoff.",
+        },
     ]
 
     passed = sum(1 for row in checks if row["status"] == "pass")
@@ -54,6 +61,8 @@ def build_handoff_checklist_report(
             "checks_pass": passed,
             "checks_warn": warned,
             "checks_fail": failed,
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "checks": checks,
         "actions": ["Resolve fail/warn checks before handoff sign-off."],

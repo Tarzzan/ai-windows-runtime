@@ -14,6 +14,7 @@ def _launch_status(
     missing_reports: int,
     office_status: str,
     pilot_recommendation: str,
+    release_policy_status: str,
 ) -> str:
     policy = load_alpha_gating_policy().get("launch_readiness", {})
     ready_allowed_gates = set(policy.get("ready_allowed_gates", ["pass", "warn"]))
@@ -24,6 +25,8 @@ def _launch_status(
         policy.get("ready_allowed_pilot_recommendations", ["ready", "limited_pilot"])
     )
 
+    if release_policy_status == "fail":
+        return "blocked"
     if office_status == "blocked":
         return "blocked"
     if (
@@ -58,6 +61,8 @@ def build_launch_readiness_report(
     quality_gate = str(quality_gate_report.get("gate", "fail"))
     office_status = str((office_readiness_report or {}).get("status", "not_provided"))
     pilot_recommendation = str(pilot_readiness_report.get("recommendation", "not_ready"))
+    release_policy_status = str(handoff_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(handoff_summary.get("release_policy_failures", 0))
 
     status = _launch_status(
         release_decision,
@@ -66,6 +71,7 @@ def build_launch_readiness_report(
         missing_reports,
         office_status,
         pilot_recommendation,
+        release_policy_status,
     )
 
     return {
@@ -79,6 +85,8 @@ def build_launch_readiness_report(
             "pilot_recommendation": pilot_recommendation,
             "handoff_failed_checks": failed_checks,
             "validation_missing_reports": missing_reports,
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "actions": [
             "Authorize launch only when status is ready and guardrails stay active.",

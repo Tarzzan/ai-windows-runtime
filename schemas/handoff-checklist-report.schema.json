@@ -8,12 +8,21 @@
     "generated_at": {"type": "string"},
     "summary": {
       "type": "object",
-      "required": ["checks_total", "checks_pass", "checks_warn", "checks_fail"],
+      "required": [
+        "checks_total",
+        "checks_pass",
+        "checks_warn",
+        "checks_fail",
+        "release_policy_status",
+        "release_policy_failures"
+      ],
       "properties": {
         "checks_total": {"type": "integer"},
         "checks_pass": {"type": "integer"},
         "checks_warn": {"type": "integer"},
-        "checks_fail": {"type": "integer"}
+        "checks_fail": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "checks": {"type": "array", "items": {"type": "object"}},

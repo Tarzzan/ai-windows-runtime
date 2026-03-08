@@ -3,7 +3,9 @@ from compat_runtime.launch_readiness.cli import build_launch_readiness_report
 
 def test_launch_readiness_ready_status():
     report = build_launch_readiness_report(
-        handoff_checklist_report={"summary": {"checks_fail": 0}},
+        handoff_checklist_report={
+            "summary": {"checks_fail": 0, "release_policy_status": "pass", "release_policy_failures": 0}
+        },
         validation_coverage_report={"summary": {"missing_reports": 0}},
         quality_gate_report={"gate": "pass"},
         release_decision_report={"decision": "go"},
@@ -15,7 +17,9 @@ def test_launch_readiness_ready_status():
 
 def test_launch_readiness_blocked_when_office_is_blocked():
     report = build_launch_readiness_report(
-        handoff_checklist_report={"summary": {"checks_fail": 0}},
+        handoff_checklist_report={
+            "summary": {"checks_fail": 0, "release_policy_status": "pass", "release_policy_failures": 0}
+        },
         validation_coverage_report={"summary": {"missing_reports": 0}},
         quality_gate_report={"gate": "pass"},
         release_decision_report={"decision": "go"},
@@ -29,7 +33,9 @@ def test_launch_readiness_blocked_when_office_is_blocked():
 
 def test_launch_readiness_limited_when_office_is_limited():
     report = build_launch_readiness_report(
-        handoff_checklist_report={"summary": {"checks_fail": 0}},
+        handoff_checklist_report={
+            "summary": {"checks_fail": 0, "release_policy_status": "pass", "release_policy_failures": 0}
+        },
         validation_coverage_report={"summary": {"missing_reports": 0}},
         quality_gate_report={"gate": "pass"},
         release_decision_report={"decision": "go"},
@@ -43,7 +49,9 @@ def test_launch_readiness_limited_when_office_is_limited():
 
 def test_launch_readiness_ready_with_limited_office_and_pilot():
     report = build_launch_readiness_report(
-        handoff_checklist_report={"summary": {"checks_fail": 0}},
+        handoff_checklist_report={
+            "summary": {"checks_fail": 0, "release_policy_status": "pass", "release_policy_failures": 0}
+        },
         validation_coverage_report={"summary": {"missing_reports": 0}},
         quality_gate_report={"gate": "warn"},
         release_decision_report={"decision": "go"},
@@ -52,3 +60,17 @@ def test_launch_readiness_ready_with_limited_office_and_pilot():
     )
 
     assert report["status"] == "ready"
+
+
+def test_launch_readiness_blocked_when_release_policy_failed():
+    report = build_launch_readiness_report(
+        handoff_checklist_report={
+            "summary": {"checks_fail": 0, "release_policy_status": "fail", "release_policy_failures": 2}
+        },
+        validation_coverage_report={"summary": {"missing_reports": 0}},
+        quality_gate_report={"gate": "pass"},
+        release_decision_report={"decision": "go"},
+        pilot_readiness_report={"recommendation": "ready"},
+        office_readiness_report={"status": "ready"},
+    )
+    assert report["status"] == "blocked"

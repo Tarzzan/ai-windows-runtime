@@ -15,7 +15,9 @@
         "office_readiness",
         "pilot_recommendation",
         "handoff_failed_checks",
-        "validation_missing_reports"
+        "validation_missing_reports",
+        "release_policy_status",
+        "release_policy_failures"
       ],
       "properties": {
         "release_decision": {"type": "string"},
@@ -23,7 +25,9 @@
         "office_readiness": {"type": "string"},
         "pilot_recommendation": {"type": "string"},
         "handoff_failed_checks": {"type": "integer"},
-        "validation_missing_reports": {"type": "integer"}
+        "validation_missing_reports": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "actions": {"type": "array", "items": {"type": "string"}}

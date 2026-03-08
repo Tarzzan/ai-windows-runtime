@@ -49,6 +49,12 @@ rm -f "${OUT_DIR}/delivery-cockpit-report.json" \
   "${OUT_DIR}/stakeholder-update-report.json" \
   "${VALIDATION_DIR}/stakeholder-update-report-validation.json"
 
+# Prevent stale pre-launch artifacts from failing early schema validation.
+rm -f "${OUT_DIR}/handoff-checklist-report.json" \
+  "${VALIDATION_DIR}/handoff-checklist-report-validation.json" \
+  "${OUT_DIR}/launch-readiness-report.json" \
+  "${VALIDATION_DIR}/launch-readiness-report-validation.json"
+
 # Prevent stale policy artifacts from failing early schema validation.
 rm -f "${OUT_DIR}/active-policy.json" \
   "${VALIDATION_DIR}/active-policy-validation.json" \
