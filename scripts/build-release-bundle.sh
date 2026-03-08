@@ -25,7 +25,9 @@ rm -f "${OUT_DIR}/release-decision-report.json" \
 rm -f "${OUT_DIR}/active-policy.json" \
   "${VALIDATION_DIR}/active-policy-validation.json" \
   "${OUT_DIR}/policy-health-report.json" \
-  "${VALIDATION_DIR}/policy-health-report-validation.json"
+  "${VALIDATION_DIR}/policy-health-report-validation.json" \
+  "${OUT_DIR}/release-policy-report.json" \
+  "${VALIDATION_DIR}/release-policy-report-validation.json"
 
 PATCH_PLAN_DIFF_ARGS=(
   --current "${OUT_DIR}/patch-plan.json"
@@ -649,6 +651,8 @@ scripts/export-active-policy.sh "${OUT_DIR}"
 scripts/build-policy-health-report.sh "${OUT_DIR}"
 # Refresh packet so evidence/governance consume policy health flags.
 scripts/build-release-packet-report.sh "${OUT_DIR}"
+# Produce machine-readable policy gate diagnostics before repro packaging.
+scripts/check-release-policy.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
@@ -718,7 +722,8 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/release-bundle-manifest.json" \
     "${OUT_DIR}/productization-readiness.json" \
     "${OUT_DIR}/active-policy.json" \
-    "${OUT_DIR}/policy-health-report.json"
+    "${OUT_DIR}/policy-health-report.json" \
+    "${OUT_DIR}/release-policy-report.json"
 
 "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
   --input "${OUT_DIR}/repro-package.json" \
@@ -809,7 +814,6 @@ cp "${OUT_DIR}/proposal-review-checklist.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/patch-template-catalog.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/active-policy.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/policy-health-report.json" "${BUNDLE_DIR}/"
-
-scripts/check-release-policy.sh "${OUT_DIR}"
+cp "${OUT_DIR}/release-policy-report.json" "${BUNDLE_DIR}/"
 
 echo "release bundle: ok"

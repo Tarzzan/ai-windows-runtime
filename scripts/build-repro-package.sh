@@ -79,7 +79,8 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/release-bundle-manifest.json" \
     "${OUT_DIR}/productization-readiness.json" \
     "${OUT_DIR}/active-policy.json" \
-    "${OUT_DIR}/policy-health-report.json"
+    "${OUT_DIR}/policy-health-report.json" \
+    "${OUT_DIR}/release-policy-report.json"
 
 "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
   --input "${OUT_DIR}/repro-package.json" \

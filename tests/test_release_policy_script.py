@@ -23,6 +23,10 @@ def _write_green_release_artifacts(tmp_path: Path, launch_status: str = "ready")
     )
 
 
+def _load_report(tmp_path: Path) -> dict:
+    return json.loads((tmp_path / "release-policy-report.json").read_text(encoding="utf-8"))
+
+
 def test_release_policy_script_passes_for_green_outputs(tmp_path):
     if shutil.which("jq") is None:
         return
@@ -38,6 +42,10 @@ def test_release_policy_script_passes_for_green_outputs(tmp_path):
 
     assert result.returncode == 0
     assert "release policy check: ok" in result.stdout
+    report = _load_report(tmp_path)
+    assert report["status"] == "pass"
+    assert report["checks"]["policy_compliance"] is True
+    assert report["failures"] == []
 
 
 def test_release_policy_script_fails_for_non_ready_launch(tmp_path):
@@ -55,6 +63,9 @@ def test_release_policy_script_fails_for_non_ready_launch(tmp_path):
 
     assert result.returncode != 0
     assert "expected launch readiness 'ready'" in result.stderr
+    report = _load_report(tmp_path)
+    assert report["status"] == "fail"
+    assert report["checks"]["launch_readiness"] is False
 
 
 def test_release_policy_script_fails_when_policy_health_is_not_synced(tmp_path):
@@ -76,6 +87,9 @@ def test_release_policy_script_fails_when_policy_health_is_not_synced(tmp_path):
 
     assert result.returncode != 0
     assert "expected policy_compliance_level='compliant'" in result.stderr
+    report = _load_report(tmp_path)
+    assert report["status"] == "fail"
+    assert report["summary"]["policy_compliance_level"] == "degraded"
 
 
 def test_release_policy_script_fails_when_policy_compliance_level_is_degraded(tmp_path):
@@ -101,6 +115,9 @@ def test_release_policy_script_fails_when_policy_compliance_level_is_degraded(tm
 
     assert result.returncode != 0
     assert "expected policy_compliance_level='compliant'" in result.stderr
+    report = _load_report(tmp_path)
+    assert report["status"] == "fail"
+    assert report["summary"]["policy_compliance_level"] == "degraded"
 
 
 def test_release_policy_script_fails_when_jq_is_missing(tmp_path):
@@ -118,3 +135,21 @@ def test_release_policy_script_fails_when_jq_is_missing(tmp_path):
 
     assert result.returncode == 2
     assert "missing dependency 'jq'" in result.stderr
+
+
+def test_release_policy_script_reports_missing_artifacts(tmp_path):
+    if shutil.which("jq") is None:
+        return
+
+    result = subprocess.run(
+        [str(SCRIPT), str(tmp_path)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "missing artifact" in result.stderr
+    report = _load_report(tmp_path)
+    assert report["status"] == "fail"
+    assert report["failures"]

@@ -32,7 +32,9 @@ rm -f "${OUT_DIR}/release-packet-report.json" \
 rm -f "${OUT_DIR}/active-policy.json" \
   "${VALIDATION_DIR}/active-policy-validation.json" \
   "${OUT_DIR}/policy-health-report.json" \
-  "${VALIDATION_DIR}/policy-health-report-validation.json"
+  "${VALIDATION_DIR}/policy-health-report-validation.json" \
+  "${OUT_DIR}/release-policy-report.json" \
+  "${VALIDATION_DIR}/release-policy-report-validation.json"
 
 "${PYTHON_BIN}" -m compat_runtime.trace_collector.cli \
   --input examples/sample-trace.log \
@@ -689,6 +691,8 @@ scripts/export-active-policy.sh "${OUT_DIR}"
 scripts/build-policy-health-report.sh "${OUT_DIR}"
 # Refresh packet so evidence/governance consume policy health flags.
 scripts/build-release-packet-report.sh "${OUT_DIR}"
+# Produce machine-readable policy gate diagnostics before repro packaging.
+scripts/check-release-policy.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
@@ -759,7 +763,8 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/release-bundle-manifest.json" \
     "${OUT_DIR}/productization-readiness.json" \
     "${OUT_DIR}/active-policy.json" \
-    "${OUT_DIR}/policy-health-report.json"
+    "${OUT_DIR}/policy-health-report.json" \
+    "${OUT_DIR}/release-policy-report.json"
 
 "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
   --input "${OUT_DIR}/repro-package.json" \
@@ -790,6 +795,5 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
   --report "${VALIDATION_DIR}/governance-checkpoint-report-validation.json"
 
 scripts/check-policy-drift.sh "${OUT_DIR}"
-scripts/check-release-policy.sh "${OUT_DIR}"
 
 echo "full pipeline: ok"

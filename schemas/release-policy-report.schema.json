@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Policy Report",
+  "type": "object",
+  "required": [
+    "artifact_version",
+    "generated_at",
+    "status",
+    "summary",
+    "checks",
+    "failures"
+  ],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "status": {"type": "string", "enum": ["pass", "fail"]},
+    "summary": {
+      "type": "object",
+      "required": [
+        "quality_gate",
+        "release_decision",
+        "launch_readiness",
+        "policy_config_valid",
+        "policy_lockfile_sync",
+        "policy_compliance_level"
+      ],
+      "properties": {
+        "quality_gate": {"type": "string"},
+        "release_decision": {"type": "string"},
+        "launch_readiness": {"type": "string"},
+        "policy_config_valid": {"type": "boolean"},
+        "policy_lockfile_sync": {"type": "boolean"},
+        "policy_compliance_level": {
+          "type": "string",
+          "enum": ["compliant", "degraded", "non_compliant"]
+        }
+      }
+    },
+    "checks": {
+      "type": "object",
+      "required": ["quality_gate", "release_decision", "launch_readiness", "policy_compliance"],
+      "properties": {
+        "quality_gate": {"type": "boolean"},
+        "release_decision": {"type": "boolean"},
+        "launch_readiness": {"type": "boolean"},
+        "policy_compliance": {"type": "boolean"}
+      }
+    },
+    "failures": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}

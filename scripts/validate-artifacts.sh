@@ -445,4 +445,11 @@ if [[ -f "${OUT_DIR}/policy-health-report.json" ]]; then
     --report "${REPORT_DIR}/policy-health-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/release-policy-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/release-policy-report.json" \
+    --schema schemas/release-policy-report.schema.json \
+    --report "${REPORT_DIR}/release-policy-report-validation.json"
+fi
+
 echo "artifact validation: ok"
