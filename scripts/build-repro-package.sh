@@ -74,6 +74,9 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/capacity-buffer-report.json" \
     "${OUT_DIR}/intake-queue-policy-report.json" \
     "${OUT_DIR}/scope-rebalance-report.json" \
+    "${OUT_DIR}/flow-control-budget-report.json" \
+    "${OUT_DIR}/intake-release-window-report.json" \
+    "${OUT_DIR}/execution-stability-guard-report.json" \
     "${OUT_DIR}/release-retrospective-report.json" \
     "${OUT_DIR}/next-cycle-bootstrap-report.json" \
     "${OUT_DIR}/stability-window-report.json" \

@@ -452,6 +452,27 @@ if [[ -f "${OUT_DIR}/scope-rebalance-report.json" ]]; then
     --report "${REPORT_DIR}/scope-rebalance-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/flow-control-budget-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/flow-control-budget-report.json" \
+    --schema schemas/flow-control-budget-report.schema.json \
+    --report "${REPORT_DIR}/flow-control-budget-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/intake-release-window-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/intake-release-window-report.json" \
+    --schema schemas/intake-release-window-report.schema.json \
+    --report "${REPORT_DIR}/intake-release-window-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/execution-stability-guard-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/execution-stability-guard-report.json" \
+    --schema schemas/execution-stability-guard-report.schema.json \
+    --report "${REPORT_DIR}/execution-stability-guard-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/release-retrospective-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/release-retrospective-report.json" \

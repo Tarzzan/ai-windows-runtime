@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Intake Release Window Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["intake_release_window", "flow_control_mode", "intake_queue_policy", "admission_window"],
+      "properties": {
+        "intake_release_window": {"type": "string", "enum": ["closed", "limited", "open"]},
+        "flow_control_mode": {"type": "string", "enum": ["tight", "managed", "open"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

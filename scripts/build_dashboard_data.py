@@ -187,6 +187,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     capacity_buffer = read_json(out_dir / "capacity-buffer-report.json", {})
     intake_queue_policy = read_json(out_dir / "intake-queue-policy-report.json", {})
     scope_rebalance = read_json(out_dir / "scope-rebalance-report.json", {})
+    flow_control_budget = read_json(out_dir / "flow-control-budget-report.json", {})
+    intake_release_window = read_json(out_dir / "intake-release-window-report.json", {})
+    execution_stability_guard = read_json(out_dir / "execution-stability-guard-report.json", {})
     risk_watchlist = read_json(out_dir / "risk-watchlist-report.json", {})
     validation = gather_validation(out_dir / "validation")
 
@@ -232,6 +235,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         capacity_buffer.get("actions", []),
         intake_queue_policy.get("actions", []),
         scope_rebalance.get("actions", []),
+        flow_control_budget.get("actions", []),
+        intake_release_window.get("actions", []),
+        execution_stability_guard.get("actions", []),
     ]:
         for item in source:
             text = str(item).strip()
@@ -369,6 +375,18 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "scope_rebalance": (scope_rebalance.get("summary", {}) or {}).get(
             "scope_rebalance", "unknown"
         ),
+        "flow_control_mode": (flow_control_budget.get("summary", {}) or {}).get(
+            "flow_control_mode", "unknown"
+        ),
+        "flow_control_score": (flow_control_budget.get("summary", {}) or {}).get(
+            "flow_control_score", 0
+        ),
+        "intake_release_window": (intake_release_window.get("summary", {}) or {}).get(
+            "intake_release_window", "unknown"
+        ),
+        "execution_stability_guard": (execution_stability_guard.get("summary", {}) or {}).get(
+            "execution_stability_guard", "unknown"
+        ),
     }
 
     return {
@@ -422,6 +440,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "capacity_buffer": capacity_buffer,
             "intake_queue_policy": intake_queue_policy,
             "scope_rebalance": scope_rebalance,
+            "flow_control_budget": flow_control_budget,
+            "intake_release_window": intake_release_window,
+            "execution_stability_guard": execution_stability_guard,
         },
         "risks": {
             "summary": risk_watchlist.get("summary", {}),

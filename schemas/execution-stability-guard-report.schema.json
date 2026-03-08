@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Execution Stability Guard Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["execution_stability_guard", "intake_release_window", "p0_entries", "monitor_status"],
+      "properties": {
+        "execution_stability_guard": {"type": "string", "enum": ["strict", "elevated", "normal"]},
+        "intake_release_window": {"type": "string", "enum": ["closed", "limited", "open"]},
+        "p0_entries": {"type": "integer", "minimum": 0},
+        "monitor_status": {"type": "string", "enum": ["stable", "watch", "critical"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}
