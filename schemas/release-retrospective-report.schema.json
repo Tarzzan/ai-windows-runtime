@@ -8,12 +8,21 @@
     "generated_at": {"type": "string"},
     "summary": {
       "type": "object",
-      "required": ["signoff_status", "trajectory", "readiness_score_delta", "dependency_blockers"],
+      "required": [
+        "signoff_status",
+        "trajectory",
+        "readiness_score_delta",
+        "dependency_blockers",
+        "release_policy_status",
+        "release_policy_failures"
+      ],
       "properties": {
         "signoff_status": {"type": "string"},
         "trajectory": {"type": "string"},
         "readiness_score_delta": {"type": "integer"},
-        "dependency_blockers": {"type": "integer"}
+        "dependency_blockers": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "lessons": {"type": "array", "items": {"type": "string"}},

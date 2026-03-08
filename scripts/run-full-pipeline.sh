@@ -44,6 +44,12 @@ rm -f "${OUT_DIR}/backlog-refresh-report.json" \
   "${OUT_DIR}/next-cycle-bootstrap-report.json" \
   "${VALIDATION_DIR}/next-cycle-bootstrap-report-validation.json"
 
+# Prevent stale closure artifacts from failing early schema validation.
+rm -f "${OUT_DIR}/release-retrospective-report.json" \
+  "${VALIDATION_DIR}/release-retrospective-report-validation.json" \
+  "${OUT_DIR}/stability-window-report.json" \
+  "${VALIDATION_DIR}/stability-window-report-validation.json"
+
 # Prevent stale policy artifacts from failing early schema validation.
 rm -f "${OUT_DIR}/active-policy.json" \
   "${VALIDATION_DIR}/active-policy-validation.json" \

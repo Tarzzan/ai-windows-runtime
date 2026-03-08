@@ -14,13 +14,20 @@ def build_stability_window_report(
     delta_summary = readiness_delta_report.get("summary", {})
 
     monitor_status = str(monitor_summary.get("monitor_status", "critical"))
+    release_policy_status = str(monitor_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(monitor_summary.get("release_policy_failures", 0))
     trajectory = str(history_summary.get("trajectory", "degrading"))
     delta = int(delta_summary.get("readiness_score_delta", 0))
 
     status = "unstable"
-    if monitor_status == "stable" and trajectory in {"stable", "improving"} and delta >= 0:
+    if (
+        monitor_status == "stable"
+        and trajectory in {"stable", "improving"}
+        and delta >= 0
+        and release_policy_status != "fail"
+    ):
         status = "stable"
-    elif monitor_status == "watch" or trajectory == "stable":
+    elif (monitor_status == "watch" or trajectory == "stable") and release_policy_status != "fail":
         status = "watch"
 
     return {
@@ -31,6 +38,8 @@ def build_stability_window_report(
             "monitor_status": monitor_status,
             "trajectory": trajectory,
             "readiness_score_delta": delta,
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "actions": ["Use this window status to decide hotfix urgency and cadence."],
     }

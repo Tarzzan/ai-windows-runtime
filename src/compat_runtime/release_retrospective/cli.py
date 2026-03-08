@@ -11,6 +11,8 @@ def build_release_retrospective_report(
 ) -> dict:
     signoff_summary = delivery_signoff_report.get("summary", {})
     signoff_status = str(delivery_signoff_report.get("status", "blocked"))
+    release_policy_status = str(signoff_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(signoff_summary.get("release_policy_failures", 0))
     delta_summary = readiness_delta_report.get("summary", {})
     history_summary = release_gate_history_report.get("summary", {})
 
@@ -21,6 +23,8 @@ def build_release_retrospective_report(
         lessons.append("Investigate readiness regressions between cycle checkpoints.")
     if str(history_summary.get("trajectory", "stable")) == "degrading":
         lessons.append("Tighten scope to stabilize gate trajectory before expansion.")
+    if release_policy_status == "fail":
+        lessons.append("Resolve release policy failures before opening the next release window.")
     if not lessons:
         lessons.append("Keep current governance cadence and preserve release discipline.")
 
@@ -32,6 +36,8 @@ def build_release_retrospective_report(
             "trajectory": str(history_summary.get("trajectory", "stable")),
             "readiness_score_delta": int(delta_summary.get("readiness_score_delta", 0)),
             "dependency_blockers": int(signoff_summary.get("dependency_blockers", 0)),
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "lessons": lessons,
         "actions": ["Feed lessons into next cycle bootstrap planning."],

@@ -3,9 +3,18 @@ from compat_runtime.release_retrospective.cli import build_release_retrospective
 
 def test_release_retrospective_generates_lessons():
     report = build_release_retrospective_report(
-        delivery_signoff_report={"status": "blocked", "summary": {"dependency_blockers": 1}},
+        delivery_signoff_report={
+            "status": "blocked",
+            "summary": {
+                "dependency_blockers": 1,
+                "release_policy_status": "fail",
+                "release_policy_failures": 2,
+            },
+        },
         readiness_delta_report={"summary": {"readiness_score_delta": -3}},
         release_gate_history_report={"summary": {"trajectory": "degrading"}},
     )
     assert report["summary"]["signoff_status"] == "blocked"
+    assert report["summary"]["release_policy_status"] == "fail"
+    assert report["summary"]["release_policy_failures"] == 2
     assert report["lessons"]

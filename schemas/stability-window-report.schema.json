@@ -8,12 +8,21 @@
     "generated_at": {"type": "string"},
     "summary": {
       "type": "object",
-      "required": ["window_status", "monitor_status", "trajectory", "readiness_score_delta"],
+      "required": [
+        "window_status",
+        "monitor_status",
+        "trajectory",
+        "readiness_score_delta",
+        "release_policy_status",
+        "release_policy_failures"
+      ],
       "properties": {
         "window_status": {"type": "string"},
         "monitor_status": {"type": "string"},
         "trajectory": {"type": "string"},
-        "readiness_score_delta": {"type": "integer"}
+        "readiness_score_delta": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "actions": {"type": "array", "items": {"type": "string"}}
