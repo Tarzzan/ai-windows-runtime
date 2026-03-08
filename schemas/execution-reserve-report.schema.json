@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Execution Reserve Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["execution_reserve", "delivery_intake_sync", "scope_budget_mode", "overloaded_owners"],
+      "properties": {
+        "execution_reserve": {"type": "string", "enum": ["protected", "managed", "surplus"]},
+        "delivery_intake_sync": {"type": "string", "enum": ["blocked", "aligned", "expanding"]},
+        "scope_budget_mode": {"type": "string", "enum": ["tight", "balanced", "flexible"]},
+        "overloaded_owners": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

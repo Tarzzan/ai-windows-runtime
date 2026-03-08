@@ -113,6 +113,12 @@ rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/admission-window-report-validation.json" \
   "${OUT_DIR}/commitment-guard-report.json" \
   "${VALIDATION_DIR}/commitment-guard-report-validation.json" \
+  "${OUT_DIR}/portfolio-risk-budget-report.json" \
+  "${VALIDATION_DIR}/portfolio-risk-budget-report-validation.json" \
+  "${OUT_DIR}/delivery-intake-sync-report.json" \
+  "${VALIDATION_DIR}/delivery-intake-sync-report-validation.json" \
+  "${OUT_DIR}/execution-reserve-report.json" \
+  "${VALIDATION_DIR}/execution-reserve-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -951,6 +957,39 @@ scripts/check-release-policy.sh "${OUT_DIR}"
   --schema schemas/commitment-guard-report.schema.json \
   --report "${VALIDATION_DIR}/commitment-guard-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.portfolio_risk_budget.cli \
+  --commitment-guard-report "${OUT_DIR}/commitment-guard-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --readiness-scorecard-report "${OUT_DIR}/readiness-scorecard-report.json" \
+  --output "${OUT_DIR}/portfolio-risk-budget-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/portfolio-risk-budget-report.json" \
+  --schema schemas/portfolio-risk-budget-report.schema.json \
+  --report "${VALIDATION_DIR}/portfolio-risk-budget-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.delivery_intake_sync.cli \
+  --portfolio-risk-budget-report "${OUT_DIR}/portfolio-risk-budget-report.json" \
+  --admission-window-report "${OUT_DIR}/admission-window-report.json" \
+  --cadence-recommendation-report "${OUT_DIR}/cadence-recommendation-report.json" \
+  --output "${OUT_DIR}/delivery-intake-sync-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/delivery-intake-sync-report.json" \
+  --schema schemas/delivery-intake-sync-report.schema.json \
+  --report "${VALIDATION_DIR}/delivery-intake-sync-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.execution_reserve.cli \
+  --delivery-intake-sync-report "${OUT_DIR}/delivery-intake-sync-report.json" \
+  --scope-budget-report "${OUT_DIR}/scope-budget-report.json" \
+  --owner-load-report "${OUT_DIR}/owner-load-report.json" \
+  --output "${OUT_DIR}/execution-reserve-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/execution-reserve-report.json" \
+  --schema schemas/execution-reserve-report.schema.json \
+  --report "${VALIDATION_DIR}/execution-reserve-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.release_retrospective.cli \
   --delivery-signoff-report "${OUT_DIR}/delivery-signoff-report.json" \
   --readiness-delta-report "${OUT_DIR}/readiness-delta-report.json" \
@@ -1076,6 +1115,9 @@ scripts/build-commitment-pacing-report.sh "${OUT_DIR}"
 scripts/build-scope-budget-report.sh "${OUT_DIR}"
 scripts/build-admission-window-report.sh "${OUT_DIR}"
 scripts/build-commitment-guard-report.sh "${OUT_DIR}"
+scripts/build-portfolio-risk-budget-report.sh "${OUT_DIR}"
+scripts/build-delivery-intake-sync-report.sh "${OUT_DIR}"
+scripts/build-execution-reserve-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
@@ -1132,6 +1174,9 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/scope-budget-report.json" \
     "${OUT_DIR}/admission-window-report.json" \
     "${OUT_DIR}/commitment-guard-report.json" \
+    "${OUT_DIR}/portfolio-risk-budget-report.json" \
+    "${OUT_DIR}/delivery-intake-sync-report.json" \
+    "${OUT_DIR}/execution-reserve-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \

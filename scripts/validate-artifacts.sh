@@ -410,6 +410,27 @@ if [[ -f "${OUT_DIR}/commitment-guard-report.json" ]]; then
     --report "${REPORT_DIR}/commitment-guard-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/portfolio-risk-budget-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/portfolio-risk-budget-report.json" \
+    --schema schemas/portfolio-risk-budget-report.schema.json \
+    --report "${REPORT_DIR}/portfolio-risk-budget-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/delivery-intake-sync-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/delivery-intake-sync-report.json" \
+    --schema schemas/delivery-intake-sync-report.schema.json \
+    --report "${REPORT_DIR}/delivery-intake-sync-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/execution-reserve-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/execution-reserve-report.json" \
+    --schema schemas/execution-reserve-report.schema.json \
+    --report "${REPORT_DIR}/execution-reserve-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/release-retrospective-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/release-retrospective-report.json" \

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Portfolio Risk Budget Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["risk_budget_score", "risk_budget_mode", "commitment_guard", "p0_entries", "readiness_score"],
+      "properties": {
+        "risk_budget_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "risk_budget_mode": {"type": "string", "enum": ["conservative", "balanced", "aggressive"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

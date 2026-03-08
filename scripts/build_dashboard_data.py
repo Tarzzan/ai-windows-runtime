@@ -181,6 +181,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     scope_budget = read_json(out_dir / "scope-budget-report.json", {})
     admission_window = read_json(out_dir / "admission-window-report.json", {})
     commitment_guard = read_json(out_dir / "commitment-guard-report.json", {})
+    portfolio_risk_budget = read_json(out_dir / "portfolio-risk-budget-report.json", {})
+    delivery_intake_sync = read_json(out_dir / "delivery-intake-sync-report.json", {})
+    execution_reserve = read_json(out_dir / "execution-reserve-report.json", {})
     risk_watchlist = read_json(out_dir / "risk-watchlist-report.json", {})
     validation = gather_validation(out_dir / "validation")
 
@@ -220,6 +223,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         scope_budget.get("actions", []),
         admission_window.get("actions", []),
         commitment_guard.get("actions", []),
+        portfolio_risk_budget.get("actions", []),
+        delivery_intake_sync.get("actions", []),
+        execution_reserve.get("actions", []),
     ]:
         for item in source:
             text = str(item).strip()
@@ -333,6 +339,18 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "commitment_guard": (commitment_guard.get("summary", {}) or {}).get(
             "commitment_guard", "unknown"
         ),
+        "risk_budget_mode": (portfolio_risk_budget.get("summary", {}) or {}).get(
+            "risk_budget_mode", "unknown"
+        ),
+        "risk_budget_score": (portfolio_risk_budget.get("summary", {}) or {}).get(
+            "risk_budget_score", 0
+        ),
+        "delivery_intake_sync": (delivery_intake_sync.get("summary", {}) or {}).get(
+            "delivery_intake_sync", "unknown"
+        ),
+        "execution_reserve": (execution_reserve.get("summary", {}) or {}).get(
+            "execution_reserve", "unknown"
+        ),
     }
 
     return {
@@ -380,6 +398,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "scope_budget": scope_budget,
             "admission_window": admission_window,
             "commitment_guard": commitment_guard,
+            "portfolio_risk_budget": portfolio_risk_budget,
+            "delivery_intake_sync": delivery_intake_sync,
+            "execution_reserve": execution_reserve,
         },
         "risks": {
             "summary": risk_watchlist.get("summary", {}),
