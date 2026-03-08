@@ -49,6 +49,7 @@ def build_release_forecast_report(
     release_decision_report: dict,
     kpi_report: dict,
     trend_report: dict,
+    release_policy_report: dict | None = None,
 ) -> dict:
     decision = str(release_decision_report.get("decision", "hold"))
     risk_level = str(kpi_report.get("summary", {}).get("risk_level", "high"))
@@ -62,6 +63,9 @@ def build_release_forecast_report(
     trend_summary = trend_report.get("summary", {})
     improved = len(trend_summary.get("improved_metrics", []))
     regressed = len(trend_summary.get("regressed_metrics", []))
+    release_policy_summary = release_policy_report or {}
+    release_policy_status = str(release_policy_summary.get("status", "missing"))
+    release_policy_failures = len(release_policy_summary.get("failures", []))
     pace = _pace_factor(improved=improved, regressed=regressed, risk_level=risk_level)
 
     # Heuristic baseline: 3 blocking tasks can be closed per iteration in healthy pace.
@@ -101,6 +105,8 @@ def build_release_forecast_report(
             "pace_factor": round(pace, 3),
             "trend_improved_metrics": improved,
             "trend_regressed_metrics": regressed,
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "top_tasks": top_tasks,
         "actions": _actions(decision, estimated_iterations, blocking_tasks),
@@ -118,6 +124,7 @@ def main() -> None:
     parser.add_argument("--release-decision-report", required=True, help="Release decision report path")
     parser.add_argument("--kpi-report", required=True, help="KPI report path")
     parser.add_argument("--trend-report", required=True, help="Trend report path")
+    parser.add_argument("--release-policy-report", required=False, help="Optional release policy report")
     parser.add_argument("--output", required=True, help="Output path")
     args = parser.parse_args()
 
@@ -126,6 +133,7 @@ def main() -> None:
         release_decision_report=read_json(args.release_decision_report),
         kpi_report=read_json(args.kpi_report),
         trend_report=read_json(args.trend_report),
+        release_policy_report=read_json(args.release_policy_report) if args.release_policy_report else None,
     )
     write_json(args.output, artifact)
 

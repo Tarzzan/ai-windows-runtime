@@ -17,7 +17,9 @@
         "current_score",
         "projected_score_iteration_1",
         "projected_score_iteration_2",
-        "projected_band_iteration_2"
+        "projected_band_iteration_2",
+        "release_policy_status",
+        "release_policy_failures"
       ],
       "properties": {
         "total_tasks": {"type": "integer"},
@@ -28,7 +30,9 @@
         "current_score": {"type": "integer"},
         "projected_score_iteration_1": {"type": "integer"},
         "projected_score_iteration_2": {"type": "integer"},
-        "projected_band_iteration_2": {"type": "string"}
+        "projected_band_iteration_2": {"type": "string"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "milestones": {

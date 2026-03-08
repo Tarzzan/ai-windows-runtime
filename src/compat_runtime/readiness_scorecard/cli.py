@@ -84,6 +84,8 @@ def build_readiness_scorecard_report(
 
     forecast_summary = release_forecast_report.get("summary", {})
     iterations = int(forecast_summary.get("estimated_iterations_to_go", 1))
+    release_policy_status = str(forecast_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(forecast_summary.get("release_policy_failures", 0))
     forecast_penalty = 0
     if iterations > 4:
         forecast_penalty = 12
@@ -122,6 +124,8 @@ def build_readiness_scorecard_report(
             "risk_level": risk_level,
             "blocking_tasks": blocking,
             "estimated_iterations_to_go": iterations,
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "factors": factors,
         "actions": _actions(band),

@@ -39,6 +39,9 @@ def build_execution_burndown_report(
     blocking_tasks = int(plan_summary.get("blocking_tasks", 0))
     estimated_hours = int(plan_summary.get("estimated_total_hours", 0))
     current_score = int(readiness_scorecard_report.get("score", 0))
+    scorecard_summary = readiness_scorecard_report.get("summary", {})
+    release_policy_status = str(scorecard_summary.get("release_policy_status", "missing"))
+    release_policy_failures = int(scorecard_summary.get("release_policy_failures", 0))
 
     burn_target = int(forecast_assumptions.get("blocking_tasks_per_iteration_target", 3))
     burn_target = max(1, burn_target)
@@ -71,6 +74,8 @@ def build_execution_burndown_report(
             "projected_score_iteration_1": projected_score_iter1,
             "projected_score_iteration_2": projected_score_iter2,
             "projected_band_iteration_2": _band(projected_score_iter2),
+            "release_policy_status": release_policy_status,
+            "release_policy_failures": release_policy_failures,
         },
         "milestones": milestones,
         "actions": _actions(blocking_tasks, projected_score_iter2),

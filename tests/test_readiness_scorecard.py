@@ -14,7 +14,13 @@ def _iteration(blocking: int) -> dict:
 
 
 def _forecast(iterations: int) -> dict:
-    return {"summary": {"estimated_iterations_to_go": iterations}}
+    return {
+        "summary": {
+            "estimated_iterations_to_go": iterations,
+            "release_policy_status": "pass",
+            "release_policy_failures": 0,
+        }
+    }
 
 
 def _kpi(level: str) -> dict:
@@ -32,6 +38,8 @@ def test_readiness_scorecard_red_for_no_go_context():
 
     assert report["score"] < 50
     assert report["band"] == "red"
+    assert report["summary"]["release_policy_status"] == "pass"
+    assert report["summary"]["release_policy_failures"] == 0
     assert report["release_candidate"] is False
     assert report["factors"]
     assert report["actions"]
@@ -48,4 +56,5 @@ def test_readiness_scorecard_green_for_go_context():
 
     assert report["score"] >= 80
     assert report["band"] == "green"
+    assert report["summary"]["release_policy_status"] == "pass"
     assert report["release_candidate"] is True

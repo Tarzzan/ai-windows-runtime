@@ -40,10 +40,13 @@ def test_release_forecast_increases_iterations_on_high_risk_regression():
         release_decision_report=_release("no-go"),
         kpi_report=_kpi("high"),
         trend_report=_trend(["a"], ["b", "c", "d"]),
+        release_policy_report={"status": "fail", "failures": ["x"]},
     )
 
     assert report["summary"]["decision_context"] == "no-go"
     assert report["summary"]["estimated_iterations_to_go"] >= 2
+    assert report["summary"]["release_policy_status"] == "fail"
+    assert report["summary"]["release_policy_failures"] == 1
     assert report["summary"]["forecast_wave"] in {"near_term", "long_term"}
     assert report["top_tasks"]
     assert report["actions"]
@@ -58,4 +61,5 @@ def test_release_forecast_handles_low_risk_stable_case():
     )
 
     assert report["summary"]["estimated_iterations_to_go"] == 1
+    assert report["summary"]["release_policy_status"] == "missing"
     assert report["summary"]["forecast_wave"] == "immediate"

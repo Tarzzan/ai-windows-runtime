@@ -27,7 +27,9 @@
         "forecast_wave",
         "pace_factor",
         "trend_improved_metrics",
-        "trend_regressed_metrics"
+        "trend_regressed_metrics",
+        "release_policy_status",
+        "release_policy_failures"
       ],
       "properties": {
         "decision_context": {"type": "string"},
@@ -41,7 +43,9 @@
         "forecast_wave": {"type": "string"},
         "pace_factor": {"type": "number"},
         "trend_improved_metrics": {"type": "integer"},
-        "trend_regressed_metrics": {"type": "integer"}
+        "trend_regressed_metrics": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "top_tasks": {
