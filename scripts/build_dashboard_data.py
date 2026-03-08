@@ -258,6 +258,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "focus_items": (execution_focus.get("summary", {}) or {}).get(
             "p0_focus_items", 0
         ),
+        "owners_in_scope": (execution_focus.get("summary", {}) or {}).get(
+            "owners_in_scope", 0
+        ),
     }
 
     return {
