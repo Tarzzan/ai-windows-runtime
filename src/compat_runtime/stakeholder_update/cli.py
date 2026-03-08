@@ -31,6 +31,8 @@ def build_stakeholder_update_report(
         "readiness_score": int(brief_summary.get("readiness_score", 0)),
         "trajectory": str(brief_summary.get("trajectory", "stable")),
         "p0_risks": int(watchlist_summary.get("p0_entries", 0)),
+        "release_policy_status": str(cockpit_summary.get("release_policy_status", "missing")),
+        "release_policy_failures": int(cockpit_summary.get("release_policy_failures", 0)),
     }
 
     highlights = [

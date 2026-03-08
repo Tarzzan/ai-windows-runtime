@@ -11,9 +11,12 @@ def test_release_brief_builds_headline_and_risks():
         release_forecast_report={"summary": {"estimated_iterations_to_go": 3}},
         release_gate_history_report={"summary": {"trajectory": "stable"}},
         risk_watchlist_report={"summary": {"p0_entries": 1}, "entries": [{"id": "r1", "priority": "P0"}]},
+        release_policy_report={"status": "fail", "failures": ["x", "y"]},
     )
 
     assert "Pilot=limited_pilot" in report["headline"]
     assert report["summary"]["readiness_score"] == 58
+    assert report["summary"]["release_policy_status"] == "fail"
+    assert report["summary"]["release_policy_failures"] == 2
     assert report["top_risks"]
     assert report["actions"]

@@ -14,7 +14,9 @@
         "pilot_recommendation",
         "readiness_score",
         "trajectory",
-        "p0_risks"
+        "p0_risks",
+        "release_policy_status",
+        "release_policy_failures"
       ],
       "properties": {
         "audience": {"type": "string"},
@@ -22,7 +24,9 @@
         "pilot_recommendation": {"type": "string"},
         "readiness_score": {"type": "integer"},
         "trajectory": {"type": "string"},
-        "p0_risks": {"type": "integer"}
+        "p0_risks": {"type": "integer"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "highlights": {"type": "array", "items": {"type": "string"}},

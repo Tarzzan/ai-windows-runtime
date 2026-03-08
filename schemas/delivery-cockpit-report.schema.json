@@ -15,7 +15,9 @@
         "blocking_tasks",
         "sprint_now_tasks",
         "missing_validation_reports",
-        "health_ratio"
+        "health_ratio",
+        "release_policy_status",
+        "release_policy_failures"
       ],
       "properties": {
         "cockpit_status": {"type": "string"},
@@ -24,7 +26,9 @@
         "blocking_tasks": {"type": "integer"},
         "sprint_now_tasks": {"type": "integer"},
         "missing_validation_reports": {"type": "integer"},
-        "health_ratio": {"type": "number"}
+        "health_ratio": {"type": "number"},
+        "release_policy_status": {"type": "string", "enum": ["pass", "fail", "missing"]},
+        "release_policy_failures": {"type": "integer"}
       }
     },
     "actions": {"type": "array", "items": {"type": "string"}}

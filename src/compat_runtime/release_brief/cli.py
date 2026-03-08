@@ -28,11 +28,13 @@ def build_release_brief_report(
     release_forecast_report: dict,
     release_gate_history_report: dict,
     risk_watchlist_report: dict,
+    release_policy_report: dict | None = None,
 ) -> dict:
     pilot_summary = pilot_readiness_report.get("summary", {})
     forecast_summary = release_forecast_report.get("summary", {})
     history_summary = release_gate_history_report.get("summary", {})
     watchlist_summary = risk_watchlist_report.get("summary", {})
+    release_policy_summary = release_policy_report or {}
 
     recommendation = str(pilot_readiness_report.get("recommendation", "not_ready"))
     summary = {
@@ -45,6 +47,8 @@ def build_release_brief_report(
         "trajectory": str(history_summary.get("trajectory", "stable")),
         "p0_watchlist_entries": int(watchlist_summary.get("p0_entries", 0)),
         "blocking_tasks": int(pilot_summary.get("blocking_tasks", 0)),
+        "release_policy_status": str(release_policy_summary.get("status", "missing")),
+        "release_policy_failures": len(release_policy_summary.get("failures", [])),
     }
 
     risks = []
@@ -76,6 +80,7 @@ def main() -> None:
     parser.add_argument("--release-forecast-report", required=True, help="Release forecast report path")
     parser.add_argument("--release-gate-history-report", required=True, help="Release gate history path")
     parser.add_argument("--risk-watchlist-report", required=True, help="Risk watchlist report path")
+    parser.add_argument("--release-policy-report", required=False, help="Optional release policy report")
     parser.add_argument("--output", required=True, help="Output path")
     args = parser.parse_args()
 
@@ -85,6 +90,7 @@ def main() -> None:
         release_forecast_report=read_json(args.release_forecast_report),
         release_gate_history_report=read_json(args.release_gate_history_report),
         risk_watchlist_report=read_json(args.risk_watchlist_report),
+        release_policy_report=read_json(args.release_policy_report) if args.release_policy_report else None,
     )
     write_json(args.output, artifact)
 

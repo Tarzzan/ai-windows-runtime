@@ -33,6 +33,8 @@ def build_delivery_cockpit_report(
         "sprint_now_tasks": int(sprint_summary.get("sprint_now_tasks", 0)),
         "missing_validation_reports": missing_reports,
         "health_ratio": float(health_summary.get("health_ratio", 0.0)),
+        "release_policy_status": str(brief_summary.get("release_policy_status", "missing")),
+        "release_policy_failures": int(brief_summary.get("release_policy_failures", 0)),
     }
 
     actions = []
