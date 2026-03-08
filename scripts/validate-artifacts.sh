@@ -389,6 +389,13 @@ if [[ -f "${OUT_DIR}/stability-window-report.json" ]]; then
     --report "${REPORT_DIR}/stability-window-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/office-readiness-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/office-readiness-report.json" \
+    --schema schemas/office-readiness-report.schema.json \
+    --report "${REPORT_DIR}/office-readiness-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/hotfix-planner-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/hotfix-planner-report.json" \
@@ -422,6 +429,20 @@ if [[ -f "${OUT_DIR}/repro-package.json" ]]; then
     --input "${OUT_DIR}/repro-package.json" \
     --schema schemas/repro-package.schema.json \
     --report "${REPORT_DIR}/repro-package-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/active-policy.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/active-policy.json" \
+    --schema schemas/active-policy.schema.json \
+    --report "${REPORT_DIR}/active-policy-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/policy-health-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/policy-health-report.json" \
+    --schema schemas/policy-health-report.schema.json \
+    --report "${REPORT_DIR}/policy-health-report-validation.json"
 fi
 
 echo "artifact validation: ok"

@@ -13,6 +13,14 @@ BASELINE_PATCH_PLAN="${BASELINE_PATCH_PLAN:-}"
 
 mkdir -p "${BUNDLE_DIR}" "${VALIDATION_DIR}"
 
+# Prevent stale office artifacts from influencing earlier pipeline stages.
+rm -f "${OUT_DIR}/office-readiness-report.json" \
+  "${VALIDATION_DIR}/office-readiness-report-validation.json"
+
+# Prevent stale release-decision artifacts from failing early schema validation.
+rm -f "${OUT_DIR}/release-decision-report.json" \
+  "${VALIDATION_DIR}/release-decision-report-validation.json"
+
 PATCH_PLAN_DIFF_ARGS=(
   --current "${OUT_DIR}/patch-plan.json"
   --current-label "current-base"
@@ -206,28 +214,40 @@ fi
   --schema schemas/productization-readiness.schema.json \
   --report "${VALIDATION_DIR}/productization-readiness-validation.json"
 
-"${PYTHON_BIN}" -m compat_runtime.quality_gate.cli \
-  --execution-report "${OUT_DIR}/execution-report.json" \
-  --kpi-report "${OUT_DIR}/kpi-report.json" \
-  --trend-report "${OUT_DIR}/trend-report.json" \
-  --proposal-risk-report "${OUT_DIR}/proposal-risk-report.json" \
-  --crash-signature-report "${OUT_DIR}/crash-signature-report.json" \
-  --installer-phase-report "${OUT_DIR}/installer-phase-report.json" \
-  --proposal-review-checklist "${OUT_DIR}/proposal-review-checklist.json" \
-  --productization-readiness "${OUT_DIR}/productization-readiness.json" \
+QUALITY_GATE_ARGS=(
+  --execution-report "${OUT_DIR}/execution-report.json"
+  --kpi-report "${OUT_DIR}/kpi-report.json"
+  --trend-report "${OUT_DIR}/trend-report.json"
+  --proposal-risk-report "${OUT_DIR}/proposal-risk-report.json"
+  --crash-signature-report "${OUT_DIR}/crash-signature-report.json"
+  --installer-phase-report "${OUT_DIR}/installer-phase-report.json"
+  --proposal-review-checklist "${OUT_DIR}/proposal-review-checklist.json"
+  --productization-readiness "${OUT_DIR}/productization-readiness.json"
   --output "${OUT_DIR}/quality-gate-report.json"
+)
+if [[ -f "${OUT_DIR}/office-readiness-report.json" ]]; then
+  QUALITY_GATE_ARGS+=(--office-readiness-report "${OUT_DIR}/office-readiness-report.json")
+fi
+
+"${PYTHON_BIN}" -m compat_runtime.quality_gate.cli "${QUALITY_GATE_ARGS[@]}"
 
 "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
   --input "${OUT_DIR}/quality-gate-report.json" \
   --schema schemas/quality-gate-report.schema.json \
   --report "${VALIDATION_DIR}/quality-gate-report-validation.json"
 
-"${PYTHON_BIN}" -m compat_runtime.release_decision.cli \
-  --quality-gate-report "${OUT_DIR}/quality-gate-report.json" \
-  --alpha-release-checklist "${OUT_DIR}/alpha-release-checklist.json" \
-  --compatibility-matrix "${OUT_DIR}/compatibility-matrix.json" \
-  --productization-readiness "${OUT_DIR}/productization-readiness.json" \
+RELEASE_DECISION_ARGS=(
+  --quality-gate-report "${OUT_DIR}/quality-gate-report.json"
+  --alpha-release-checklist "${OUT_DIR}/alpha-release-checklist.json"
+  --compatibility-matrix "${OUT_DIR}/compatibility-matrix.json"
+  --productization-readiness "${OUT_DIR}/productization-readiness.json"
   --output "${OUT_DIR}/release-decision-report.json"
+)
+if [[ -f "${OUT_DIR}/office-readiness-report.json" ]]; then
+  RELEASE_DECISION_ARGS+=(--office-readiness-report "${OUT_DIR}/office-readiness-report.json")
+fi
+
+"${PYTHON_BIN}" -m compat_runtime.release_decision.cli "${RELEASE_DECISION_ARGS[@]}"
 
 "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
   --input "${OUT_DIR}/release-decision-report.json" \
@@ -430,13 +450,19 @@ fi
   --schema schemas/validation-coverage-report.schema.json \
   --report "${VALIDATION_DIR}/validation-coverage-report-validation.json"
 
-"${PYTHON_BIN}" -m compat_runtime.launch_readiness.cli \
-  --handoff-checklist-report "${OUT_DIR}/handoff-checklist-report.json" \
-  --validation-coverage-report "${OUT_DIR}/validation-coverage-report.json" \
-  --quality-gate-report "${OUT_DIR}/quality-gate-report.json" \
-  --release-decision-report "${OUT_DIR}/release-decision-report.json" \
-  --pilot-readiness-report "${OUT_DIR}/pilot-readiness-report.json" \
+LAUNCH_READINESS_ARGS=(
+  --handoff-checklist-report "${OUT_DIR}/handoff-checklist-report.json"
+  --validation-coverage-report "${OUT_DIR}/validation-coverage-report.json"
+  --quality-gate-report "${OUT_DIR}/quality-gate-report.json"
+  --release-decision-report "${OUT_DIR}/release-decision-report.json"
+  --pilot-readiness-report "${OUT_DIR}/pilot-readiness-report.json"
   --output "${OUT_DIR}/launch-readiness-report.json"
+)
+if [[ -f "${OUT_DIR}/office-readiness-report.json" ]]; then
+  LAUNCH_READINESS_ARGS+=(--office-readiness-report "${OUT_DIR}/office-readiness-report.json")
+fi
+
+"${PYTHON_BIN}" -m compat_runtime.launch_readiness.cli "${LAUNCH_READINESS_ARGS[@]}"
 
 "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
   --input "${OUT_DIR}/launch-readiness-report.json" \
@@ -567,6 +593,29 @@ fi
   --schema schemas/stability-window-report.schema.json \
   --report "${VALIDATION_DIR}/stability-window-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.office_readiness.cli \
+  --runtime-signal-report "${OUT_DIR}/runtime-signal-report.json" \
+  --hook-backlog-report "${OUT_DIR}/hook-backlog-report.json" \
+  --stability-window-report "${OUT_DIR}/stability-window-report.json" \
+  --installer-phase-report "${OUT_DIR}/installer-phase-report.json" \
+  --output "${OUT_DIR}/office-readiness-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/office-readiness-report.json" \
+  --schema schemas/office-readiness-report.schema.json \
+  --report "${VALIDATION_DIR}/office-readiness-report-validation.json"
+
+# Refresh decision and launch chain with office readiness now available.
+scripts/build-quality-gate-report.sh "${OUT_DIR}"
+scripts/build-release-decision-report.sh "${OUT_DIR}"
+scripts/build-pilot-readiness-report.sh "${OUT_DIR}"
+scripts/build-launch-readiness-report.sh "${OUT_DIR}"
+scripts/build-release-packet-report.sh "${OUT_DIR}"
+scripts/build-readiness-delta-report.sh "${OUT_DIR}"
+scripts/build-delivery-signoff-report.sh "${OUT_DIR}"
+scripts/build-post-release-monitor-report.sh "${OUT_DIR}"
+scripts/build-stability-window-report.sh "${OUT_DIR}"
+
 "${PYTHON_BIN}" -m compat_runtime.hotfix_planner.cli \
   --stability-window-report "${OUT_DIR}/stability-window-report.json" \
   --incident-feedback-report "${OUT_DIR}/incident-feedback-report.json" \
@@ -589,28 +638,11 @@ fi
   --schema schemas/verification-snapshot-report.schema.json \
   --report "${VALIDATION_DIR}/verification-snapshot-report-validation.json"
 
-"${PYTHON_BIN}" -m compat_runtime.evidence_catalog.cli \
-  --verification-snapshot-report "${OUT_DIR}/verification-snapshot-report.json" \
-  --release-packet-report "${OUT_DIR}/release-packet-report.json" \
-  --repro-package "${OUT_DIR}/repro-package.json" \
-  --output "${OUT_DIR}/evidence-catalog-report.json"
-
-"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
-  --input "${OUT_DIR}/evidence-catalog-report.json" \
-  --schema schemas/evidence-catalog-report.schema.json \
-  --report "${VALIDATION_DIR}/evidence-catalog-report-validation.json"
-
-"${PYTHON_BIN}" -m compat_runtime.governance_checkpoint.cli \
-  --stability-window-report "${OUT_DIR}/stability-window-report.json" \
-  --hotfix-planner-report "${OUT_DIR}/hotfix-planner-report.json" \
-  --verification-snapshot-report "${OUT_DIR}/verification-snapshot-report.json" \
-  --evidence-catalog-report "${OUT_DIR}/evidence-catalog-report.json" \
-  --output "${OUT_DIR}/governance-checkpoint-report.json"
-
-"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
-  --input "${OUT_DIR}/governance-checkpoint-report.json" \
-  --schema schemas/governance-checkpoint-report.schema.json \
-  --report "${VALIDATION_DIR}/governance-checkpoint-report-validation.json"
+scripts/check-policy-config.sh "${OUT_DIR}"
+scripts/export-active-policy.sh "${OUT_DIR}"
+scripts/build-policy-health-report.sh "${OUT_DIR}"
+# Refresh packet so evidence/governance consume policy health flags.
+scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
   --execution-report "${OUT_DIR}/execution-report.json" \
@@ -666,6 +698,7 @@ fi
     "${OUT_DIR}/release-retrospective-report.json" \
     "${OUT_DIR}/next-cycle-bootstrap-report.json" \
     "${OUT_DIR}/stability-window-report.json" \
+    "${OUT_DIR}/office-readiness-report.json" \
     "${OUT_DIR}/hotfix-planner-report.json" \
     "${OUT_DIR}/verification-snapshot-report.json" \
     "${OUT_DIR}/evidence-catalog-report.json" \
@@ -677,12 +710,39 @@ fi
     "${OUT_DIR}/compatibility-matrix.json" \
     "${OUT_DIR}/alpha-release-checklist.json" \
     "${OUT_DIR}/release-bundle-manifest.json" \
-    "${OUT_DIR}/productization-readiness.json"
+    "${OUT_DIR}/productization-readiness.json" \
+    "${OUT_DIR}/active-policy.json" \
+    "${OUT_DIR}/policy-health-report.json"
 
 "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
   --input "${OUT_DIR}/repro-package.json" \
   --schema schemas/repro-package.schema.json \
   --report "${VALIDATION_DIR}/repro-package-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.evidence_catalog.cli \
+  --verification-snapshot-report "${OUT_DIR}/verification-snapshot-report.json" \
+  --release-packet-report "${OUT_DIR}/release-packet-report.json" \
+  --repro-package "${OUT_DIR}/repro-package.json" \
+  --output "${OUT_DIR}/evidence-catalog-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/evidence-catalog-report.json" \
+  --schema schemas/evidence-catalog-report.schema.json \
+  --report "${VALIDATION_DIR}/evidence-catalog-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.governance_checkpoint.cli \
+  --stability-window-report "${OUT_DIR}/stability-window-report.json" \
+  --hotfix-planner-report "${OUT_DIR}/hotfix-planner-report.json" \
+  --verification-snapshot-report "${OUT_DIR}/verification-snapshot-report.json" \
+  --evidence-catalog-report "${OUT_DIR}/evidence-catalog-report.json" \
+  --output "${OUT_DIR}/governance-checkpoint-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/governance-checkpoint-report.json" \
+  --schema schemas/governance-checkpoint-report.schema.json \
+  --report "${VALIDATION_DIR}/governance-checkpoint-report-validation.json"
+
+scripts/check-policy-drift.sh "${OUT_DIR}"
 
 cp "${OUT_DIR}/execution-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/trend-report.json" "${BUNDLE_DIR}/"
@@ -723,6 +783,7 @@ cp "${OUT_DIR}/backlog-refresh-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-retrospective-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/next-cycle-bootstrap-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/stability-window-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/office-readiness-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/hotfix-planner-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/verification-snapshot-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/evidence-catalog-report.json" "${BUNDLE_DIR}/"
@@ -740,5 +801,9 @@ cp "${OUT_DIR}/proposal-risk-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/hook-backlog-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/proposal-review-checklist.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/patch-template-catalog.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/active-policy.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/policy-health-report.json" "${BUNDLE_DIR}/"
+
+scripts/check-release-policy.sh "${OUT_DIR}"
 
 echo "release bundle: ok"

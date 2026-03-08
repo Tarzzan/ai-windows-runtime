@@ -10,13 +10,19 @@ OUT_DIR="${1:-out}"
 VALIDATION_DIR="${OUT_DIR}/validation"
 mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
 
-"${PYTHON_BIN}" -m compat_runtime.launch_readiness.cli \
-  --handoff-checklist-report "${OUT_DIR}/handoff-checklist-report.json" \
-  --validation-coverage-report "${OUT_DIR}/validation-coverage-report.json" \
-  --quality-gate-report "${OUT_DIR}/quality-gate-report.json" \
-  --release-decision-report "${OUT_DIR}/release-decision-report.json" \
-  --pilot-readiness-report "${OUT_DIR}/pilot-readiness-report.json" \
+LAUNCH_READINESS_ARGS=(
+  --handoff-checklist-report "${OUT_DIR}/handoff-checklist-report.json"
+  --validation-coverage-report "${OUT_DIR}/validation-coverage-report.json"
+  --quality-gate-report "${OUT_DIR}/quality-gate-report.json"
+  --release-decision-report "${OUT_DIR}/release-decision-report.json"
+  --pilot-readiness-report "${OUT_DIR}/pilot-readiness-report.json"
   --output "${OUT_DIR}/launch-readiness-report.json"
+)
+if [[ -f "${OUT_DIR}/office-readiness-report.json" ]]; then
+  LAUNCH_READINESS_ARGS+=(--office-readiness-report "${OUT_DIR}/office-readiness-report.json")
+fi
+
+"${PYTHON_BIN}" -m compat_runtime.launch_readiness.cli "${LAUNCH_READINESS_ARGS[@]}"
 
 "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
   --input "${OUT_DIR}/launch-readiness-report.json" \

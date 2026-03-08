@@ -10,10 +10,16 @@ OUT_DIR="${1:-out}"
 VALIDATION_DIR="${OUT_DIR}/validation"
 mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
 
+POLICY_HEALTH_ARGS=()
+if [[ -f "${OUT_DIR}/policy-health-report.json" ]]; then
+  POLICY_HEALTH_ARGS=(--policy-health-report "${OUT_DIR}/policy-health-report.json")
+fi
+
 "${PYTHON_BIN}" -m compat_runtime.release_packet.cli \
   --launch-readiness-report "${OUT_DIR}/launch-readiness-report.json" \
   --release-bundle-manifest "${OUT_DIR}/release-bundle-manifest.json" \
   --stakeholder-update-report "${OUT_DIR}/stakeholder-update-report.json" \
+  "${POLICY_HEALTH_ARGS[@]}" \
   --output "${OUT_DIR}/release-packet-report.json"
 
 "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \

@@ -10,16 +10,22 @@ OUT_DIR="${1:-out}"
 VALIDATION_DIR="${OUT_DIR}/validation"
 mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
 
-"${PYTHON_BIN}" -m compat_runtime.quality_gate.cli \
-  --execution-report "${OUT_DIR}/execution-report.json" \
-  --kpi-report "${OUT_DIR}/kpi-report.json" \
-  --trend-report "${OUT_DIR}/trend-report.json" \
-  --proposal-risk-report "${OUT_DIR}/proposal-risk-report.json" \
-  --crash-signature-report "${OUT_DIR}/crash-signature-report.json" \
-  --installer-phase-report "${OUT_DIR}/installer-phase-report.json" \
-  --proposal-review-checklist "${OUT_DIR}/proposal-review-checklist.json" \
-  --productization-readiness "${OUT_DIR}/productization-readiness.json" \
+QUALITY_GATE_ARGS=(
+  --execution-report "${OUT_DIR}/execution-report.json"
+  --kpi-report "${OUT_DIR}/kpi-report.json"
+  --trend-report "${OUT_DIR}/trend-report.json"
+  --proposal-risk-report "${OUT_DIR}/proposal-risk-report.json"
+  --crash-signature-report "${OUT_DIR}/crash-signature-report.json"
+  --installer-phase-report "${OUT_DIR}/installer-phase-report.json"
+  --proposal-review-checklist "${OUT_DIR}/proposal-review-checklist.json"
+  --productization-readiness "${OUT_DIR}/productization-readiness.json"
   --output "${OUT_DIR}/quality-gate-report.json"
+)
+if [[ -f "${OUT_DIR}/office-readiness-report.json" ]]; then
+  QUALITY_GATE_ARGS+=(--office-readiness-report "${OUT_DIR}/office-readiness-report.json")
+fi
+
+"${PYTHON_BIN}" -m compat_runtime.quality_gate.cli "${QUALITY_GATE_ARGS[@]}"
 
 "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
   --input "${OUT_DIR}/quality-gate-report.json" \
@@ -27,4 +33,3 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
   --report "${VALIDATION_DIR}/quality-gate-report-validation.json"
 
 echo "quality gate report: ok"
-

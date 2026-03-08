@@ -21,6 +21,8 @@ def build_evidence_catalog_report(
             "coverage_ratio": float(snapshot_summary.get("coverage_ratio", 0.0)),
             "packet_ready": bool(packet_summary.get("packet_ready", False)),
             "bundle_missing": int(packet_summary.get("bundle_missing", 0)),
+            "policy_config_valid": bool(packet_summary.get("policy_config_valid", False)),
+            "policy_lockfile_sync": bool(packet_summary.get("policy_lockfile_sync", False)),
         },
         "catalog": [
             {

@@ -99,6 +99,11 @@ fn resolve_export<'a>(exports: &'a [PeExport], symbol: &PeImportSymbol) -> Optio
 
 fn win32_call_name(call: &Win32Call) -> &'static str {
     match call {
+        Win32Call::CoInitializeEx { .. } => "CoInitializeEx",
+        Win32Call::CoUninitialize { .. } => "CoUninitialize",
+        Win32Call::CoCreateInstance { .. } => "CoCreateInstance",
+        Win32Call::CLSIDFromString { .. } => "CLSIDFromString",
+        Win32Call::IIDFromString { .. } => "IIDFromString",
         Win32Call::CreateProcess { .. } => "CreateProcessW",
         Win32Call::CreateThread { .. } => "CreateThread",
         Win32Call::VirtualAlloc { .. } => "VirtualAlloc",
@@ -120,6 +125,8 @@ fn win32_call_name(call: &Win32Call) -> &'static str {
         Win32Call::RegSetValue { .. } => "RegSetValueExW",
         Win32Call::RegQueryValue { .. } => "RegQueryValueExW",
         Win32Call::RegDeleteValue { .. } => "RegDeleteValueW",
+        Win32Call::RegEnumValues { .. } => "RegEnumValueW",
+        Win32Call::RegEnumSubKeys { .. } => "RegEnumKeyExW",
         Win32Call::TerminateProcess { .. } => "TerminateProcess",
         Win32Call::GetExitCodeProcess { .. } => "GetExitCodeProcess",
         Win32Call::CloseHandle { .. } => "CloseHandle",
@@ -135,6 +142,8 @@ fn win32_result_label(result: &Win32CallResult) -> &'static str {
         Win32CallResult::Wait(_) => "wait",
         Win32CallResult::WaitMultiple(_) => "wait-multiple",
         Win32CallResult::Bytes(_) => "bytes",
+        Win32CallResult::Text(_) => "text",
+        Win32CallResult::StringList(_) => "string-list",
         Win32CallResult::ExitCode(_) => "exit-code",
         Win32CallResult::Size(_) => "size",
         Win32CallResult::Position(_) => "position",
@@ -346,6 +355,31 @@ impl RuntimeCore {
         self.nt_core.registry_delete_value(key_path, value_name)
     }
 
+    pub fn registry_enum_values(&self, key_path: &str) -> Result<Vec<String>, NtError> {
+        self.nt_core.registry_enum_values(key_path)
+    }
+
+    pub fn registry_enum_subkeys(&self, key_path: &str) -> Result<Vec<String>, NtError> {
+        self.nt_core.registry_enum_subkeys(key_path)
+    }
+
+    pub fn co_initialize_ex(&mut self, caller_tid: Option<ThreadId>, coinit_flags: u32) {
+        self.nt_core.co_initialize_ex(caller_tid, coinit_flags);
+    }
+
+    pub fn co_uninitialize(&mut self, caller_tid: Option<ThreadId>) {
+        self.nt_core.co_uninitialize(caller_tid);
+    }
+
+    pub fn co_create_instance(
+        &mut self,
+        caller_tid: Option<ThreadId>,
+        clsid: &str,
+        iid: &str,
+    ) -> Result<Handle, NtError> {
+        self.nt_core.co_create_instance(caller_tid, clsid, iid)
+    }
+
     pub fn close_handle(&mut self, handle: Handle) -> Result<(), NtError> {
         self.nt_core.close_handle(handle)
     }
@@ -392,6 +426,13 @@ impl RuntimeCore {
             "advapi32.RegSetValueExW",
             "advapi32.RegQueryValueExW",
             "advapi32.RegDeleteValueW",
+            "advapi32.RegEnumValueW",
+            "advapi32.RegEnumKeyExW",
+            "ole32.CoInitializeEx",
+            "ole32.CoUninitialize",
+            "ole32.CoCreateInstance",
+            "ole32.CLSIDFromString",
+            "ole32.IIDFromString",
         ] {
             self.dispatcher_mut().register_implemented(api);
         }
@@ -413,6 +454,30 @@ impl RuntimeCore {
         self.telemetry.record_start("win32", &action);
 
         let result: Result<Win32CallResult, NtError> = (|| match call {
+            Win32Call::CoInitializeEx {
+                caller_tid,
+                coinit_flags,
+            } => {
+                self.co_initialize_ex(caller_tid, coinit_flags);
+                Ok(Win32CallResult::None)
+            }
+            Win32Call::CoUninitialize { caller_tid } => {
+                self.co_uninitialize(caller_tid);
+                Ok(Win32CallResult::None)
+            }
+            Win32Call::CoCreateInstance {
+                caller_tid,
+                clsid,
+                iid,
+            } => Ok(Win32CallResult::Handle(
+                self.co_create_instance(caller_tid, &clsid, &iid)?,
+            )),
+            Win32Call::CLSIDFromString { value } => {
+                Ok(Win32CallResult::Text(value.trim().to_ascii_uppercase()))
+            }
+            Win32Call::IIDFromString { value } => {
+                Ok(Win32CallResult::Text(value.trim().to_ascii_uppercase()))
+            }
             Win32Call::CreateProcess {
                 image_name,
                 entry_point_rva,
@@ -559,6 +624,12 @@ impl RuntimeCore {
                 self.registry_delete_value(&key_path, &value_name)?;
                 Ok(Win32CallResult::None)
             }
+            Win32Call::RegEnumValues { key_path } => Ok(Win32CallResult::StringList(
+                self.registry_enum_values(&key_path)?,
+            )),
+            Win32Call::RegEnumSubKeys { key_path } => Ok(Win32CallResult::StringList(
+                self.registry_enum_subkeys(&key_path)?,
+            )),
             Win32Call::TerminateProcess {
                 process_handle,
                 exit_code,
@@ -777,7 +848,7 @@ impl RuntimeCore {
 #[cfg(test)]
 mod tests {
     use crate::ntcore::{
-        MemoryProtection, ProcessState, ThreadState, WaitMultipleStatus, WaitStatus,
+        MemoryProtection, NtError, ProcessState, ThreadState, WaitMultipleStatus, WaitStatus,
     };
     use crate::runtime::RuntimeCore;
     use crate::telemetry::TelemetryStage;
@@ -1073,5 +1144,73 @@ mod tests {
         assert_eq!(events[4].stage, TelemetryStage::Start);
         assert_eq!(events[5].action, "CreateThread");
         assert_eq!(events[5].stage, TelemetryStage::Error);
+    }
+
+    #[test]
+    fn runtime_supports_office_bootstrap_com_and_registry_enumeration() {
+        let mut core = RuntimeCore::new();
+        let launch = core.launch_process("office-bootstrap.exe", 0x1000);
+        let tid = launch.primary_thread_id;
+
+        let err = core
+            .simulate_win32_call(Win32Call::CoCreateInstance {
+                caller_tid: Some(tid),
+                clsid: "{000209FF-0000-0000-C000-000000000046}".to_string(),
+                iid: "{00000000-0000-0000-C000-000000000046}".to_string(),
+            })
+            .expect_err("COM init is mandatory");
+        assert!(matches!(err, NtError::ComNotInitialized(Some(_))));
+
+        core.simulate_win32_call(Win32Call::CoInitializeEx {
+            caller_tid: Some(tid),
+            coinit_flags: 0,
+        })
+        .expect("co init should succeed");
+
+        let com_obj = core
+            .simulate_win32_call(Win32Call::CoCreateInstance {
+                caller_tid: Some(tid),
+                clsid: "{000209FF-0000-0000-C000-000000000046}".to_string(),
+                iid: "{00000000-0000-0000-C000-000000000046}".to_string(),
+            })
+            .expect("co create should succeed");
+        let Win32CallResult::Handle(handle) = com_obj else {
+            panic!("expected COM object handle");
+        };
+        core.simulate_win32_call(Win32Call::CloseHandle { handle })
+            .expect("closing COM handle should succeed");
+
+        core.simulate_win32_call(Win32Call::RegSetValue {
+            key_path: "HKCU\\Software\\AIWR".to_string(),
+            value_name: "InstallDir".to_string(),
+            data: b"C:\\Office".to_vec(),
+        })
+        .expect("set root value should succeed");
+        core.simulate_win32_call(Win32Call::RegSetValue {
+            key_path: "HKCU\\Software\\AIWR\\Bootstrap".to_string(),
+            value_name: "Stage".to_string(),
+            data: b"init".to_vec(),
+        })
+        .expect("set nested value should succeed");
+
+        let values = core
+            .simulate_win32_call(Win32Call::RegEnumValues {
+                key_path: "HKCU\\Software\\AIWR".to_string(),
+            })
+            .expect("enum values should succeed");
+        assert_eq!(
+            values,
+            Win32CallResult::StringList(vec!["InstallDir".to_string()])
+        );
+
+        let subkeys = core
+            .simulate_win32_call(Win32Call::RegEnumSubKeys {
+                key_path: "HKCU\\Software\\AIWR".to_string(),
+            })
+            .expect("enum subkeys should succeed");
+        assert_eq!(
+            subkeys,
+            Win32CallResult::StringList(vec!["Bootstrap".to_string()])
+        );
     }
 }

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Active Policy Artifact",
+  "type": "object",
+  "required": ["artifact_version", "policy_profile", "policy"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "policy_profile": {"type": "string"},
+    "policy": {"type": "object"}
+  }
+}

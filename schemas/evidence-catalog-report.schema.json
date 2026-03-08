@@ -8,12 +8,21 @@
     "generated_at": {"type": "string"},
     "summary": {
       "type": "object",
-      "required": ["catalog_items", "coverage_ratio", "packet_ready", "bundle_missing"],
+      "required": [
+        "catalog_items",
+        "coverage_ratio",
+        "packet_ready",
+        "bundle_missing",
+        "policy_config_valid",
+        "policy_lockfile_sync"
+      ],
       "properties": {
         "catalog_items": {"type": "integer"},
         "coverage_ratio": {"type": "number"},
         "packet_ready": {"type": "boolean"},
-        "bundle_missing": {"type": "integer"}
+        "bundle_missing": {"type": "integer"},
+        "policy_config_valid": {"type": "boolean"},
+        "policy_lockfile_sync": {"type": "boolean"}
       }
     },
     "catalog": {"type": "array", "items": {"type": "object"}},

@@ -25,6 +25,11 @@
 2. Blocants vs warnings:
 - separation claire entre echecs bloquants et alertes non bloquantes
 - comptage centralise du warning budget cross-artefacts
+- deux compteurs explicites dans `summary`:
+  - `total_warnings`: nombre de checks en statut `warn`
+  - `budget_warnings`: compteur utilise pour la logique de budget warning
+- le check `warning_budget` passe en `warn` seulement si le budget est depasse
+- `checks[].detail` pour `warning_budget` expose `budget_warnings=<n>`
 
 3. Guidance actionnable:
 - actions de suite coherentes avec la decision

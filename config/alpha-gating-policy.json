@@ -1,0 +1,116 @@
+{
+  "default_profile": "alpha",
+  "profiles": {
+    "alpha": {
+      "quality_gate": {
+        "kpi_high_without_failed_runs_pass": true,
+        "trend_regression_warn_threshold": 4,
+        "proposal_high_risk_warn_threshold": 3,
+        "installer_error_warn_threshold": 5,
+        "office_limited_as_pass": true
+      },
+      "release_decision": {
+        "warning_budget": 2
+      },
+      "release_readiness": {
+        "kpi_high_without_failed_runs_pass": true,
+        "regression_warn_threshold": 4
+      },
+      "pilot_readiness": {
+        "limited_pilot_min_score": 60,
+        "limited_pilot_max_blocking_tasks": 4,
+        "limited_pilot_max_iterations_to_go": 4,
+        "limited_pilot_allowed_gates": [
+          "pass",
+          "warn"
+        ],
+        "limited_pilot_allowed_decisions": [
+          "go",
+          "hold"
+        ]
+      },
+      "launch_readiness": {
+        "ready_allowed_gates": [
+          "pass",
+          "warn"
+        ],
+        "ready_allowed_office_statuses": [
+          "ready",
+          "limited",
+          "not_provided"
+        ],
+        "ready_allowed_pilot_recommendations": [
+          "ready",
+          "limited_pilot"
+        ]
+      }
+    },
+    "beta": {
+      "quality_gate": {
+        "trend_regression_warn_threshold": 2,
+        "proposal_high_risk_warn_threshold": 1,
+        "installer_error_warn_threshold": 2,
+        "office_limited_as_pass": false
+      },
+      "release_decision": {
+        "warning_budget": 1
+      },
+      "release_readiness": {
+        "regression_warn_threshold": 2
+      },
+      "pilot_readiness": {
+        "limited_pilot_min_score": 70,
+        "limited_pilot_max_blocking_tasks": 2,
+        "limited_pilot_max_iterations_to_go": 3
+      },
+      "launch_readiness": {
+        "ready_allowed_gates": [
+          "pass"
+        ],
+        "ready_allowed_office_statuses": [
+          "ready",
+          "limited"
+        ]
+      }
+    },
+    "prod": {
+      "quality_gate": {
+        "kpi_high_without_failed_runs_pass": false,
+        "trend_regression_warn_threshold": 0,
+        "proposal_high_risk_warn_threshold": 0,
+        "installer_error_warn_threshold": 0,
+        "office_limited_as_pass": false
+      },
+      "release_decision": {
+        "warning_budget": 0
+      },
+      "release_readiness": {
+        "kpi_high_without_failed_runs_pass": false,
+        "regression_warn_threshold": 0
+      },
+      "pilot_readiness": {
+        "limited_pilot_min_score": 80,
+        "limited_pilot_max_blocking_tasks": 0,
+        "limited_pilot_max_iterations_to_go": 2,
+        "limited_pilot_allowed_gates": [
+          "pass"
+        ],
+        "limited_pilot_allowed_decisions": [
+          "go"
+        ]
+      },
+      "launch_readiness": {
+        "ready_allowed_gates": [
+          "pass"
+        ],
+        "ready_allowed_office_statuses": [
+          "ready",
+          "not_provided"
+        ],
+        "ready_allowed_pilot_recommendations": [
+          "ready"
+        ]
+      }
+    }
+  }
+}

@@ -65,6 +65,7 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/release-retrospective-report.json" \
     "${OUT_DIR}/next-cycle-bootstrap-report.json" \
     "${OUT_DIR}/stability-window-report.json" \
+    "${OUT_DIR}/office-readiness-report.json" \
     "${OUT_DIR}/hotfix-planner-report.json" \
     "${OUT_DIR}/verification-snapshot-report.json" \
     "${OUT_DIR}/evidence-catalog-report.json" \
@@ -76,7 +77,9 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/compatibility-matrix.json" \
     "${OUT_DIR}/alpha-release-checklist.json" \
     "${OUT_DIR}/release-bundle-manifest.json" \
-    "${OUT_DIR}/productization-readiness.json"
+    "${OUT_DIR}/productization-readiness.json" \
+    "${OUT_DIR}/active-policy.json" \
+    "${OUT_DIR}/policy-health-report.json"
 
 "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
   --input "${OUT_DIR}/repro-package.json" \

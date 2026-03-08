@@ -7,6 +7,24 @@ pub const STILL_ACTIVE: u32 = 259;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Win32Call {
+    CoInitializeEx {
+        caller_tid: Option<ThreadId>,
+        coinit_flags: u32,
+    },
+    CoUninitialize {
+        caller_tid: Option<ThreadId>,
+    },
+    CoCreateInstance {
+        caller_tid: Option<ThreadId>,
+        clsid: String,
+        iid: String,
+    },
+    CLSIDFromString {
+        value: String,
+    },
+    IIDFromString {
+        value: String,
+    },
     CreateProcess {
         image_name: String,
         entry_point_rva: u32,
@@ -98,6 +116,12 @@ pub enum Win32Call {
         key_path: String,
         value_name: String,
     },
+    RegEnumValues {
+        key_path: String,
+    },
+    RegEnumSubKeys {
+        key_path: String,
+    },
     TerminateProcess {
         process_handle: Handle,
         exit_code: u32,
@@ -119,6 +143,8 @@ pub enum Win32CallResult {
     Wait(WaitStatus),
     WaitMultiple(WaitMultipleStatus),
     Bytes(Vec<u8>),
+    Text(String),
+    StringList(Vec<String>),
     ExitCode(u32),
     Size(usize),
     Position(u64),

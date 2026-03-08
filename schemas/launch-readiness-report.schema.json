@@ -12,6 +12,7 @@
       "required": [
         "release_decision",
         "quality_gate",
+        "office_readiness",
         "pilot_recommendation",
         "handoff_failed_checks",
         "validation_missing_reports"
@@ -19,6 +20,7 @@
       "properties": {
         "release_decision": {"type": "string"},
         "quality_gate": {"type": "string"},
+        "office_readiness": {"type": "string"},
         "pilot_recommendation": {"type": "string"},
         "handoff_failed_checks": {"type": "integer"},
         "validation_missing_reports": {"type": "integer"}

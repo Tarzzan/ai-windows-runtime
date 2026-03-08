@@ -7,13 +7,18 @@ from compat_runtime.common.io import read_json, write_json
 
 
 def build_release_packet_report(
-    *, launch_readiness_report: dict, release_bundle_manifest: dict, stakeholder_update_report: dict
+    *,
+    launch_readiness_report: dict,
+    release_bundle_manifest: dict,
+    stakeholder_update_report: dict,
+    policy_health_report: dict | None = None,
 ) -> dict:
     launch_status = str(launch_readiness_report.get("status", "blocked"))
     launch_summary = launch_readiness_report.get("summary", {})
     files = release_bundle_manifest.get("files", [])
     missing = release_bundle_manifest.get("missing", [])
     stakeholder_summary = stakeholder_update_report.get("summary", {})
+    policy_health_summary = policy_health_report or {}
 
     packet_ready = launch_status in {"ready", "limited"} and len(missing) == 0
 
@@ -27,6 +32,8 @@ def build_release_packet_report(
             "bundle_files": len(files),
             "bundle_missing": len(missing),
             "stakeholder_delivery_status": str(stakeholder_summary.get("delivery_status", "at_risk")),
+            "policy_config_valid": bool(policy_health_summary.get("config_valid", False)),
+            "policy_lockfile_sync": bool(policy_health_summary.get("lockfile_sync", False)),
         },
         "missing": missing,
         "actions": [
@@ -41,13 +48,19 @@ def main() -> None:
     parser.add_argument("--launch-readiness-report", required=True, help="Launch readiness report path")
     parser.add_argument("--release-bundle-manifest", required=True, help="Release bundle manifest path")
     parser.add_argument("--stakeholder-update-report", required=True, help="Stakeholder update report path")
+    parser.add_argument("--policy-health-report", required=False, help="Optional policy health report")
     parser.add_argument("--output", required=True, help="Output path")
     args = parser.parse_args()
+
+    policy_health_report: dict | None = None
+    if args.policy_health_report:
+        policy_health_report = read_json(args.policy_health_report)
 
     artifact = build_release_packet_report(
         launch_readiness_report=read_json(args.launch_readiness_report),
         release_bundle_manifest=read_json(args.release_bundle_manifest),
         stakeholder_update_report=read_json(args.stakeholder_update_report),
+        policy_health_report=policy_health_report,
     )
     write_json(args.output, artifact)
 

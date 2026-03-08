@@ -24,7 +24,8 @@
         "warn_checks",
         "fail_checks",
         "blocking_failures",
-        "total_warnings"
+        "total_warnings",
+        "budget_warnings"
       ],
       "properties": {
         "total_checks": {"type": "integer"},
@@ -32,7 +33,8 @@
         "warn_checks": {"type": "integer"},
         "fail_checks": {"type": "integer"},
         "blocking_failures": {"type": "integer"},
-        "total_warnings": {"type": "integer"}
+        "total_warnings": {"type": "integer"},
+        "budget_warnings": {"type": "integer"}
       }
     },
     "checks": {

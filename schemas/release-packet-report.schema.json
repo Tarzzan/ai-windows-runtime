@@ -14,7 +14,9 @@
         "release_decision",
         "bundle_files",
         "bundle_missing",
-        "stakeholder_delivery_status"
+        "stakeholder_delivery_status",
+        "policy_config_valid",
+        "policy_lockfile_sync"
       ],
       "properties": {
         "packet_ready": {"type": "boolean"},
@@ -22,7 +24,9 @@
         "release_decision": {"type": "string"},
         "bundle_files": {"type": "integer"},
         "bundle_missing": {"type": "integer"},
-        "stakeholder_delivery_status": {"type": "string"}
+        "stakeholder_delivery_status": {"type": "string"},
+        "policy_config_valid": {"type": "boolean"},
+        "policy_lockfile_sync": {"type": "boolean"}
       }
     },
     "missing": {"type": "array", "items": {}},

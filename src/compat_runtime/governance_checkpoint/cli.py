@@ -6,7 +6,15 @@ from datetime import datetime, timezone
 from compat_runtime.common.io import read_json, write_json
 
 
-def _checkpoint_status(window_status: str, plan_mode: str, missing_reports: int) -> str:
+def _checkpoint_status(
+    window_status: str,
+    plan_mode: str,
+    missing_reports: int,
+    policy_config_valid: bool,
+    policy_lockfile_sync: bool,
+) -> str:
+    if not policy_config_valid or not policy_lockfile_sync:
+        return "block"
     if window_status == "stable" and plan_mode == "routine" and missing_reports == 0:
         return "pass"
     if missing_reports == 0 and window_status in {"stable", "watch"}:
@@ -25,11 +33,15 @@ def build_governance_checkpoint_report(
     hotfix_summary = hotfix_planner_report.get("summary", {})
     snapshot_summary = verification_snapshot_report.get("summary", {})
     catalog_summary = evidence_catalog_report.get("summary", {})
+    policy_config_valid = bool(catalog_summary.get("policy_config_valid", False))
+    policy_lockfile_sync = bool(catalog_summary.get("policy_lockfile_sync", False))
 
     status = _checkpoint_status(
         str(window_summary.get("window_status", "unstable")),
         str(hotfix_summary.get("plan_mode", "urgent")),
         int(snapshot_summary.get("missing_reports", 1)),
+        policy_config_valid,
+        policy_lockfile_sync,
     )
 
     return {
@@ -41,6 +53,8 @@ def build_governance_checkpoint_report(
             "hotfix_plan_mode": str(hotfix_summary.get("plan_mode", "urgent")),
             "missing_reports": int(snapshot_summary.get("missing_reports", 0)),
             "catalog_items": int(catalog_summary.get("catalog_items", 0)),
+            "policy_config_valid": policy_config_valid,
+            "policy_lockfile_sync": policy_lockfile_sync,
         },
         "actions": ["Proceed only when governance checkpoint status is pass or conditional."],
     }

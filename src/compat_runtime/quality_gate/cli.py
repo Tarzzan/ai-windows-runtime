@@ -4,6 +4,7 @@ import argparse
 from datetime import datetime, timezone
 
 from compat_runtime.common.io import read_json, write_json
+from compat_runtime.common.policy import load_alpha_gating_policy
 
 
 def _grade(has_fail: bool, has_warn: bool) -> str:
@@ -49,7 +50,17 @@ def build_quality_gate_report(
     installer_phase_report: dict,
     proposal_review_checklist: dict,
     productization_readiness: dict,
+    office_readiness_report: dict | None = None,
 ) -> dict:
+    policy = load_alpha_gating_policy().get("quality_gate", {})
+    kpi_high_without_failed_runs_pass = bool(
+        policy.get("kpi_high_without_failed_runs_pass", True)
+    )
+    trend_warn_threshold = int(policy.get("trend_regression_warn_threshold", 4))
+    proposal_high_risk_warn_threshold = int(policy.get("proposal_high_risk_warn_threshold", 3))
+    installer_error_warn_threshold = int(policy.get("installer_error_warn_threshold", 5))
+    office_limited_as_pass = bool(policy.get("office_limited_as_pass", True))
+
     items = []
 
     execution_ok = execution_report.get("status") == "ok"
@@ -64,8 +75,15 @@ def build_quality_gate_report(
         )
     )
 
-    kpi_risk = str(kpi_report.get("summary", {}).get("risk_level", "unknown"))
-    kpi_status = "pass" if kpi_risk in {"low", "medium"} else "fail"
+    kpi_summary = kpi_report.get("summary", {})
+    kpi_risk = str(kpi_summary.get("risk_level", "unknown"))
+    kpi_failed_runs = int(kpi_summary.get("failed_runs", 0))
+    if kpi_risk in {"low", "medium"}:
+        kpi_status = "pass"
+    elif kpi_risk == "high" and kpi_failed_runs == 0 and kpi_high_without_failed_runs_pass:
+        kpi_status = "pass"
+    else:
+        kpi_status = "fail"
     items.append(
         _item(
             "kpi_risk_level",
@@ -73,12 +91,12 @@ def build_quality_gate_report(
             True,
             kpi_status,
             "out/kpi-report.json",
-            f"risk_level={kpi_risk}",
+            f"risk_level={kpi_risk},failed_runs={kpi_failed_runs}",
         )
     )
 
     regressed = len(trend_report.get("summary", {}).get("regressed_metrics", []))
-    trend_status = "warn" if regressed > 0 else "pass"
+    trend_status = "warn" if regressed > trend_warn_threshold else "pass"
     items.append(
         _item(
             "trend_regressions",
@@ -91,7 +109,7 @@ def build_quality_gate_report(
     )
 
     high_risk = int(proposal_risk_report.get("summary", {}).get("high_risk", 0))
-    proposal_risk_status = "warn" if high_risk > 0 else "pass"
+    proposal_risk_status = "warn" if high_risk > proposal_high_risk_warn_threshold else "pass"
     items.append(
         _item(
             "proposal_risk_high",
@@ -117,7 +135,7 @@ def build_quality_gate_report(
     )
 
     installer_errors = int(installer_phase_report.get("summary", {}).get("error_events", 0))
-    installer_status = "warn" if installer_errors > 0 else "pass"
+    installer_status = "warn" if installer_errors > installer_error_warn_threshold else "pass"
     items.append(
         _item(
             "installer_phases",
@@ -155,8 +173,29 @@ def build_quality_gate_report(
         )
     )
 
+    office_status = str((office_readiness_report or {}).get("status", "not_provided"))
+    if office_status == "ready":
+        office_gate_status = "pass"
+    elif office_status == "limited":
+        office_gate_status = "pass" if office_limited_as_pass else "warn"
+    elif office_status == "blocked":
+        office_gate_status = "fail"
+    else:
+        office_gate_status = "pass"
+
+    items.append(
+        _item(
+            "office_readiness",
+            "Office runtime readiness",
+            False,
+            office_gate_status,
+            "out/office-readiness-report.json",
+            f"status={office_status}",
+        )
+    )
+
     required_failures = sum(
-        1 for item in items if item["required"] and item["status"] != "pass"
+        1 for item in items if item["required"] and item["status"] == "fail"
     )
     warn_count = sum(1 for item in items if item["status"] == "warn")
     fail_count = sum(1 for item in items if item["status"] == "fail")
@@ -194,6 +233,11 @@ def main() -> None:
     parser.add_argument(
         "--productization-readiness", required=True, help="Productization readiness report path"
     )
+    parser.add_argument(
+        "--office-readiness-report",
+        required=False,
+        help="Office readiness report path (optional)",
+    )
     parser.add_argument("--output", required=True, help="Output path")
     args = parser.parse_args()
 
@@ -206,10 +250,12 @@ def main() -> None:
         installer_phase_report=read_json(args.installer_phase_report),
         proposal_review_checklist=read_json(args.proposal_review_checklist),
         productization_readiness=read_json(args.productization_readiness),
+        office_readiness_report=(
+            read_json(args.office_readiness_report) if args.office_readiness_report else None
+        ),
     )
     write_json(args.output, report)
 
 
 if __name__ == "__main__":
     main()
-

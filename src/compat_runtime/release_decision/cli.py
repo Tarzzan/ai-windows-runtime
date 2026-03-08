@@ -4,6 +4,12 @@ import argparse
 from datetime import datetime, timezone
 
 from compat_runtime.common.io import read_json, write_json
+from compat_runtime.common.policy import load_alpha_gating_policy
+
+
+def _warning_budget() -> int:
+    policy = load_alpha_gating_policy().get("release_decision", {})
+    return int(policy.get("warning_budget", 2))
 
 
 def _check(
@@ -25,10 +31,10 @@ def _check(
     }
 
 
-def _decision(*, blockers: int, warnings: int) -> str:
+def _decision(*, blockers: int, warnings: int, warning_budget: int) -> str:
     if blockers > 0:
         return "no-go"
-    if warnings > 0:
+    if warnings > warning_budget:
         return "hold"
     return "go"
 
@@ -65,7 +71,9 @@ def build_release_decision_report(
     alpha_release_checklist: dict,
     compatibility_matrix: dict,
     productization_readiness: dict,
+    office_readiness_report: dict | None = None,
 ) -> dict:
+    warning_budget = _warning_budget()
     checks = []
 
     gate = str(quality_gate_report.get("gate", "fail"))
@@ -117,22 +125,46 @@ def build_release_decision_report(
         )
     )
 
+    office_status = str((office_readiness_report or {}).get("status", "not_provided"))
+    office_required = office_status == "blocked"
+    if office_status == "ready":
+        office_gate_status = "pass"
+    elif office_status == "limited":
+        office_gate_status = "warn"
+    elif office_status == "blocked":
+        office_gate_status = "fail"
+    else:
+        office_gate_status = "pass"
+
+    checks.append(
+        _check(
+            "office_readiness",
+            "Office runtime readiness",
+            required=office_required,
+            status=office_gate_status,
+            evidence="out/office-readiness-report.json",
+            detail=f"status={office_status}",
+        )
+    )
+
     warnings = _warn_count_from_gate(quality_gate_report) + _warn_count_from_checklist(
         alpha_release_checklist
     )
+    if office_gate_status == "warn":
+        warnings += 1
     checks.append(
         _check(
             "warning_budget",
             "Warning budget observed",
             required=False,
-            status="warn" if warnings > 0 else "pass",
+            status="warn" if warnings > warning_budget else "pass",
             evidence="out/quality-gate-report.json + out/alpha-release-checklist.json",
-            detail=f"total_warnings={warnings}",
+            detail=f"budget_warnings={warnings}",
         )
     )
 
     blockers = sum(1 for item in checks if item["required"] and item["status"] == "fail")
-    decision = _decision(blockers=blockers, warnings=warnings)
+    decision = _decision(blockers=blockers, warnings=warnings, warning_budget=warning_budget)
     release_ready = decision == "go"
     pass_count = sum(1 for item in checks if item["status"] == "pass")
     warn_count = sum(1 for item in checks if item["status"] == "warn")
@@ -149,7 +181,8 @@ def build_release_decision_report(
             "warn_checks": warn_count,
             "fail_checks": fail_count,
             "blocking_failures": blockers,
-            "total_warnings": warnings,
+            "total_warnings": warn_count,
+            "budget_warnings": warnings,
         },
         "checks": checks,
         "actions": _actions(decision),
@@ -164,6 +197,11 @@ def main() -> None:
     parser.add_argument(
         "--productization-readiness", required=True, help="Productization readiness path"
     )
+    parser.add_argument(
+        "--office-readiness-report",
+        required=False,
+        help="Office readiness report path (optional)",
+    )
     parser.add_argument("--output", required=True, help="Output path")
     args = parser.parse_args()
 
@@ -172,6 +210,9 @@ def main() -> None:
         alpha_release_checklist=read_json(args.alpha_release_checklist),
         compatibility_matrix=read_json(args.compatibility_matrix),
         productization_readiness=read_json(args.productization_readiness),
+        office_readiness_report=(
+            read_json(args.office_readiness_report) if args.office_readiness_report else None
+        ),
     )
     write_json(args.output, artifact)
 

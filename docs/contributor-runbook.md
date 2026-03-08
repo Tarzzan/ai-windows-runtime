@@ -12,7 +12,9 @@ This runbook defines the minimum workflow to contribute safely and reproducibly 
 ## End-to-End Validation
 1. Run `scripts/run-full-pipeline.sh out`.
 2. Run `scripts/runtime-core-smoke.sh`.
-3. Verify generated artifacts in `out/` and `out/validation/`.
+3. Run `scripts/check-policy-lockfile-sync.sh`.
+4. If lockfile drift is expected, run `scripts/refresh-policy-lockfile.sh` and re-run sync check.
+5. Verify generated artifacts in `out/` and `out/validation/`.
 
 ## Contribution Flow
 1. Create focused commits (one phase / one concern).

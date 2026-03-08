@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 pub type ProcessId = u32;
@@ -127,6 +127,9 @@ pub enum NtError {
         key_path: String,
         value_name: String,
     },
+    RegistryKeyNotFound(String),
+    ComNotInitialized(Option<ThreadId>),
+    InvalidComHandle(Handle),
 }
 
 impl fmt::Display for NtError {
@@ -172,6 +175,12 @@ impl fmt::Display for NtError {
             } => {
                 write!(f, "registry value not found: {key_path}::{value_name}")
             }
+            Self::RegistryKeyNotFound(key_path) => write!(f, "registry key not found: {key_path}"),
+            Self::ComNotInitialized(Some(tid)) => {
+                write!(f, "COM apartment is not initialized for thread {tid}")
+            }
+            Self::ComNotInitialized(None) => write!(f, "COM apartment is not initialized"),
+            Self::InvalidComHandle(handle) => write!(f, "invalid COM handle: 0x{handle:08X}"),
         }
     }
 }
@@ -184,6 +193,7 @@ enum HandleTarget {
     Thread(ThreadId),
     Sync(SyncId),
     File(FileId),
+    ComObject(ComObjectId),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -194,6 +204,7 @@ struct MemoryRegionRecord {
 
 type SyncId = u32;
 type FileId = u32;
+type ComObjectId = u32;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum SyncObject {
@@ -214,6 +225,13 @@ struct FileHandleRecord {
     cursor: usize,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct ComObjectRecord {
+    clsid: String,
+    iid: String,
+    owner_tid: Option<ThreadId>,
+}
+
 #[derive(Debug)]
 pub struct NtCore {
     next_pid: ProcessId,
@@ -222,6 +240,7 @@ pub struct NtCore {
     next_mem_base: VirtualAddress,
     next_sync_id: SyncId,
     next_file_id: FileId,
+    next_com_object_id: ComObjectId,
     processes: HashMap<ProcessId, ProcessRecord>,
     threads: HashMap<ThreadId, ThreadRecord>,
     handles: HashMap<Handle, HandleTarget>,
@@ -230,6 +249,9 @@ pub struct NtCore {
     file_contents: HashMap<String, Vec<u8>>,
     open_files: HashMap<FileId, FileHandleRecord>,
     registry: HashMap<String, HashMap<String, Vec<u8>>>,
+    com_initialized_threads: HashSet<ThreadId>,
+    com_initialized_global: bool,
+    com_objects: HashMap<ComObjectId, ComObjectRecord>,
 }
 
 impl Default for NtCore {
@@ -241,6 +263,7 @@ impl Default for NtCore {
             next_mem_base: 0x0000_0000_1000_0000,
             next_sync_id: 1,
             next_file_id: 1,
+            next_com_object_id: 1,
             processes: HashMap::new(),
             threads: HashMap::new(),
             handles: HashMap::new(),
@@ -249,6 +272,9 @@ impl Default for NtCore {
             file_contents: HashMap::new(),
             open_files: HashMap::new(),
             registry: HashMap::new(),
+            com_initialized_threads: HashSet::new(),
+            com_initialized_global: false,
+            com_objects: HashMap::new(),
         }
     }
 }
@@ -337,6 +363,7 @@ impl NtCore {
                 None => Err(NtError::InvalidSyncHandle(handle)),
             },
             Some(HandleTarget::File(_)) => Ok(true),
+            Some(HandleTarget::ComObject(_)) => Ok(true),
             None => Err(NtError::InvalidHandle(handle)),
         }
     }
@@ -349,7 +376,8 @@ impl NtCore {
         match self.handles.get(&handle).copied() {
             Some(HandleTarget::Process(_))
             | Some(HandleTarget::Thread(_))
-            | Some(HandleTarget::File(_)) => Ok(()),
+            | Some(HandleTarget::File(_))
+            | Some(HandleTarget::ComObject(_)) => Ok(()),
             Some(HandleTarget::Sync(sync_id)) => {
                 let sync = self
                     .sync_objects
@@ -962,6 +990,79 @@ impl NtCore {
         Ok(())
     }
 
+    pub fn registry_enum_values(&self, key_path: &str) -> Result<Vec<String>, NtError> {
+        let values = self
+            .registry
+            .get(key_path)
+            .ok_or_else(|| NtError::RegistryKeyNotFound(key_path.to_string()))?;
+        let mut names: Vec<String> = values.keys().cloned().collect();
+        names.sort();
+        Ok(names)
+    }
+
+    pub fn registry_enum_subkeys(&self, key_path: &str) -> Result<Vec<String>, NtError> {
+        let prefix = format!("{key_path}\\");
+        let mut subkeys = HashSet::new();
+        for full_key in self.registry.keys() {
+            if let Some(rest) = full_key.strip_prefix(&prefix) {
+                if let Some((child, _)) = rest.split_once('\\') {
+                    if !child.is_empty() {
+                        subkeys.insert(child.to_string());
+                    }
+                } else if !rest.is_empty() {
+                    subkeys.insert(rest.to_string());
+                }
+            }
+        }
+        if subkeys.is_empty() {
+            return Err(NtError::RegistryKeyNotFound(key_path.to_string()));
+        }
+        let mut ordered: Vec<String> = subkeys.into_iter().collect();
+        ordered.sort();
+        Ok(ordered)
+    }
+
+    pub fn co_initialize_ex(&mut self, caller_tid: Option<ThreadId>, _coinit_flags: u32) {
+        if let Some(tid) = caller_tid {
+            self.com_initialized_threads.insert(tid);
+        } else {
+            self.com_initialized_global = true;
+        }
+    }
+
+    pub fn co_uninitialize(&mut self, caller_tid: Option<ThreadId>) {
+        if let Some(tid) = caller_tid {
+            self.com_initialized_threads.remove(&tid);
+        } else {
+            self.com_initialized_global = false;
+        }
+    }
+
+    pub fn co_create_instance(
+        &mut self,
+        caller_tid: Option<ThreadId>,
+        clsid: &str,
+        iid: &str,
+    ) -> Result<Handle, NtError> {
+        if !(self.com_initialized_global
+            || caller_tid.is_some_and(|tid| self.com_initialized_threads.contains(&tid)))
+        {
+            return Err(NtError::ComNotInitialized(caller_tid));
+        }
+
+        let id = self.next_com_object_id;
+        self.next_com_object_id = self.next_com_object_id.saturating_add(1);
+        self.com_objects.insert(
+            id,
+            ComObjectRecord {
+                clsid: clsid.to_string(),
+                iid: iid.to_string(),
+                owner_tid: caller_tid,
+            },
+        );
+        Ok(self.alloc_handle(HandleTarget::ComObject(id)))
+    }
+
     pub fn close_handle(&mut self, handle: Handle) -> Result<(), NtError> {
         let Some(target) = self.handles.remove(&handle) else {
             return Err(NtError::InvalidHandle(handle));
@@ -969,6 +1070,9 @@ impl NtCore {
 
         if let HandleTarget::File(file_id) = target {
             self.open_files.remove(&file_id);
+        }
+        if let HandleTarget::ComObject(com_id) = target {
+            self.com_objects.remove(&com_id);
         }
 
         Ok(())
@@ -1300,5 +1404,54 @@ mod tests {
             .registry_get_value("HKCU\\Software\\AIWR", "InstallDir")
             .expect_err("deleted registry value should be gone");
         assert!(matches!(err, NtError::UnknownRegistryValue { .. }));
+    }
+
+    #[test]
+    fn registry_enumeration_returns_sorted_values_and_subkeys() {
+        let mut nt = NtCore::new();
+        nt.registry_set_value("HKCU\\Software\\AIWR", "Channel", b"beta");
+        nt.registry_set_value("HKCU\\Software\\AIWR", "InstallDir", b"C:\\Apps");
+        nt.registry_set_value("HKCU\\Software\\AIWR\\Bootstrap", "Stage", b"init");
+        nt.registry_set_value("HKCU\\Software\\AIWR\\Config", "Region", b"FR");
+
+        let values = nt
+            .registry_enum_values("HKCU\\Software\\AIWR")
+            .expect("root values must exist");
+        assert_eq!(values, vec!["Channel".to_string(), "InstallDir".to_string()]);
+
+        let subkeys = nt
+            .registry_enum_subkeys("HKCU\\Software\\AIWR")
+            .expect("subkeys must exist");
+        assert_eq!(
+            subkeys,
+            vec!["Bootstrap".to_string(), "Config".to_string()]
+        );
+    }
+
+    #[test]
+    fn com_instance_requires_initialized_apartment() {
+        let mut nt = NtCore::new();
+        let caller_tid = 42_001;
+        let err = nt
+            .co_create_instance(
+                Some(caller_tid),
+                "{000209FF-0000-0000-C000-000000000046}",
+                "{00000000-0000-0000-C000-000000000046}",
+            )
+            .expect_err("COM init is required before instance creation");
+        assert_eq!(err, NtError::ComNotInitialized(Some(caller_tid)));
+
+        nt.co_initialize_ex(Some(caller_tid), 0);
+        let handle = nt
+            .co_create_instance(
+                Some(caller_tid),
+                "{000209FF-0000-0000-C000-000000000046}",
+                "{00000000-0000-0000-C000-000000000046}",
+            )
+            .expect("instance should be created after init");
+
+        nt.close_handle(handle)
+            .expect("closing synthetic COM object handle should succeed");
+        nt.co_uninitialize(Some(caller_tid));
     }
 }

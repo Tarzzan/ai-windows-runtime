@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Alpha Gating Policy Config",
+  "type": "object",
+  "required": ["default_profile", "profiles"],
+  "additionalProperties": false,
+  "properties": {
+    "default_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "quality_gate": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "kpi_high_without_failed_runs_pass": { "type": "boolean" },
+              "trend_regression_warn_threshold": { "type": "integer", "minimum": 0 },
+              "proposal_high_risk_warn_threshold": { "type": "integer", "minimum": 0 },
+              "installer_error_warn_threshold": { "type": "integer", "minimum": 0 },
+              "office_limited_as_pass": { "type": "boolean" }
+            }
+          },
+          "release_decision": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "warning_budget": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "release_readiness": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "kpi_high_without_failed_runs_pass": { "type": "boolean" },
+              "regression_warn_threshold": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "pilot_readiness": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "limited_pilot_min_score": { "type": "integer", "minimum": 0 },
+              "limited_pilot_max_blocking_tasks": { "type": "integer", "minimum": 0 },
+              "limited_pilot_max_iterations_to_go": { "type": "integer", "minimum": 0 },
+              "limited_pilot_allowed_gates": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "limited_pilot_allowed_decisions": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          },
+          "launch_readiness": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "ready_allowed_gates": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "ready_allowed_office_statuses": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "ready_allowed_pilot_recommendations": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

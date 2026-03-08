@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from compat_runtime.common.io import read_json, write_json
+from compat_runtime.common.policy import load_alpha_gating_policy
 
 
 def _metric(report: dict, path: tuple[str, ...]) -> int:
@@ -32,6 +33,10 @@ def build_compatibility_matrix(
     trend_report: dict | None = None,
     kpi_report: dict | None = None,
 ) -> dict:
+    policy = load_alpha_gating_policy().get("release_readiness", {})
+    kpi_high_without_failed_runs_pass = bool(
+        policy.get("kpi_high_without_failed_runs_pass", True)
+    )
     base_trace_events = _metric(execution_report, ("pipeline", "base", "trace_events"))
     base_gaps = _metric(execution_report, ("pipeline", "base", "gaps"))
     base_proposals = _metric(execution_report, ("pipeline", "base", "proposals"))
@@ -52,7 +57,9 @@ def build_compatibility_matrix(
     regressed_metrics = len(
         (trend_report or {}).get("summary", {}).get("regressed_metrics", [])
     )
-    risk_level = (kpi_report or {}).get("summary", {}).get("risk_level", "unknown")
+    kpi_summary = (kpi_report or {}).get("summary", {})
+    risk_level = kpi_summary.get("risk_level", "unknown")
+    failed_runs = int(kpi_summary.get("failed_runs", 0))
 
     scenarios = [
         {
@@ -71,7 +78,10 @@ def build_compatibility_matrix(
         },
     ]
 
-    release_ready = execution_ok and base_validation and runtime_validation and risk_level != "high"
+    risk_blocks_release = risk_level == "high" and (
+        failed_runs > 0 or not kpi_high_without_failed_runs_pass
+    )
+    release_ready = execution_ok and base_validation and runtime_validation and not risk_blocks_release
 
     return {
         "artifact_version": "1.0",
@@ -81,6 +91,7 @@ def build_compatibility_matrix(
         "summary": {
             "execution_status": execution_report.get("status", "unknown"),
             "risk_level": risk_level,
+            "failed_runs": failed_runs,
             "regressed_metrics_count": regressed_metrics,
             "base_trace_events": base_trace_events,
             "runtime_trace_events": runtime_trace_events,
@@ -95,7 +106,14 @@ def build_alpha_release_checklist(
     trend_report: dict | None = None,
     kpi_report: dict | None = None,
 ) -> dict:
-    risk_level = (kpi_report or {}).get("summary", {}).get("risk_level", "unknown")
+    policy = load_alpha_gating_policy().get("release_readiness", {})
+    kpi_high_without_failed_runs_pass = bool(
+        policy.get("kpi_high_without_failed_runs_pass", True)
+    )
+    regression_warn_threshold = int(policy.get("regression_warn_threshold", 4))
+    kpi_summary = (kpi_report or {}).get("summary", {})
+    risk_level = kpi_summary.get("risk_level", "unknown")
+    failed_runs = int(kpi_summary.get("failed_runs", 0))
     regressed = len((trend_report or {}).get("summary", {}).get("regressed_metrics", []))
 
     items = [
@@ -121,14 +139,24 @@ def build_alpha_release_checklist(
             "id": "risk_level",
             "title": "Niveau de risque acceptable",
             "required": True,
-            "status": "pass" if risk_level in {"low", "medium"} else "fail",
+            "status": (
+                "pass"
+                if risk_level in {"low", "medium"}
+                else (
+                    "pass"
+                    if risk_level == "high"
+                    and failed_runs == 0
+                    and kpi_high_without_failed_runs_pass
+                    else "fail"
+                )
+            ),
             "evidence": "out/kpi-report.json",
         },
         {
             "id": "regression_review",
             "title": "Régressions analysées",
             "required": False,
-            "status": "warn" if regressed > 0 else "pass",
+            "status": "warn" if regressed > regression_warn_threshold else "pass",
             "evidence": "out/trend-report.json",
         },
         {
@@ -141,7 +169,7 @@ def build_alpha_release_checklist(
     ]
 
     required_failures = sum(
-        1 for item in items if item.get("required") and item.get("status") != "pass"
+        1 for item in items if item.get("required") and item.get("status") == "fail"
     )
     pass_count = sum(1 for item in items if item.get("status") == "pass")
     warn_count = sum(1 for item in items if item.get("status") == "warn")

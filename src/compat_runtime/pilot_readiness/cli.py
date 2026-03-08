@@ -4,6 +4,7 @@ import argparse
 from datetime import datetime, timezone
 
 from compat_runtime.common.io import read_json, write_json
+from compat_runtime.common.policy import load_alpha_gating_policy
 
 
 def _recommendation(
@@ -15,6 +16,13 @@ def _recommendation(
     blocking_tasks: int,
     iterations_to_go: int,
 ) -> str:
+    policy = load_alpha_gating_policy().get("pilot_readiness", {})
+    limited_min_score = int(policy.get("limited_pilot_min_score", 60))
+    limited_max_blocking_tasks = int(policy.get("limited_pilot_max_blocking_tasks", 4))
+    limited_max_iterations = int(policy.get("limited_pilot_max_iterations_to_go", 4))
+    limited_allowed_gates = set(policy.get("limited_pilot_allowed_gates", ["pass", "warn"]))
+    limited_allowed_decisions = set(policy.get("limited_pilot_allowed_decisions", ["go", "hold"]))
+
     if not productization_ready:
         return "not_ready"
     if (
@@ -25,7 +33,13 @@ def _recommendation(
         and iterations_to_go <= 2
     ):
         return "ready"
-    if score >= 50 and blocking_tasks <= 3 and iterations_to_go <= 4:
+    if (
+        score >= limited_min_score
+        and decision in limited_allowed_decisions
+        and gate in limited_allowed_gates
+        and blocking_tasks <= limited_max_blocking_tasks
+        and iterations_to_go <= limited_max_iterations
+    ):
         return "limited_pilot"
     return "not_ready"
 

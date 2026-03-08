@@ -34,7 +34,7 @@ def _trend_report() -> dict:
 
 
 def _kpi_report() -> dict:
-    return {"summary": {"risk_level": "low"}}
+    return {"summary": {"risk_level": "low", "failed_runs": 0}}
 
 
 def test_release_readiness_generates_matrix_and_checklist():
@@ -65,3 +65,24 @@ def test_release_bundle_manifest_hashes_existing_files(tmp_path):
     assert len(manifest["files"]) == 2
     assert len(manifest["missing"]) == 1
     assert manifest["files"][0]["sha256"]
+
+
+def test_release_readiness_allows_high_risk_without_failed_runs():
+    trend = {"summary": {"regressed_metrics": ["runtime_gaps"], "improved_metrics": []}}
+    kpi = {"summary": {"risk_level": "high", "failed_runs": 0}}
+    matrix = build_compatibility_matrix(
+        _execution_report(),
+        trend_report=trend,
+        kpi_report=kpi,
+    )
+    checklist = build_alpha_release_checklist(
+        matrix,
+        trend_report=trend,
+        kpi_report=kpi,
+    )
+
+    risk_item = next(item for item in checklist["items"] if item["id"] == "risk_level")
+    assert matrix["release_ready"] is True
+    assert risk_item["status"] == "pass"
+    assert checklist["release_ready"] is True
+    assert checklist["summary"]["required_failures"] == 0

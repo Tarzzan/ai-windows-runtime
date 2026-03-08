@@ -18,6 +18,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -e .
+      - name: Tooling Checks
+        run: |
+          jq --version
+      - name: Policy Config Check
+        run: bash scripts/check-policy-config.sh out
+      - name: Policy Lockfile Sync
+        run: bash scripts/check-policy-lockfile-sync.sh
       - name: Lint
         run: ruff check .
       - name: Test
