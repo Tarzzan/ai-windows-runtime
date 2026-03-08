@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Admission Control Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["admission_state", "intake_capacity_mode", "policy_status", "priority_corridor"],
+      "properties": {
+        "admission_state": {"type": "string", "enum": ["gated", "selective", "open"]},
+        "intake_capacity_mode": {"type": "string", "enum": ["constrained", "balanced", "expandable"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

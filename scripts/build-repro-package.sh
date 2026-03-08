@@ -62,6 +62,9 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/post-release-monitor-report.json" \
     "${OUT_DIR}/incident-feedback-report.json" \
     "${OUT_DIR}/backlog-refresh-report.json" \
+    "${OUT_DIR}/intake-capacity-report.json" \
+    "${OUT_DIR}/admission-control-report.json" \
+    "${OUT_DIR}/commitment-pacing-report.json" \
     "${OUT_DIR}/release-retrospective-report.json" \
     "${OUT_DIR}/next-cycle-bootstrap-report.json" \
     "${OUT_DIR}/stability-window-report.json" \

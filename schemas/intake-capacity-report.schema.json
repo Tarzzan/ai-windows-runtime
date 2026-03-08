@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Intake Capacity Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": [
+        "intake_capacity_score",
+        "intake_capacity_mode",
+        "intake_guard",
+        "bandwidth_mode",
+        "queue_pressure_band"
+      ],
+      "properties": {
+        "intake_capacity_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "intake_capacity_mode": {"type": "string", "enum": ["constrained", "balanced", "expandable"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

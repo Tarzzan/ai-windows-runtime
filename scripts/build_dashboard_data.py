@@ -175,6 +175,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     queue_pressure = read_json(out_dir / "queue-pressure-report.json", {})
     delivery_bandwidth = read_json(out_dir / "delivery-bandwidth-report.json", {})
     intake_guard = read_json(out_dir / "intake-guard-report.json", {})
+    intake_capacity = read_json(out_dir / "intake-capacity-report.json", {})
+    admission_control = read_json(out_dir / "admission-control-report.json", {})
+    commitment_pacing = read_json(out_dir / "commitment-pacing-report.json", {})
     risk_watchlist = read_json(out_dir / "risk-watchlist-report.json", {})
     validation = gather_validation(out_dir / "validation")
 
@@ -208,6 +211,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         queue_pressure.get("actions", []),
         delivery_bandwidth.get("actions", []),
         intake_guard.get("actions", []),
+        intake_capacity.get("actions", []),
+        admission_control.get("actions", []),
+        commitment_pacing.get("actions", []),
     ]:
         for item in source:
             text = str(item).strip()
@@ -297,6 +303,18 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "intake_guard": (intake_guard.get("summary", {}) or {}).get(
             "intake_guard", "unknown"
         ),
+        "intake_capacity_mode": (intake_capacity.get("summary", {}) or {}).get(
+            "intake_capacity_mode", "unknown"
+        ),
+        "intake_capacity_score": (intake_capacity.get("summary", {}) or {}).get(
+            "intake_capacity_score", 0
+        ),
+        "admission_state": (admission_control.get("summary", {}) or {}).get(
+            "admission_state", "unknown"
+        ),
+        "commitment_mode": (commitment_pacing.get("summary", {}) or {}).get(
+            "commitment_mode", "unknown"
+        ),
     }
 
     return {
@@ -338,6 +356,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "queue_pressure": queue_pressure,
             "delivery_bandwidth": delivery_bandwidth,
             "intake_guard": intake_guard,
+            "intake_capacity": intake_capacity,
+            "admission_control": admission_control,
+            "commitment_pacing": commitment_pacing,
         },
         "risks": {
             "summary": risk_watchlist.get("summary", {}),

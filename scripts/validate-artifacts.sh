@@ -368,6 +368,27 @@ if [[ -f "${OUT_DIR}/backlog-refresh-report.json" ]]; then
     --report "${REPORT_DIR}/backlog-refresh-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/intake-capacity-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/intake-capacity-report.json" \
+    --schema schemas/intake-capacity-report.schema.json \
+    --report "${REPORT_DIR}/intake-capacity-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/admission-control-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/admission-control-report.json" \
+    --schema schemas/admission-control-report.schema.json \
+    --report "${REPORT_DIR}/admission-control-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/commitment-pacing-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/commitment-pacing-report.json" \
+    --schema schemas/commitment-pacing-report.schema.json \
+    --report "${REPORT_DIR}/commitment-pacing-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/release-retrospective-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/release-retrospective-report.json" \

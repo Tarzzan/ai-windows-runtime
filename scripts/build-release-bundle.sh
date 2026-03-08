@@ -94,6 +94,12 @@ rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/delivery-bandwidth-report-validation.json" \
   "${OUT_DIR}/intake-guard-report.json" \
   "${VALIDATION_DIR}/intake-guard-report-validation.json" \
+  "${OUT_DIR}/intake-capacity-report.json" \
+  "${VALIDATION_DIR}/intake-capacity-report-validation.json" \
+  "${OUT_DIR}/admission-control-report.json" \
+  "${VALIDATION_DIR}/admission-control-report-validation.json" \
+  "${OUT_DIR}/commitment-pacing-report.json" \
+  "${VALIDATION_DIR}/commitment-pacing-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -804,6 +810,28 @@ fi
   --schema schemas/intake-guard-report.schema.json \
   --report "${VALIDATION_DIR}/intake-guard-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.intake_capacity.cli \
+  --intake-guard-report "${OUT_DIR}/intake-guard-report.json" \
+  --delivery-bandwidth-report "${OUT_DIR}/delivery-bandwidth-report.json" \
+  --queue-pressure-report "${OUT_DIR}/queue-pressure-report.json" \
+  --output "${OUT_DIR}/intake-capacity-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/intake-capacity-report.json" \
+  --schema schemas/intake-capacity-report.schema.json \
+  --report "${VALIDATION_DIR}/intake-capacity-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.admission_control.cli \
+  --intake-capacity-report "${OUT_DIR}/intake-capacity-report.json" \
+  --release-policy-report "${OUT_DIR}/release-policy-report.json" \
+  --priority-corridor-report "${OUT_DIR}/priority-corridor-report.json" \
+  --output "${OUT_DIR}/admission-control-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/admission-control-report.json" \
+  --schema schemas/admission-control-report.schema.json \
+  --report "${VALIDATION_DIR}/admission-control-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.backlog_refresh.cli \
   --incident-feedback-report "${OUT_DIR}/incident-feedback-report.json" \
   --iteration-plan-report "${OUT_DIR}/iteration-plan-report.json" \
@@ -814,6 +842,17 @@ fi
   --input "${OUT_DIR}/backlog-refresh-report.json" \
   --schema schemas/backlog-refresh-report.schema.json \
   --report "${VALIDATION_DIR}/backlog-refresh-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.commitment_pacing.cli \
+  --admission-control-report "${OUT_DIR}/admission-control-report.json" \
+  --backlog-refresh-report "${OUT_DIR}/backlog-refresh-report.json" \
+  --delivery-bandwidth-report "${OUT_DIR}/delivery-bandwidth-report.json" \
+  --output "${OUT_DIR}/commitment-pacing-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/commitment-pacing-report.json" \
+  --schema schemas/commitment-pacing-report.schema.json \
+  --report "${VALIDATION_DIR}/commitment-pacing-report-validation.json"
 
 "${PYTHON_BIN}" -m compat_runtime.release_retrospective.cli \
   --delivery-signoff-report "${OUT_DIR}/delivery-signoff-report.json" \
@@ -934,6 +973,9 @@ scripts/build-priority-corridor-report.sh "${OUT_DIR}"
 scripts/build-queue-pressure-report.sh "${OUT_DIR}"
 scripts/build-delivery-bandwidth-report.sh "${OUT_DIR}"
 scripts/build-intake-guard-report.sh "${OUT_DIR}"
+scripts/build-intake-capacity-report.sh "${OUT_DIR}"
+scripts/build-admission-control-report.sh "${OUT_DIR}"
+scripts/build-commitment-pacing-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
@@ -983,6 +1025,9 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/queue-pressure-report.json" \
     "${OUT_DIR}/delivery-bandwidth-report.json" \
     "${OUT_DIR}/intake-guard-report.json" \
+    "${OUT_DIR}/intake-capacity-report.json" \
+    "${OUT_DIR}/admission-control-report.json" \
+    "${OUT_DIR}/commitment-pacing-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \
@@ -1085,6 +1130,9 @@ cp "${OUT_DIR}/priority-corridor-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/queue-pressure-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/delivery-bandwidth-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/intake-guard-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/intake-capacity-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/admission-control-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/commitment-pacing-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-gate-history-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/pilot-readiness-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/ownership-assignment-report.json" "${BUNDLE_DIR}/"

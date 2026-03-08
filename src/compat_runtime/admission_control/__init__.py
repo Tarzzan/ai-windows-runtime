@@ -1,0 +1,1 @@
+"""Admission control artifact module."""

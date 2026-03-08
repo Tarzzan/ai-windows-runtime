@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 123)
+## Current scope (Phase 126)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -293,6 +293,15 @@ Core runtime capabilities in this phase:
 266. Surface queue pressure, delivery bandwidth, and intake guard in the local dashboard control panel.
 267. Refresh queue pressure/bandwidth/intake guard signals in policy-aware regeneration flow before release packet rebuild.
 268. Add dedicated CLIs and build scripts for queue pressure, delivery bandwidth, and intake guard automation.
+269. Add intake capacity artifact (`intake-capacity-report.json`) from intake guard, bandwidth mode, and queue pressure.
+270. Validate and package intake capacity artifacts in full pipeline and release bundle workflows.
+271. Add admission control artifact (`admission-control-report.json`) from intake capacity, release policy status, and priority corridor.
+272. Validate and package admission control artifacts in full pipeline and release bundle workflows.
+273. Add commitment pacing artifact (`commitment-pacing-report.json`) from admission control, refreshed backlog, and bandwidth mode.
+274. Validate and package commitment pacing artifacts in full pipeline and release bundle workflows.
+275. Surface intake capacity, admission state, and commitment mode in the local dashboard control panel.
+276. Refresh intake capacity/admission/commitment signals in policy-aware regeneration flow before release packet rebuild.
+277. Add dedicated CLIs and build scripts for intake capacity, admission control, and commitment pacing automation.
 194. Add explicit `policy_compliance_level` to `policy-health-report.json` and enforce it in release policy gate.
 195. Keep backward-compatible gate behavior by deriving compliance level when older policy health artifacts omit it.
 196. Harden pipeline determinism by cleaning stale policy artifacts before early schema validation stages.

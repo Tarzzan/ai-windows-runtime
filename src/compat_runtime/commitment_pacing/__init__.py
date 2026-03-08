@@ -1,0 +1,1 @@
+"""Commitment pacing artifact module."""

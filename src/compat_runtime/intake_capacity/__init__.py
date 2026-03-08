@@ -1,0 +1,1 @@
+"""Intake capacity artifact module."""
