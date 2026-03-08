@@ -846,8 +846,6 @@ scripts/build-handoff-checklist-report.sh "${OUT_DIR}"
 scripts/build-launch-readiness-report.sh "${OUT_DIR}"
 scripts/build-delivery-temperature-report.sh "${OUT_DIR}"
 scripts/build-control-recommendation-report.sh "${OUT_DIR}"
-scripts/build-control-efficiency-report.sh "${OUT_DIR}"
-scripts/build-intervention-plan-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \

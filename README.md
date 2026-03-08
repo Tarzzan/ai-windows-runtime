@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 108)
+## Current scope (Phase 111)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -248,6 +248,15 @@ Core runtime capabilities in this phase:
 221. Add dedicated CLIs and build scripts for control efficiency and intervention planning artifacts.
 222. Add targeted unit tests for control efficiency and intervention plan artifact logic.
 223. Propagate control efficiency/intervention artifacts into repro package and release bundle inventories.
+224. Add control efficiency artifact (`control-efficiency-report.json`) to score governance efficiency from confidence, momentum, and validation command pressure.
+225. Validate and package control efficiency artifacts in full pipeline and release bundle workflows.
+226. Add intervention plan artifact (`intervention-plan-report.json`) to classify execution intervention mode from efficiency, P0 risk load, and dependency blockers.
+227. Validate and package intervention plan artifacts in full pipeline and release bundle workflows.
+228. Surface control efficiency and intervention mode in the local dashboard control panel with visual indicators.
+229. Refresh control efficiency and intervention plan in policy-aware regeneration flow before release packet rebuild.
+230. Add dedicated CLIs and build scripts for control efficiency and intervention plan for reusable automation entry points.
+231. Add targeted unit tests for control efficiency and intervention plan logic.
+232. Propagate control efficiency and intervention artifacts into repro package and release bundle inventories.
 194. Add explicit `policy_compliance_level` to `policy-health-report.json` and enforce it in release policy gate.
 195. Keep backward-compatible gate behavior by deriving compliance level when older policy health artifacts omit it.
 196. Harden pipeline determinism by cleaning stale policy artifacts before early schema validation stages.

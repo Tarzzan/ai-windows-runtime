@@ -186,6 +186,10 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         release_policy.get("failures", []),
         risk_watchlist.get("actions", []),
         launch_readiness.get("actions", []),
+        delivery_temperature.get("actions", []),
+        control_recommendation.get("actions", []),
+        control_efficiency.get("actions", []),
+        intervention_plan.get("actions", []),
     ]:
         for item in source:
             text = str(item).strip()
