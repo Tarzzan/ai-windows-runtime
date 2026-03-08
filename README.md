@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 156)
+## Current scope (Phase 159)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -392,6 +392,15 @@ Core runtime capabilities in this phase:
 365. Surface scope expansion readiness, intake expansion policy, and scope expansion gate in the local dashboard control panel.
 366. Refresh expansion-readiness/policy/gate signals in policy-aware regeneration flow before release packet rebuild.
 367. Add dedicated CLIs and build scripts for scope expansion readiness, intake expansion policy, and scope expansion gate automation.
+368. Add scope acceleration readiness artifact (`scope-acceleration-readiness-report.json`) from scope expansion gate, expansion readiness, and P0 watchlist pressure.
+369. Validate and package scope acceleration readiness artifacts in full pipeline and release bundle workflows.
+370. Add intake acceleration policy artifact (`intake-acceleration-policy-report.json`) from acceleration readiness, intake expansion policy, and delivery bandwidth.
+371. Validate and package intake acceleration policy artifacts in full pipeline and release bundle workflows.
+372. Add scope acceleration gate artifact (`scope-acceleration-gate-report.json`) from intake acceleration policy, scope expansion gate, and release policy status.
+373. Validate and package scope acceleration gate artifacts in full pipeline and release bundle workflows.
+374. Surface scope acceleration readiness, intake acceleration policy, and scope acceleration gate in the local dashboard control panel.
+375. Refresh acceleration-readiness/policy/gate signals in policy-aware regeneration flow before release packet rebuild.
+376. Add dedicated CLIs and build scripts for scope acceleration readiness, intake acceleration policy, and scope acceleration gate automation.
 194. Add explicit `policy_compliance_level` to `policy-health-report.json` and enforce it in release policy gate.
 195. Keep backward-compatible gate behavior by deriving compliance level when older policy health artifacts omit it.
 196. Harden pipeline determinism by cleaning stale policy artifacts before early schema validation stages.

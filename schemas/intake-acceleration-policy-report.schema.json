@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Intake Acceleration Policy Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["intake_acceleration_policy", "scope_acceleration_readiness_band", "intake_expansion_policy", "bandwidth_mode"],
+      "properties": {
+        "intake_acceleration_policy": {"type": "string", "enum": ["hold", "stage", "accelerate"]},
+        "scope_acceleration_readiness_band": {"type": "string", "enum": ["blocked", "watch", "ready"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

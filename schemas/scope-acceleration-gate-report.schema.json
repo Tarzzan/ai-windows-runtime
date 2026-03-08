@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scope Acceleration Gate Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["scope_acceleration_gate", "intake_acceleration_policy", "scope_expansion_gate", "release_policy_status"],
+      "properties": {
+        "scope_acceleration_gate": {"type": "string", "enum": ["closed", "guarded", "open"]},
+        "intake_acceleration_policy": {"type": "string", "enum": ["hold", "stage", "accelerate"]},
+        "scope_expansion_gate": {"type": "string", "enum": ["closed", "guarded", "open"]}
+      },
+      "additionalProperties": true
+    },
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

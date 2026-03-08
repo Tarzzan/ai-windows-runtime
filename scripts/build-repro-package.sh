@@ -95,6 +95,9 @@ mkdir -p "$OUT_DIR" "$VALIDATION_DIR"
     "${OUT_DIR}/scope-expansion-readiness-report.json" \
     "${OUT_DIR}/intake-expansion-policy-report.json" \
     "${OUT_DIR}/scope-expansion-gate-report.json" \
+    "${OUT_DIR}/scope-acceleration-readiness-report.json" \
+    "${OUT_DIR}/intake-acceleration-policy-report.json" \
+    "${OUT_DIR}/scope-acceleration-gate-report.json" \
     "${OUT_DIR}/release-retrospective-report.json" \
     "${OUT_DIR}/next-cycle-bootstrap-report.json" \
     "${OUT_DIR}/stability-window-report.json" \

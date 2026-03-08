@@ -167,6 +167,12 @@ rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/intake-expansion-policy-report-validation.json" \
   "${OUT_DIR}/scope-expansion-gate-report.json" \
   "${VALIDATION_DIR}/scope-expansion-gate-report-validation.json" \
+  "${OUT_DIR}/scope-acceleration-readiness-report.json" \
+  "${VALIDATION_DIR}/scope-acceleration-readiness-report-validation.json" \
+  "${OUT_DIR}/intake-acceleration-policy-report.json" \
+  "${VALIDATION_DIR}/intake-acceleration-policy-report-validation.json" \
+  "${OUT_DIR}/scope-acceleration-gate-report.json" \
+  "${VALIDATION_DIR}/scope-acceleration-gate-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -1302,6 +1308,39 @@ scripts/check-release-policy.sh "${OUT_DIR}"
   --schema schemas/scope-expansion-gate-report.schema.json \
   --report "${VALIDATION_DIR}/scope-expansion-gate-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.scope_acceleration_readiness.cli \
+  --scope-expansion-gate-report "${OUT_DIR}/scope-expansion-gate-report.json" \
+  --scope-expansion-readiness-report "${OUT_DIR}/scope-expansion-readiness-report.json" \
+  --risk-watchlist-report "${OUT_DIR}/risk-watchlist-report.json" \
+  --output "${OUT_DIR}/scope-acceleration-readiness-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/scope-acceleration-readiness-report.json" \
+  --schema schemas/scope-acceleration-readiness-report.schema.json \
+  --report "${VALIDATION_DIR}/scope-acceleration-readiness-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.intake_acceleration_policy.cli \
+  --scope-acceleration-readiness-report "${OUT_DIR}/scope-acceleration-readiness-report.json" \
+  --intake-expansion-policy-report "${OUT_DIR}/intake-expansion-policy-report.json" \
+  --delivery-bandwidth-report "${OUT_DIR}/delivery-bandwidth-report.json" \
+  --output "${OUT_DIR}/intake-acceleration-policy-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/intake-acceleration-policy-report.json" \
+  --schema schemas/intake-acceleration-policy-report.schema.json \
+  --report "${VALIDATION_DIR}/intake-acceleration-policy-report-validation.json"
+
+"${PYTHON_BIN}" -m compat_runtime.scope_acceleration_gate.cli \
+  --intake-acceleration-policy-report "${OUT_DIR}/intake-acceleration-policy-report.json" \
+  --scope-expansion-gate-report "${OUT_DIR}/scope-expansion-gate-report.json" \
+  --release-policy-report "${OUT_DIR}/release-policy-report.json" \
+  --output "${OUT_DIR}/scope-acceleration-gate-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/scope-acceleration-gate-report.json" \
+  --schema schemas/scope-acceleration-gate-report.schema.json \
+  --report "${VALIDATION_DIR}/scope-acceleration-gate-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.release_retrospective.cli \
   --delivery-signoff-report "${OUT_DIR}/delivery-signoff-report.json" \
   --readiness-delta-report "${OUT_DIR}/readiness-delta-report.json" \
@@ -1454,6 +1493,9 @@ scripts/build-scope-unlock-gate-report.sh "${OUT_DIR}"
 scripts/build-scope-expansion-readiness-report.sh "${OUT_DIR}"
 scripts/build-intake-expansion-policy-report.sh "${OUT_DIR}"
 scripts/build-scope-expansion-gate-report.sh "${OUT_DIR}"
+scripts/build-scope-acceleration-readiness-report.sh "${OUT_DIR}"
+scripts/build-intake-acceleration-policy-report.sh "${OUT_DIR}"
+scripts/build-scope-acceleration-gate-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
@@ -1537,6 +1579,9 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/scope-expansion-readiness-report.json" \
     "${OUT_DIR}/intake-expansion-policy-report.json" \
     "${OUT_DIR}/scope-expansion-gate-report.json" \
+    "${OUT_DIR}/scope-acceleration-readiness-report.json" \
+    "${OUT_DIR}/intake-acceleration-policy-report.json" \
+    "${OUT_DIR}/scope-acceleration-gate-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \

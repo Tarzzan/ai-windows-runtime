@@ -599,6 +599,27 @@ if [[ -f "${OUT_DIR}/scope-expansion-gate-report.json" ]]; then
     --report "${REPORT_DIR}/scope-expansion-gate-report-validation.json"
 fi
 
+if [[ -f "${OUT_DIR}/scope-acceleration-readiness-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/scope-acceleration-readiness-report.json" \
+    --schema schemas/scope-acceleration-readiness-report.schema.json \
+    --report "${REPORT_DIR}/scope-acceleration-readiness-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/intake-acceleration-policy-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/intake-acceleration-policy-report.json" \
+    --schema schemas/intake-acceleration-policy-report.schema.json \
+    --report "${REPORT_DIR}/intake-acceleration-policy-report-validation.json"
+fi
+
+if [[ -f "${OUT_DIR}/scope-acceleration-gate-report.json" ]]; then
+  "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+    --input "${OUT_DIR}/scope-acceleration-gate-report.json" \
+    --schema schemas/scope-acceleration-gate-report.schema.json \
+    --report "${REPORT_DIR}/scope-acceleration-gate-report-validation.json"
+fi
+
 if [[ -f "${OUT_DIR}/release-retrospective-report.json" ]]; then
   "${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
     --input "${OUT_DIR}/release-retrospective-report.json" \

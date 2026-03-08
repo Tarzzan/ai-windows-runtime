@@ -351,6 +351,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     scope_expansion_readiness = read_json(out_dir / "scope-expansion-readiness-report.json", {})
     intake_expansion_policy = read_json(out_dir / "intake-expansion-policy-report.json", {})
     scope_expansion_gate = read_json(out_dir / "scope-expansion-gate-report.json", {})
+    scope_acceleration_readiness = read_json(out_dir / "scope-acceleration-readiness-report.json", {})
+    intake_acceleration_policy = read_json(out_dir / "intake-acceleration-policy-report.json", {})
+    scope_acceleration_gate = read_json(out_dir / "scope-acceleration-gate-report.json", {})
     risk_watchlist = read_json(out_dir / "risk-watchlist-report.json", {})
     validation = gather_validation(out_dir / "validation")
 
@@ -582,6 +585,18 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "scope_expansion_gate": (scope_expansion_gate.get("summary", {}) or {}).get(
             "scope_expansion_gate", "unknown"
         ),
+        "scope_acceleration_readiness_band": (scope_acceleration_readiness.get("summary", {}) or {}).get(
+            "scope_acceleration_readiness_band", "unknown"
+        ),
+        "scope_acceleration_readiness_score": (scope_acceleration_readiness.get("summary", {}) or {}).get(
+            "scope_acceleration_readiness_score", 0
+        ),
+        "intake_acceleration_policy": (intake_acceleration_policy.get("summary", {}) or {}).get(
+            "intake_acceleration_policy", "unknown"
+        ),
+        "scope_acceleration_gate": (scope_acceleration_gate.get("summary", {}) or {}).get(
+            "scope_acceleration_gate", "unknown"
+        ),
     }
 
     raw_actions: list[str] = []
@@ -636,6 +651,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         scope_expansion_readiness.get("actions", []),
         intake_expansion_policy.get("actions", []),
         scope_expansion_gate.get("actions", []),
+        scope_acceleration_readiness.get("actions", []),
+        intake_acceleration_policy.get("actions", []),
+        scope_acceleration_gate.get("actions", []),
     ]:
         for item in source:
             text = localize_action(str(item).strip())
@@ -722,6 +740,9 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "scope_expansion_readiness": scope_expansion_readiness,
             "intake_expansion_policy": intake_expansion_policy,
             "scope_expansion_gate": scope_expansion_gate,
+            "scope_acceleration_readiness": scope_acceleration_readiness,
+            "intake_acceleration_policy": intake_acceleration_policy,
+            "scope_acceleration_gate": scope_acceleration_gate,
         },
         "risks": {
             "summary": risk_summary,
