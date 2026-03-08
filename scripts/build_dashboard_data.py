@@ -162,6 +162,8 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
     execution_confidence = read_json(out_dir / "execution-confidence-report.json", {})
     execution_momentum = read_json(out_dir / "execution-momentum-report.json", {})
     execution_pressure = read_json(out_dir / "execution-pressure-report.json", {})
+    delivery_temperature = read_json(out_dir / "delivery-temperature-report.json", {})
+    control_recommendation = read_json(out_dir / "control-recommendation-report.json", {})
     risk_watchlist = read_json(out_dir / "risk-watchlist-report.json", {})
     validation = gather_validation(out_dir / "validation")
 
@@ -214,6 +216,15 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
         "pressure_index": (execution_pressure.get("summary", {}) or {}).get(
             "pressure_index", 0
         ),
+        "temperature": (delivery_temperature.get("summary", {}) or {}).get(
+            "temperature", "unknown"
+        ),
+        "temperature_index": (delivery_temperature.get("summary", {}) or {}).get(
+            "temperature_index", 0
+        ),
+        "control_mode": (control_recommendation.get("summary", {}) or {}).get(
+            "control_mode", "unknown"
+        ),
     }
 
     return {
@@ -242,6 +253,8 @@ def build_dashboard_data(repo: Path) -> dict[str, Any]:
             "execution_confidence": execution_confidence,
             "execution_momentum": execution_momentum,
             "execution_pressure": execution_pressure,
+            "delivery_temperature": delivery_temperature,
+            "control_recommendation": control_recommendation,
         },
         "risks": {
             "summary": risk_watchlist.get("summary", {}),

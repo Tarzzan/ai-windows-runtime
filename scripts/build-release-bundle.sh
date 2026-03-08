@@ -68,6 +68,10 @@ rm -f "${OUT_DIR}/risk-watchlist-report.json" \
   "${VALIDATION_DIR}/execution-momentum-report-validation.json" \
   "${OUT_DIR}/execution-pressure-report.json" \
   "${VALIDATION_DIR}/execution-pressure-report-validation.json" \
+  "${OUT_DIR}/delivery-temperature-report.json" \
+  "${VALIDATION_DIR}/delivery-temperature-report-validation.json" \
+  "${OUT_DIR}/control-recommendation-report.json" \
+  "${VALIDATION_DIR}/control-recommendation-report-validation.json" \
   "${OUT_DIR}/ownership-assignment-report.json" \
   "${VALIDATION_DIR}/ownership-assignment-report-validation.json" \
   "${OUT_DIR}/remediation-sprint-report.json" \
@@ -648,6 +652,17 @@ fi
   --schema schemas/execution-pressure-report.schema.json \
   --report "${VALIDATION_DIR}/execution-pressure-report-validation.json"
 
+"${PYTHON_BIN}" -m compat_runtime.delivery_temperature.cli \
+  --execution-pressure-report "${OUT_DIR}/execution-pressure-report.json" \
+  --launch-readiness-report "${OUT_DIR}/launch-readiness-report.json" \
+  --release-decision-report "${OUT_DIR}/release-decision-report.json" \
+  --output "${OUT_DIR}/delivery-temperature-report.json"
+
+"${PYTHON_BIN}" -m compat_runtime.schema_validator.cli \
+  --input "${OUT_DIR}/delivery-temperature-report.json" \
+  --schema schemas/delivery-temperature-report.schema.json \
+  --report "${VALIDATION_DIR}/delivery-temperature-report-validation.json"
+
 "${PYTHON_BIN}" -m compat_runtime.backlog_refresh.cli \
   --incident-feedback-report "${OUT_DIR}/incident-feedback-report.json" \
   --iteration-plan-report "${OUT_DIR}/iteration-plan-report.json" \
@@ -761,6 +776,8 @@ scripts/build-stakeholder-update-report.sh "${OUT_DIR}"
 # Refresh prelaunch chain so launch/packet reflect latest policy-aware stakeholder state.
 scripts/build-handoff-checklist-report.sh "${OUT_DIR}"
 scripts/build-launch-readiness-report.sh "${OUT_DIR}"
+scripts/build-delivery-temperature-report.sh "${OUT_DIR}"
+scripts/build-control-recommendation-report.sh "${OUT_DIR}"
 scripts/build-release-packet-report.sh "${OUT_DIR}"
 
 "${PYTHON_BIN}" -m compat_runtime.repro_package.cli \
@@ -797,6 +814,8 @@ scripts/build-release-packet-report.sh "${OUT_DIR}"
     "${OUT_DIR}/execution-confidence-report.json" \
     "${OUT_DIR}/execution-momentum-report.json" \
     "${OUT_DIR}/execution-pressure-report.json" \
+    "${OUT_DIR}/delivery-temperature-report.json" \
+    "${OUT_DIR}/control-recommendation-report.json" \
     "${OUT_DIR}/release-gate-history-report.json" \
     "${OUT_DIR}/pilot-readiness-report.json" \
     "${OUT_DIR}/ownership-assignment-report.json" \
@@ -886,6 +905,8 @@ cp "${OUT_DIR}/risk-watchlist-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/execution-confidence-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/execution-momentum-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/execution-pressure-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/delivery-temperature-report.json" "${BUNDLE_DIR}/"
+cp "${OUT_DIR}/control-recommendation-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/release-gate-history-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/pilot-readiness-report.json" "${BUNDLE_DIR}/"
 cp "${OUT_DIR}/ownership-assignment-report.json" "${BUNDLE_DIR}/"

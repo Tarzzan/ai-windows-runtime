@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Delivery Temperature Report Artifact",
+  "type": "object",
+  "required": ["artifact_version", "generated_at", "summary", "factors", "actions"],
+  "properties": {
+    "artifact_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["temperature_index", "temperature", "pressure_index", "launch_status", "release_decision"],
+      "properties": {
+        "temperature_index": {"type": "integer", "minimum": 0, "maximum": 100},
+        "temperature": {"type": "string", "enum": ["cool", "warm", "hot"]},
+        "pressure_index": {"type": "integer", "minimum": 0, "maximum": 100},
+        "launch_status": {"type": "string"},
+        "release_decision": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "factors": {"type": "object"},
+    "actions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

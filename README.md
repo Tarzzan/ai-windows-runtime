@@ -17,7 +17,7 @@ Deliver a native Ubuntu-compatible runtime that can execute modern Windows insta
 - `tests/` automated validation
 - `.github/workflows/` CI
 
-## Current scope (Phase 102)
+## Current scope (Phase 105)
 This repository currently ships:
 1. Planning baseline (vision, architecture, roadmap, risk model).
 2. AI compatibility loop prototype (trace -> gaps -> patch plan).
@@ -230,6 +230,15 @@ Core runtime capabilities in this phase:
 203. Add execution pressure artifact (`execution-pressure-report.json`) correlating momentum, dependency blockers, P0 risk pressure, and validation coverage gaps.
 204. Validate and package execution pressure artifacts in full pipeline and release bundle workflows.
 205. Surface execution pressure level and pressure index in the local dashboard control panel.
+206. Add delivery temperature artifact (`delivery-temperature-report.json`) combining execution pressure with launch/decision context.
+207. Validate and package delivery temperature artifacts in full pipeline and release bundle workflows.
+208. Surface delivery temperature status and index in the local dashboard control panel.
+209. Add control recommendation artifact (`control-recommendation-report.json`) deriving control mode from temperature, confidence, pressure, and release policy status.
+210. Validate and package control recommendation artifacts in full pipeline and release bundle workflows.
+211. Surface control recommendation mode in the local dashboard control panel.
+212. Refresh delivery temperature and control recommendation signals in policy-aware regeneration flow after launch-readiness rebuild.
+213. Add dedicated CLIs and build scripts for temperature/control artifacts for reusable automation entry points.
+214. Add targeted unit tests for delivery temperature and control recommendation artifact logic.
 194. Add explicit `policy_compliance_level` to `policy-health-report.json` and enforce it in release policy gate.
 195. Keep backward-compatible gate behavior by deriving compliance level when older policy health artifacts omit it.
 196. Harden pipeline determinism by cleaning stale policy artifacts before early schema validation stages.

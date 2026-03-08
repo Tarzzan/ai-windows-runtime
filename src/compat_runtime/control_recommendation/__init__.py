@@ -1,0 +1,1 @@
+"""Control recommendation report builder."""
