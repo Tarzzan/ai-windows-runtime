@@ -23,6 +23,9 @@ def build_evidence_catalog_report(
             "bundle_missing": int(packet_summary.get("bundle_missing", 0)),
             "policy_config_valid": bool(packet_summary.get("policy_config_valid", False)),
             "policy_lockfile_sync": bool(packet_summary.get("policy_lockfile_sync", False)),
+            "policy_compliance_level": str(
+                packet_summary.get("policy_compliance_level", "non_compliant")
+            ),
         },
         "catalog": [
             {

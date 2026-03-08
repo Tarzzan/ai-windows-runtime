@@ -16,7 +16,8 @@
         "bundle_missing",
         "stakeholder_delivery_status",
         "policy_config_valid",
-        "policy_lockfile_sync"
+        "policy_lockfile_sync",
+        "policy_compliance_level"
       ],
       "properties": {
         "packet_ready": {"type": "boolean"},
@@ -26,7 +27,11 @@
         "bundle_missing": {"type": "integer"},
         "stakeholder_delivery_status": {"type": "string"},
         "policy_config_valid": {"type": "boolean"},
-        "policy_lockfile_sync": {"type": "boolean"}
+        "policy_lockfile_sync": {"type": "boolean"},
+        "policy_compliance_level": {
+          "type": "string",
+          "enum": ["compliant", "degraded", "non_compliant"]
+        }
       }
     },
     "missing": {"type": "array", "items": {}},

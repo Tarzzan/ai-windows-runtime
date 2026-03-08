@@ -14,7 +14,8 @@
         "packet_ready",
         "bundle_missing",
         "policy_config_valid",
-        "policy_lockfile_sync"
+        "policy_lockfile_sync",
+        "policy_compliance_level"
       ],
       "properties": {
         "catalog_items": {"type": "integer"},
@@ -22,7 +23,11 @@
         "packet_ready": {"type": "boolean"},
         "bundle_missing": {"type": "integer"},
         "policy_config_valid": {"type": "boolean"},
-        "policy_lockfile_sync": {"type": "boolean"}
+        "policy_lockfile_sync": {"type": "boolean"},
+        "policy_compliance_level": {
+          "type": "string",
+          "enum": ["compliant", "degraded", "non_compliant"]
+        }
       }
     },
     "catalog": {"type": "array", "items": {"type": "object"}},

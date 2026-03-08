@@ -35,6 +35,7 @@ def build_governance_checkpoint_report(
     catalog_summary = evidence_catalog_report.get("summary", {})
     policy_config_valid = bool(catalog_summary.get("policy_config_valid", False))
     policy_lockfile_sync = bool(catalog_summary.get("policy_lockfile_sync", False))
+    policy_compliance_level = str(catalog_summary.get("policy_compliance_level", "non_compliant"))
 
     status = _checkpoint_status(
         str(window_summary.get("window_status", "unstable")),
@@ -55,6 +56,7 @@ def build_governance_checkpoint_report(
             "catalog_items": int(catalog_summary.get("catalog_items", 0)),
             "policy_config_valid": policy_config_valid,
             "policy_lockfile_sync": policy_lockfile_sync,
+            "policy_compliance_level": policy_compliance_level,
         },
         "actions": ["Proceed only when governance checkpoint status is pass or conditional."],
     }

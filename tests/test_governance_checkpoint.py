@@ -11,12 +11,14 @@ def test_governance_checkpoint_pass():
                 "catalog_items": 10,
                 "policy_config_valid": True,
                 "policy_lockfile_sync": True,
+                "policy_compliance_level": "compliant",
             }
         },
     )
     assert report["status"] == "pass"
     assert report["summary"]["policy_config_valid"] is True
     assert report["summary"]["policy_lockfile_sync"] is True
+    assert report["summary"]["policy_compliance_level"] == "compliant"
 
 
 def test_governance_checkpoint_blocks_when_policy_is_not_synced():
@@ -29,6 +31,7 @@ def test_governance_checkpoint_blocks_when_policy_is_not_synced():
                 "catalog_items": 10,
                 "policy_config_valid": True,
                 "policy_lockfile_sync": False,
+                "policy_compliance_level": "degraded",
             }
         },
     )

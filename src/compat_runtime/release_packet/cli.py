@@ -6,6 +6,14 @@ from datetime import datetime, timezone
 from compat_runtime.common.io import read_json, write_json
 
 
+def _policy_compliance_level(*, policy_config_valid: bool, policy_lockfile_sync: bool) -> str:
+    if policy_config_valid and policy_lockfile_sync:
+        return "compliant"
+    if policy_config_valid or policy_lockfile_sync:
+        return "degraded"
+    return "non_compliant"
+
+
 def build_release_packet_report(
     *,
     launch_readiness_report: dict,
@@ -19,6 +27,8 @@ def build_release_packet_report(
     missing = release_bundle_manifest.get("missing", [])
     stakeholder_summary = stakeholder_update_report.get("summary", {})
     policy_health_summary = policy_health_report or {}
+    policy_config_valid = bool(policy_health_summary.get("config_valid", False))
+    policy_lockfile_sync = bool(policy_health_summary.get("lockfile_sync", False))
 
     packet_ready = launch_status in {"ready", "limited"} and len(missing) == 0
 
@@ -32,8 +42,12 @@ def build_release_packet_report(
             "bundle_files": len(files),
             "bundle_missing": len(missing),
             "stakeholder_delivery_status": str(stakeholder_summary.get("delivery_status", "at_risk")),
-            "policy_config_valid": bool(policy_health_summary.get("config_valid", False)),
-            "policy_lockfile_sync": bool(policy_health_summary.get("lockfile_sync", False)),
+            "policy_config_valid": policy_config_valid,
+            "policy_lockfile_sync": policy_lockfile_sync,
+            "policy_compliance_level": _policy_compliance_level(
+                policy_config_valid=policy_config_valid,
+                policy_lockfile_sync=policy_lockfile_sync,
+            ),
         },
         "missing": missing,
         "actions": [
